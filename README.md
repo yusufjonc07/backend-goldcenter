@@ -1,1 +1,1 @@
-(./assets/building.jpg)
+(assets/building.jpg)
