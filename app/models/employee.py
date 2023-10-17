@@ -1,0 +1,25 @@
+from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from databases.main import Base
+from sqlalchemy.orm import relationship, backref
+from app.models.branch import * 
+from app.models.shift import * 
+
+
+class Employee(Base):
+    __tablename__ = "employee"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    firstname = Column(String, default='')
+    lastname = Column(String, default='')
+    phoneNumber = Column(Integer, default=0)
+    passportSeriaNumber = Column(String, default='')
+    salaryQuantity = Column(String, default='')
+    role = Column(String, default='')
+    agreementFile = Column(Text, default='')
+    duty = Column(String, default='')
+    fired = Column(Boolean, default=False)
+    branchId = Column(Integer, ForeignKey('branch.id'), nullable=True)
+    shiftId = Column(Integer, ForeignKey('shift.id'), default=0)
+
+    branch = relationship('Branch', backref='employees')
+    shift = relationship('Shift', backref='employees')
+

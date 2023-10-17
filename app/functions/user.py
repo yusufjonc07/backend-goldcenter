@@ -1,0 +1,82 @@
+import math
+from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException
+from app.models.user import *
+from app.schemas.user import *
+from security.auth import get_password_hash
+
+
+def get_all_users(search, page, limit, usr, db: Session):
+    if page == 1 or page < 1:
+        offset = 0
+    else:
+        offset = (page-1) * limit
+
+    users = db.query(User)
+
+    # if search:
+    # users = users.filter(
+    # User.id.like(f"%{search}%"),
+    # )
+
+    all_data = users.order_by(User.id.desc()).offset(offset).limit(limit)
+    count_data = users.count()
+
+    return {
+        "data": all_data.all(),
+        "page_count": math.ceil(count_data / limit),
+        "data_count": count_data,
+        "current_page": page,
+        "page_limit": limit,
+    }
+
+
+def create_user(form_data: NewUser, usr, db: Session):
+
+    try:
+        new_user = User(
+            userRole=form_data.userrole,
+            username=form_data.username,
+            passwordHash=get_password_hash(form_data.password),
+            disabled=form_data.disabled,
+            branchId=form_data.branchid,
+            employeeId=form_data.employeeid,
+        )
+
+        db.add(new_user)
+        db.commit()
+
+        raise HTTPException(200, "Ma`lumotlar saqlandi!")
+    except IntegrityError as e:
+        raise HTTPException(400, e.args)
+
+
+def update_user(id, form_data: UpdateUser, usr, db: Session):
+
+    try:
+        user = db.query(User).filter(User.id == id)
+        this_user = user.first()
+        if this_user:
+
+            if len(form_data.password) > 5:
+                passwordHash = get_password_hash(form_data.password)
+            else:
+                passwordHash = this_user.passwordHash
+
+
+            user.update({
+                "userRole": form_data.userrole,
+                "username": form_data.username,
+                "passwordHash": passwordHash,
+                "disabled": form_data.disabled,
+                "branchId": form_data.branchid,
+                "employeeId": form_data.employeeid,
+            })
+            db.commit()
+
+            raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")
+        else:
+            raise HTTPException(status_code=400, detail="So`rovda xatolik!")
+    except IntegrityError as e:
+        raise HTTPException(400, e.args)
