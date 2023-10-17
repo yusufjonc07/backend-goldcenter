@@ -6,16 +6,13 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from app.models.user import User
+from config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 from databases.main import get_db, ActiveSession
 from app.schemas.user import NewUser
 from pydantic import BaseModel
 
 class TokenData(BaseModel):
     username: Optional[str] = None
-
-SECRET_KEY = "09dwkew65094faa6ca2556c818166b7a9563befffcf7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 365
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
