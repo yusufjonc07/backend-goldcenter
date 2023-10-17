@@ -1,1 +1,1 @@
-!(assets/building.jpg)
+(building.jpg)
