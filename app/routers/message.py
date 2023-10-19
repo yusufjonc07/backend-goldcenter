@@ -7,6 +7,8 @@ from sqlalchemy.orm import joinedload, Session
 from app.models.message import *
 from app.functions.message import *
 from app.schemas.message import *
+from app.utils.wsmanager import manager
+from app.schemas.enums import messageTypeLabels
 
 message_router = APIRouter(tags=['Message Endpoint'])
 
@@ -30,7 +32,16 @@ async def create_new_message(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return create_message(form_data, usr, db)
+        res = create_message(form_data, usr, db)
+        if res:
+
+            message = dict(res)
+            message.imgUrl = f"https://ui-avatars.com/api/?name={usr.employee.firstname}+{usr.employee.lastname}&background=random"
+
+            await manager.send_user(message, message.forRole, db)
+
+            return message
+            
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

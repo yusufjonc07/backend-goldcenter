@@ -47,7 +47,7 @@ def create_message(form_data: NewMessage, usr, db: Session):
         db.add(new_message)
         db.commit()
 
-        raise HTTPException(200, "Ma`lumotlar saqlandi!")
+        return new_message
     except IntegrityError as e:
         raise HTTPException(400, e.args)
 

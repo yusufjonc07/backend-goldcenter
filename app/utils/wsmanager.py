@@ -2,7 +2,6 @@ from fastapi import WebSocket, WebSocketException, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.notification import Notification
-from app.schemas.notification import MessageSchema
 
 
 class ConnectionManager:
@@ -14,7 +13,7 @@ class ConnectionManager:
         await websocket.accept()
         self.active_connections.append((websocket, user))
 
-    def disconnect(self, websocket: WebSocket):
+    async def disconnect(self, websocket: WebSocket):
         for connection in self.active_connections:
             if connection[0] == websocket:
                 self.active_connections.remove(connection)
@@ -27,13 +26,13 @@ class ConnectionManager:
         except WebSocketDisconnect:
             await self.disconnect(websocket)
 
-    async def send_personal_json(self, message: MessageSchema, connection):
+    async def send_personal_json(self, message: dict, connection):
         websocket, user = connection
         try:
             await websocket.send_json({
-                "title": message.title,
-                "body": message.body,
-                "imgUrl": message.imgurl,
+                "title": message['title'],
+                "body": message['body'],
+                "imgUrl": message['imgurl'],
             })
 
         except WebSocketDisconnect:
@@ -55,9 +54,9 @@ class ConnectionManager:
             except WebSocketDisconnect:
                 await self.disconnect(websocket)
 
-    async def send_user(self, message: MessageSchema, role: str, db: Session):
+    async def send_user(self, message: dict, role: str, db: Session):
 
-        users = db.query(User.id).filter_by(role=role).all()
+        users = db.query(User.id).filter_by(userRole=role).all()
 
         sended = 0
         sended_str = ""
@@ -69,11 +68,7 @@ class ConnectionManager:
                 try:
                     
                     if user.id == employee.id:
-                        await websocket.send_json({
-                            "title": message.title,
-                            "body": message.body,
-                            "imgUrl": message.imgurl,
-                        })
+                        await websocket.send_json(message)
                         sent = True
                         sended += 1
                         sended_str += f"{user.username}"
@@ -83,9 +78,9 @@ class ConnectionManager:
 
             if sent == False:
                 db.add(Notification(
-                    title=message.title,
-                    body=message.body,
-                    imgUrl=message.imgurl,
+                    title=message['title'],
+                    body=message,
+                    imgUrl=message['imgurl'],
                     user_id=employee.id
                 ))
                 db.commit()

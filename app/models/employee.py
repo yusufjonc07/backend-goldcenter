@@ -20,6 +20,9 @@ class Employee(Base):
     branchId = Column(Integer, ForeignKey('branch.id'), nullable=True)
     shiftId = Column(Integer, ForeignKey('shift.id'), default=0)
 
+    def fullname(self):
+        return f"{self.firstname} {self.lastname}"
+
     branch = relationship('Branch', backref='employees')
     shift = relationship('Shift', backref='employees')
 

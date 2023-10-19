@@ -1,10 +1,11 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, WebSocketException
+from config import ALGORITHM, SECRET_KEY
 from databases.main import ActiveSession
 from app.utils.wsmanager import *
 from app.models.user import *
 from app.schemas.user import NewUser
 from app.schemas.notification import MessageSchema
-from security.auth import jwt, SECRET_KEY, ALGORITHM
+from security.auth import jwt
 
 notification_router = APIRouter()
 
@@ -35,21 +36,16 @@ async def websocket_endpoint(
 
     await manager.connect(websocket, user)
 
-    if user:
-
-        for ntf in user.notifications:
-            message = MessageSchema(
-                title=ntf.title,
-                body=ntf.body,
-                imgurl=ntf.imgUrl,
-            )
-            await manager.send_personal_json(message, (websocket, user))
-        db.query(Notification).filter_by(user_id=user.id).delete()
-        db.commit()
-
-
     try:
+
+        if user:
+            for ntf in user.notifications:
+                await manager.send_personal_json(ntf.body, (websocket, user))
+
+            db.query(Notification).filter_by(user_id=user.id).delete()
+            db.commit()
+
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        await manager.disconnect(websocket)
