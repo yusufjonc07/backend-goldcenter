@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from enum import unique
+from sqlalchemy import Column, UniqueConstraint, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.branch import * 
@@ -22,6 +23,8 @@ class Employee(Base):
 
     def fullname(self):
         return f"{self.firstname} {self.lastname}"
+    
+    UniqueConstraint('firstname', 'lastname')
 
     branch = relationship('Branch', backref='employees')
     shift = relationship('Shift', backref='employees')
