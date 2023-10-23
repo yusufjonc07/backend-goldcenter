@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Double, Enum, Integer, Text, ForeignKey
+from sqlalchemy import Column, Enum, Integer, Text, ForeignKey
+from sqlalchemy.dialects.mysql import DOUBLE
 from app.schemas.enums import AgreementStatus, AgreementType
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
@@ -12,8 +13,8 @@ class ClientAgreement(Base):
     fileName = Column(Text, default='')
     shopId = Column(Integer, ForeignKey('shop.id'), default=0)
     clientId = Column(Integer, ForeignKey('client.id'), default=0)
-    monthlyFee = Column(Double, default=0)
-    balance = Column(Double, default=0)
+    monthlyFee = Column(DOUBLE, default=0)
+    balance = Column(DOUBLE, default=0)
     status = Column(Enum(AgreementStatus), default='active')
     type = Column(Enum(AgreementType))
     startedAt = Column(Date)

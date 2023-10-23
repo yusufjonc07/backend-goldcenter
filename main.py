@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes import app_routers
 from app.utils.jsonToCryllic import dict_to_nested_class
 from security.auth import auth_router
-# from events import events_router
+from events import events_router
 
 app = FastAPI(
     title="Gold Center"
@@ -29,6 +29,6 @@ async def krill_konverter(data_dict: dict = Body(...)):
     return dict_to_nested_class(data_dict)
 
 
-# app.include_router(events_router)
+app.include_router(events_router)
 app.include_router(app_routers)
 app.include_router(auth_router)
