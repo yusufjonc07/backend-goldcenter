@@ -25,7 +25,7 @@ async def get_clients_list(
 
 @client_router.post("/client/create", description="This router is able to add new client")
 async def create_new_client(
-    form_data: NewClient,
+    form_data: FormClient,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
@@ -37,7 +37,7 @@ async def create_new_client(
 @client_router.put("/client/{id}/update", description="This router is able to update client")
 async def update_one_client(
     id: int,
-    form_data: UpdateClient,
+    form_data: FormClient,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):

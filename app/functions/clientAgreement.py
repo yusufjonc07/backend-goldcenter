@@ -11,7 +11,7 @@ def get_all_clientAgreements(search, page, limit, usr, db: Session):
     else:
         offset = (page-1) * limit
     
-    clientAgreements = db.query(Clientagreement)
+    clientAgreements = db.query(ClientAgreement)
 
     #if search:
        #clientAgreements = clientAgreements.filter(
@@ -19,7 +19,7 @@ def get_all_clientAgreements(search, page, limit, usr, db: Session):
        #)
 
     
-    all_data = clientAgreements.order_by(Clientagreement.id.desc()).offset(offset).limit(limit)
+    all_data = clientAgreements.order_by(ClientAgreement.id.desc()).offset(offset).limit(limit)
     count_data = clientAgreements.count()
 
     return {
@@ -33,7 +33,7 @@ def get_all_clientAgreements(search, page, limit, usr, db: Session):
 def create_clientAgreement(form_data: NewClientagreement, usr, db: Session):
     
     try:
-        new_clientAgreement = Clientagreement(
+        new_clientAgreement = ClientAgreement(
             fileName=form_data.filename,
         shopId=form_data.shopid,
         clientId=form_data.clientid,
@@ -52,16 +52,16 @@ def create_clientAgreement(form_data: NewClientagreement, usr, db: Session):
 def update_clientAgreement(id, form_data: UpdateClientagreement, usr, db: Session):
     
     try:
-        clientAgreement = db.query(Clientagreement).filter(Clientagreement.id == id)
+        clientAgreement = db.query(ClientAgreement).filter(ClientAgreement.id == id)
         this_clientAgreement = clientAgreement.first()
         if this_clientAgreement:
             clientAgreement.update({    
-            Clientagreement.fileName: form_data.filename,
-            Clientagreement.shopId: form_data.shopid,
-            Clientagreement.clientId: form_data.clientid,
-            Clientagreement.monthlyFee: form_data.monthlyfee,
-            Clientagreement.balance: form_data.balance,
-            Clientagreement.status: form_data.status,
+            ClientAgreement.fileName: form_data.filename,
+            ClientAgreement.shopId: form_data.shopid,
+            ClientAgreement.clientId: form_data.clientid,
+            ClientAgreement.monthlyFee: form_data.monthlyfee,
+            ClientAgreement.balance: form_data.balance,
+            ClientAgreement.status: form_data.status,
             })
             db.commit()
 

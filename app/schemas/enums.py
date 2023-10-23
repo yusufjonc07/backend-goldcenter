@@ -52,3 +52,12 @@ class UserRoles(str, Enum):
     headGuard = "headGuard"
     headCleaner = "headCleaner"
     clerk = "clerk"
+
+class AgreementStatus(str, Enum):
+    active = "active"
+    paused = "paused"
+    closed = "closed"
+
+class AgreementType(str, Enum):
+    rent = "rent"
+    sold = "sold"
