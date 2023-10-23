@@ -3,5 +3,6 @@ alembic/
 alembic.ini
 venv/
 .env
+commiter.sh
 /assets/employeeAgreements/*
 

@@ -1,6 +1,5 @@
 from fastapi_utils.tasks import repeat_every
 from fastapi import APIRouter
-import subprocess
 import random
 import string
 
@@ -16,10 +15,6 @@ async def auto_committer():
             longTextArr = longText.split('a')
             f.write(" \n".join(longTextArr))
             f.close()
-
-        commitText = ''.join(random.choices(string.ascii_lowercase, k=8))
-        res = subprocess.run(f"git add data.txt; git commit -m'{commitText}'; git push", capture_output=True, shell=True)
-        print(res.stdout.decode())
 
     except Exception as e:
         print(e.args)
