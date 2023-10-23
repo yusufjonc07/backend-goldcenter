@@ -31,23 +31,24 @@ def get_all_messages(search, page, limit, usr, db: Session):
     }
 
 
-def create_message(form_data: NewMessage, usr, db: Session):
+def create_message(form_data: NewMessage, usr: User, db: Session):
 
     try:
         new_message = Message(
+            context=form_data.context, 
             type=form_data.type,
-            userId=form_data.userid,
+            userId=usr.id,
             forRole=form_data.forrole,
-            branchId=form_data.branchid,
-            replyId=form_data.replyid,
-            createdAt=form_data.createdat,
-            updated_at=form_data.updated_at,
+            branchId=usr.branchId,
+            replyId=(form_data.replyid if form_data.replyid > 0 else text("NULL")),
         )
 
         db.add(new_message)
         db.commit()
+        db.refresh(new_message)
 
         return new_message
+    
     except IntegrityError as e:
         raise HTTPException(400, e.args)
 

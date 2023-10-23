@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.user import *
 from app.schemas.user import *
+from app.utils.handler import integrityHandler
 from security.auth import get_password_hash
 
 
@@ -32,16 +33,21 @@ def get_all_users(search, page, limit, usr, db: Session):
     }
 
 
-def create_user(form_data: NewUser, usr, db: Session):
+def create_user(form_data: NewUser, usr: User, db: Session):
 
     try:
+
+        employee = db.get(Employee, form_data.employeeid)
+
+        if not employee:
+            raise HTTPException(400, 'Hodim topilmadi')
+
         new_user = User(
-            userRole=form_data.userrole,
-            username=form_data.username,
-            passwordHash=get_password_hash(form_data.password),
-            disabled=form_data.disabled,
-            branchId=form_data.branchid,
             employeeId=form_data.employeeid,
+            username=form_data.username,
+            userRole=employee.role,
+            passwordHash=get_password_hash(form_data.password),
+            branchId=usr.branchId,
         )
 
         db.add(new_user)
@@ -49,7 +55,7 @@ def create_user(form_data: NewUser, usr, db: Session):
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
     except IntegrityError as e:
-        raise HTTPException(400, e.args)
+        raise integrityHandler(e)
 
 
 def update_user(id, form_data: UpdateUser, usr, db: Session):
@@ -64,14 +70,11 @@ def update_user(id, form_data: UpdateUser, usr, db: Session):
             else:
                 passwordHash = this_user.passwordHash
 
-
             user.update({
                 "userRole": form_data.userrole,
                 "username": form_data.username,
                 "passwordHash": passwordHash,
                 "disabled": form_data.disabled,
-                "branchId": form_data.branchid,
-                "employeeId": form_data.employeeid,
             })
             db.commit()
 

@@ -68,7 +68,11 @@ class ConnectionManager:
                 try:
                     
                     if user.id == employee.id:
-                        await websocket.send_json(message)
+                        try:
+                            await websocket.send_json(message)
+                        except Exception as e:
+                            print(e)
+
                         sent = True
                         sended += 1
                         sended_str += f"{user.username}"
@@ -80,7 +84,7 @@ class ConnectionManager:
                 db.add(Notification(
                     title=message['title'],
                     body=message,
-                    imgUrl=message['imgurl'],
+                    imgUrl=message['imgUrl'],
                     user_id=employee.id
                 ))
                 db.commit()

@@ -37,7 +37,7 @@ def create_floor(form_data: NewFloor, usr, db: Session):
             name=form_data.name,
         number=form_data.number,
         description=form_data.description,
-        coridorCleaningCost=form_data.coridorcleaningcost,
+        coridorCleaningCost=form_data.coridorCleaningCost,
         branchId=form_data.branchid,
         type=form_data.type,
     )

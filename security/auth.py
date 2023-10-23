@@ -136,6 +136,7 @@ async def get_current_active_user(current_user: NewUser = Depends(get_current_us
 
 @auth_router.get("/me")
 async def get_me(usr: NewUser = Depends(get_current_active_user)):
+    usr.employee = usr.employee
     return usr
 
 
@@ -145,7 +146,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Login yoki parolda xatolik!",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

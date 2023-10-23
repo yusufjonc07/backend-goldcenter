@@ -5,6 +5,7 @@ from fastapi import Body, File, Form, HTTPException, APIRouter, Depends, UploadF
 from typing import Optional
 from app.schemas.enums import EmployeeRoles
 from app.schemas.user import NewUser
+from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
 from sqlalchemy.orm import joinedload, Session
@@ -159,6 +160,6 @@ async def update_one_employee(
                 raise HTTPException(
                     status_code=400, detail="So`rovda xatolik!")
         except IntegrityError as e:
-            raise HTTPException(400, e.args)
+            integrityHandler(e)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
