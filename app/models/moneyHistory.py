@@ -15,7 +15,7 @@ class Moneyhistory(Base):
     ownerId = Column(Integer, default=0)
     value = Column(String, default='')
     moneyFormId = Column(Integer, ForeignKey('moneyForm.id'), default=0)
-    floorid = Column(Integer, ForeignKey('floor.id'), default=0)
+    floorId = Column(Integer, ForeignKey('floor.id'), default=0)
     branchId = Column(Integer, ForeignKey('branch.id'), default=0)
     comment = Column(String, default='')
     userId = Column(Integer, ForeignKey('user.id'), default=0)
