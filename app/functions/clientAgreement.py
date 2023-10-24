@@ -1,4 +1,5 @@
 import math
+from sqlalchemy.sql import label
 from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
@@ -10,7 +11,15 @@ def get_all_clientAgreements(search, page, limit, usr, db: Session):
     else:
         offset = (page-1) * limit
     
-    clientAgreements = db.query(ClientAgreement)
+    clientAgreements = db.query(
+        label('id', ClientAgreement.id),
+        label('clientName', Client.clientName),
+        label('shopNumber', Shop.number),
+        label('shopArea', Shop.area),
+        label('phoneNumber', Client.phoneNumber),
+        label('balance', ClientAgreement.balance),
+        label('monthlyFee', ClientAgreement.monthlyFee),
+    ).join(ClientAgreement.client).join(ClientAgreement.shop)
 
     #if search:
        #clientAgreements = clientAgreements.filter(

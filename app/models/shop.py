@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, UniqueConstraint, func, TIMESTAMP
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.floor import * 
@@ -13,6 +13,8 @@ class Shop(Base):
     floorId = Column(Integer, ForeignKey('floor.id'), default=0)
     clientId = Column(Integer, ForeignKey('client.id'), nullable=True)
     area = Column(String, default='')
+
+    UniqueConstraint("number", "floorId")
 
     floor = relationship('Floor', backref='shops')
     client = relationship('Client', backref='shops')

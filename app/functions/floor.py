@@ -59,7 +59,7 @@ def update_floor(id, form_data: UpdateFloor, usr, db: Session):
             Floor.name: form_data.name,
             Floor.number: form_data.number,
             Floor.description: form_data.description,
-            Floor.coridorCleaningCost: form_data.coridorcleaningcost,
+            Floor.coridorCleaningCost: form_data.coridorCleaningCost,
             Floor.branchId: form_data.branchid,
             Floor.type: form_data.type,
             })

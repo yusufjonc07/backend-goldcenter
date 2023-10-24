@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.shop import *
 from app.schemas.shop import *
+from app.utils.handler import integrityHandler
 
 def get_all_shops(search, page, limit, usr, db: Session):
     if page == 1 or page < 1:
@@ -35,18 +36,17 @@ def create_shop(form_data: NewShop, usr, db: Session):
     try:
         new_shop = Shop(
             name=form_data.name,
-        number=form_data.number,
-        floorId=form_data.floorid,
-        clientId=form_data.clientid,
-        area=form_data.area,
-    )
+            number=form_data.number,
+            floorId=form_data.floorId,
+            area=form_data.area,
+        )
 
         db.add(new_shop)
         db.commit()
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
     except IntegrityError as e:
-        raise HTTPException(400, e.args)
+        raise integrityHandler(e)
 
 def update_shop(id, form_data: UpdateShop, usr, db: Session):
     
@@ -55,11 +55,10 @@ def update_shop(id, form_data: UpdateShop, usr, db: Session):
         this_shop = shop.first()
         if this_shop:
             shop.update({    
-            Shop.name: form_data.name,
-            Shop.number: form_data.number,
-            Shop.floorId: form_data.floorid,
-            Shop.clientId: form_data.clientid,
-            Shop.area: form_data.area,
+                Shop.name: form_data.name,
+                Shop.number: form_data.number,
+                Shop.floorId: form_data.floorId,
+                Shop.area: form_data.area,
             })
             db.commit()
 
@@ -67,5 +66,5 @@ def update_shop(id, form_data: UpdateShop, usr, db: Session):
         else:
             raise HTTPException(status_code=400, detail="So`rovda xatolik!")
     except IntegrityError as e:
-        raise HTTPException(400, e.args)
+        raise integrityHandler(e)
     

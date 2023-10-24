@@ -15,7 +15,7 @@ class EmployeeRoles(str, Enum):
 
 class FloorTypes(str, Enum):
     rent = "rent"
-    personal = "personal"
+    sold = "sold"
 
 
 class MessageTypes(str, Enum):

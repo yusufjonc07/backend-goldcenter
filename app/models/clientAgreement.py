@@ -21,6 +21,8 @@ class ClientAgreement(Base):
     startedAt = Column(Date)
     closedAt = Column(Date, nullable=True)
 
+    UniqueConstraint("clientId", "shopId", "status")
+
     shop = relationship('Shop', backref='clientAgreements')
     client = relationship('Client', backref='clientAgreements')
 
