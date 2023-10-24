@@ -7,7 +7,7 @@ from app.models.branch import *
 class Floor(Base):
     __tablename__ = "floor"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String, default='')
+    name = Column(String)
     number = Column(Integer, default=0)
     description = Column(String, default='')
     coridorCleaningCost = Column(String, default='')

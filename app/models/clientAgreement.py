@@ -10,7 +10,8 @@ from app.models.client import *
 class ClientAgreement(Base):
     __tablename__ = "clientAgreement"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    fileName = Column(Text, default='')
+    fileName = Column(Text)
+    liablePerson = Column(String(255))
     shopId = Column(Integer, ForeignKey('shop.id'), default=0)
     clientId = Column(Integer, ForeignKey('client.id'), default=0)
     monthlyFee = Column(DOUBLE, default=0)

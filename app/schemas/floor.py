@@ -6,7 +6,7 @@ class NewFloor(BaseModel):
     name: str
     number: int
     description: str
-    coridorcleaningcost: str
+    coridorCleaningCost: str
     branchid: int
     type: FloorTypes
 
@@ -15,7 +15,7 @@ class UpdateFloor(BaseModel):
     name: str
     number: int
     description: str
-    coridorcleaningcost: str
+    coridorCleaningCost: str
     branchid: int
     type: FloorTypes
 

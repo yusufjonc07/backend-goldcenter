@@ -35,12 +35,12 @@ def create_floor(form_data: NewFloor, usr, db: Session):
     try:
         new_floor = Floor(
             name=form_data.name,
-        number=form_data.number,
-        description=form_data.description,
-        coridorCleaningCost=form_data.coridorCleaningCost,
-        branchId=form_data.branchid,
-        type=form_data.type,
-    )
+            number=form_data.number,
+            description=form_data.description,
+            coridorCleaningCost=form_data.coridorCleaningCost,
+            branchId=form_data.branchid,
+            type=form_data.type,
+        )
 
         db.add(new_floor)
         db.commit()
