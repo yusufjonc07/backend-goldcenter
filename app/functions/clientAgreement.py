@@ -12,26 +12,8 @@ def get_all_clientAgreements(search, page, limit, usr, db: Session):
     else:
         offset = (page-1) * limit
 
-    _current_month = func.MONTH(func.now())
-    _current_year = func.YEAR(func.now())
-    _aggDate = func.DAY(ClientAgreement.startedAt)
-    _aggDateR = func.IF(_aggDate < 10, func.CONCAT('0', _aggDate), _aggDate)
 
-    _caseThisMonth = func.CONCAT(
-        _current_year, '-', 
-        func.IF(_current_month < 10, func.CONCAT('0', _current_month), _current_month), '-', 
-        _aggDateR,
-    )
-    
-    _caseNextMonth = func.CONCAT(_current_year, '-', _current_month+1, '-', _aggDateR)
-    _caseNextYear = func.CONCAT(_current_year+1, '-01-', _aggDateR)
 
-    _next_payment_date = func.IF(
-        func.DAY(ClientAgreement.startedAt) < func.DAY(func.now()), 
-        func.IF(_current_month == 12, _caseNextYear, _caseNextMonth),
-        _caseThisMonth
-    )
-    
     clientAgreements = db.query(
         label('id', ClientAgreement.id),
         label('clientName', Client.clientName),
@@ -40,7 +22,7 @@ def get_all_clientAgreements(search, page, limit, usr, db: Session):
         label('phoneNumber', Client.phoneNumber),
         label('balance', ClientAgreement.balance),
         label('monthlyFee', ClientAgreement.monthlyFee),
-        label('nextPaymentDate', _next_payment_date),
+        label('nextPaymentDate', ClientAgreement.startedAt),
     ).join(ClientAgreement.client).join(ClientAgreement.shop)
 
     #if search:
