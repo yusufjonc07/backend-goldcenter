@@ -1,4 +1,5 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, WebSocketException
+import sqlalchemy
 from config import ALGORITHM, SECRET_KEY
 from databases.main import ActiveSession
 from app.utils.wsmanager import *
@@ -22,6 +23,8 @@ notification_router = APIRouter()
 #     return await manager.send_user(message, 'plant_admin', db)
 
 
+ 
+
 @notification_router.websocket("/connection")
 async def websocket_endpoint(
     token: str,
@@ -39,10 +42,13 @@ async def websocket_endpoint(
     try:
 
         if user:
-            for ntf in user.notifications:
-                await manager.send_personal_json(ntf.body, (websocket, user))
+            nots = db.query(Message).filter_by(forRole=user.userRole, isViewed=False).all()
+            for msg in nots:
+                await manager.send_personal_json(msg, (websocket, user))
 
-            db.query(Notification).filter_by(user_id=user.id).delete()
+            db.query(Message).filter_by(forRole=user.userRole, isViewed=False).update({
+                    Message.isViewed: True
+            })
             db.commit()
 
         while True:

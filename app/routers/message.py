@@ -35,7 +35,7 @@ async def create_new_message(
     context: Optional[str] = Body(None),
     fileName: Optional[UploadFile] = File(None),
     forRole: ChatTypes = Body(...),
-    replyId: Optional[int] = Body(None),
+    replyId: int = Body(0),
     branchId: Optional[int] = Body(...),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
@@ -56,7 +56,7 @@ async def create_new_message(
                 if len(file_contents) > 3000000:
                     raise HTTPException(400, "Fayl kattaligi maksimal 3 MB!")
 
-                with open(f"assets/clientAgreements/{_fileName}", "wb") as f:
+                with open(f"assets/{forRole}/{_fileName}", "wb") as f:
                     f.write(file_contents)
             else:
                 _fileName = None
@@ -65,7 +65,7 @@ async def create_new_message(
                 fileName=_fileName,
                 context=context,
                 forRole=forRole,
-                replyId=replyId,
+                replyId=replyId if replyId > 0 else None,
                 userId=usr.id,
                 branchId=branchId,
             )

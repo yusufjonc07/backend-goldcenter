@@ -16,7 +16,7 @@ class Message(Base):
     userId = Column(Integer, ForeignKey('user.id'), default=0)
     forRole = Column(Enum(ChatTypes))
     branchId = Column(Integer, ForeignKey('branch.id'), default=0)
-    replyId = Column(Integer, default=0, nullable=True)
+    replyId = Column(Integer, nullable=True)
     createdAt = Column(TIMESTAMP, nullable=False, default=text("CURRENT_TIMESTAMP"))
     updated_at = Column(TIMESTAMP, nullable=True, default=text("CURRENT_TIMESTAMP"), onupdate=text("CURRENT_TIMESTAMP"))
 

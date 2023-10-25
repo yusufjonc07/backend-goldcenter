@@ -1,8 +1,24 @@
+from tokenize import Triple
 from fastapi import WebSocket, WebSocketException, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from app.models.message import Message
 from app.models.user import User
 from app.models.notification import Notification
+
+def get_clean_message_dict(record: Message):
+    return {
+        "id": record.id,
+        "context": str(record.context),
+        "fileName": str(record.fileName),
+        "isViewed": record.isViewed,
+        "userId": record.userId,
+        "forRole": str(record.forRole),
+        "branchId": record.branchId,
+        "replyId": record.replyId,
+        "createdAt": str(record.createdAt),
+        "updated_at": str(record.updated_at),
+        "employeeName": str(record.user.employee.fullname())
+    }
 
 
 class ConnectionManager:
@@ -27,14 +43,10 @@ class ConnectionManager:
         except WebSocketDisconnect:
             await self.disconnect(websocket)
 
-    async def send_personal_json(self, message: dict, connection):
+    async def send_personal_json(self, message, connection):
         websocket, user = connection
         try:
-            await websocket.send_json({
-                "title": message['title'],
-                "body": message['body'],
-                "imgUrl": message['imgurl'],
-            })
+            await websocket.send_json(get_clean_message_dict(message))
 
         except WebSocketDisconnect:
             await self.disconnect(websocket)
@@ -58,35 +70,19 @@ class ConnectionManager:
     async def send_user(self, message: Message, usr: User, db: Session):
 
         users = db.query(User.id).filter_by(userRole=message.forRole).all()
-
-
         for employee in users:
-            sent = False
             for connection in self.active_connections:
                 websocket, user = connection
                 try:
+
                     
                     if user.id == employee.id:
-                        try:
-                            await websocket.send_json(message)
-                        except Exception as e:
-                            print(e)
-
-                        sent = True
+                        await websocket.send_json(get_clean_message_dict(message))
+                        message.isViewed = True
+                        db.commit()
 
                 except WebSocketDisconnect:
                     await self.disconnect(websocket)
-
-            if sent == False:
-                db.add(Notification(
-                    title=message['title'],
-                    body=message,
-                    imgUrl=message['imgUrl'],
-                    user_id=employee.id
-                ))
-                db.commit()
-
         return
-
 
 manager = ConnectionManager()
