@@ -43,7 +43,7 @@ async def shop_view(
 ):
     if not usr.userRole in ['any_role']:
         return db.query(Shop).options(
-            joinedload(Shop.clientAgreement.and_(ClientAgreement.clientId==Shop.clientId))
+            joinedload(Shop.clientAgreement.and_(ClientAgreement.clientId==Shop.clientId)).joinedload(ClientAgreement.client    )
         ).filter(Shop.id==shop_id).first()
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

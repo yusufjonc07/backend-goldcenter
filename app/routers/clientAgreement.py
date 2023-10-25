@@ -117,7 +117,7 @@ async def update_one_clientAgreement(
             this_clientAgreement = clientAgreement.first()
             if this_clientAgreement:
 
-                old_file_path = f"assets/clientAgreements/{this_clientAgreement.agreementFile}"
+                old_file_path = f"assets/clientAgreements/{this_clientAgreement.fileName}"
 
                 if agreementFile:
 
@@ -150,7 +150,7 @@ async def update_one_clientAgreement(
                 db.commit()
 
                 if file_contents:
-                    with open(f"assets/clientAgreementAgreements/{filename}", "wb") as f:
+                    with open(f"assets/clientAgreements/{filename}", "wb") as f:
                         f.write(file_contents)
 
                         if exists(old_file_path):

@@ -16,6 +16,11 @@ employee_router = APIRouter(tags=['Employee Endpoint'])
 
 
 CONTENT_TYPE_LOOKUP_TABLE = [
+    "audio/wav",
+    "audio/mpeg",
+    "audio/mp4",
+    "video/mp4",
+    "video/mov",
     "image/png",
     "image/jpeg",
     "application/pdf",

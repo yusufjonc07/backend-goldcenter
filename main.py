@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.routes import app_routers
 from app.utils.jsonToCryllic import dict_to_nested_class
 from security.auth import auth_router
@@ -8,6 +9,8 @@ from events import events_router
 app = FastAPI(
     title="Gold Center"
 )
+
+app.mount("/files", StaticFiles(directory="assets"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
