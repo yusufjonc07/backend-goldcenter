@@ -18,14 +18,16 @@ clientAgreement_router = APIRouter(tags=['Clientagreement Endpoint'])
 
 @clientAgreement_router.get("/clientAgreements", description="This router returns list of the clientAgreements using pagination")
 async def get_clientAgreements_list(
-    search: Optional[str] = "",
+    # search: Optional[str] = "",
+    floorId: int,
+    status: Optional[AgreementStatus] = "active",
     page: int = 1,
     limit: int = 10,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):   
     if not usr.userRole in ['any_role']:
-        return get_all_clientAgreements(search, page, limit, usr, db)  
+        return get_all_clientAgreements(floorId, status, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
 
