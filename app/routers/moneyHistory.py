@@ -85,7 +85,7 @@ async def create_new_moneyHistory(
                
 
             if isProceed:
-                new_moneyHistory = Moneyhistory(
+                new_moneyHistory = MoneyHistory(
                     ownerTable=ownerTable,
                     ownerId=ownerId,
                     value=value,

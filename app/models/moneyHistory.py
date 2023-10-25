@@ -8,7 +8,7 @@ from app.models.branch import *
 from app.models.user import * 
 
 
-class Moneyhistory(Base):
+class MoneyHistory(Base):
     __tablename__ = "moneyHistory"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     ownerTable = Column(String, default='')
