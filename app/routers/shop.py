@@ -1,5 +1,6 @@
 from fastapi import HTTPException, APIRouter, Depends
 from typing import Optional
+from app.models.clientAgreement import ClientAgreement
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -31,6 +32,19 @@ async def create_new_shop(
 ):
     if not usr.userRole in ['any_role']:
         return create_shop(form_data, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+@shop_router.get("/shop/detail")
+async def shop_view(
+    shop_id: int,
+    db:Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return db.query(Shop).options(
+            joinedload(Shop.clientAgreement.and_(ClientAgreement.clientId==Shop.clientId))
+        ).filter(Shop.id==shop_id).first()
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

@@ -23,6 +23,6 @@ class ClientAgreement(Base):
 
     UniqueConstraint("clientId", "shopId", "status")
 
-    shop = relationship('Shop', backref='clientAgreements')
+    shop = relationship('Shop', backref=backref('clientAgreement', uselist=False))
     client = relationship('Client', backref='clientAgreements')
 
