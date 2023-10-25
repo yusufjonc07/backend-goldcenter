@@ -10,8 +10,9 @@ from app.models.branch import *
 class Message(Base):
     __tablename__ = "message"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    context = Column(String)
-    type = Column(Enum(MessageTypes))
+    context = Column(String, nullable=True)
+    fileName = Column(Text, nullable=True)
+    isViewed = Column(Boolean, default=False)
     userId = Column(Integer, ForeignKey('user.id'), default=0)
     forRole = Column(Enum(ChatTypes))
     branchId = Column(Integer, ForeignKey('branch.id'), default=0)

@@ -1,5 +1,6 @@
 from fastapi import WebSocket, WebSocketException, WebSocketDisconnect
 from sqlalchemy.orm import Session
+from app.models.message import Message
 from app.models.user import User
 from app.models.notification import Notification
 
@@ -54,12 +55,10 @@ class ConnectionManager:
             except WebSocketDisconnect:
                 await self.disconnect(websocket)
 
-    async def send_user(self, message: dict, role: str, db: Session):
+    async def send_user(self, message: Message, usr: User, db: Session):
 
-        users = db.query(User.id).filter_by(userRole=role).all()
+        users = db.query(User.id).filter_by(userRole=message.forRole).all()
 
-        sended = 0
-        sended_str = ""
 
         for employee in users:
             sent = False
@@ -74,8 +73,6 @@ class ConnectionManager:
                             print(e)
 
                         sent = True
-                        sended += 1
-                        sended_str += f"{user.username}"
 
                 except WebSocketDisconnect:
                     await self.disconnect(websocket)
@@ -89,7 +86,7 @@ class ConnectionManager:
                 ))
                 db.commit()
 
-        return f"Message was sent to {sended} user/s, they are {sended_str}"
+        return
 
 
 manager = ConnectionManager()
