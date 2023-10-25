@@ -1,5 +1,5 @@
 from email.policy import default
-from sqlalchemy import Column, Enum, Integer, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from sqlalchemy import Column, Enum, Integer, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP, text
 from app.schemas.enums import ExpenceTypes
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
@@ -20,8 +20,8 @@ class Moneyhistory(Base):
     comment = Column(String, default='')
     userId = Column(Integer, ForeignKey('user.id'), default=0)
     fileName = Column(Text, default='')
-    createdAt = Column(TIMESTAMP, nullable=True)
-    addingtofee = Column(Enum(ExpenceTypes), default='none')
+    createdAt = Column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
+    addingToFee = Column(Enum(ExpenceTypes), default='none')
 
     moneyForm = relationship('Moneyform', backref='moneyHistorys')
     branch = relationship('Branch', backref='moneyHistorys')

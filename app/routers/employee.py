@@ -16,6 +16,8 @@ employee_router = APIRouter(tags=['Employee Endpoint'])
 
 
 CONTENT_TYPE_LOOKUP_TABLE = [
+    "image/png",
+    "image/jpeg",
     "application/pdf",
     "application/x-excel",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

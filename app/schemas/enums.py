@@ -61,3 +61,6 @@ class AgreementStatus(str, Enum):
 class AgreementType(str, Enum):
     rent = "rent"
     sold = "sold"
+
+class MoneyHistoryTables(str, Enum):
+    clientAgreement = "clientAgreement"
