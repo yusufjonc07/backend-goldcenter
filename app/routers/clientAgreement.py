@@ -4,6 +4,7 @@ import os
 import uuid
 from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
+from app.functions.moneyHistory import get_all_agreement_payments
 from app.models.user import User
 from app.routers.employee import CONTENT_TYPE_LOOKUP_TABLE
 from app.schemas.user import NewUser
@@ -30,6 +31,20 @@ async def get_clientAgreements_list(
         return get_all_clientAgreements(floorId, status, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
+    
+
+@clientAgreement_router.get("/clientAgreement/payments")
+async def get_agreement_payments(
+    id: Optional[int] = 0,
+    page: int = 1,
+    limit: int = 10,
+    db:Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return get_all_agreement_payments(id, page, limit, usr, db)  
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 @clientAgreement_router.post("/clientAgreement/create", description="This router is able to add new clientAgreement")
 async def create_new_clientAgreement(
@@ -130,6 +145,7 @@ async def update_one_clientAgreement(
                     ClientAgreement.type: type,
                     ClientAgreement.startedAt: startedAt,
                     ClientAgreement.liablePerson: liablePerson,
+                    ClientAgreement.closedAt: (func.now() if status == 'closed' else None)
                 })
                 db.commit()
 

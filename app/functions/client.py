@@ -39,6 +39,7 @@ def create_client(form_data: FormClient, usr, db: Session):
             clientName=form_data.clientName,
             chiefName=form_data.chiefName,
             phoneNumber=form_data.phoneNumber,
+            inn=form_data.inn,
             extraPhoneNumber=form_data.extraPhoneNumber
         )
 
@@ -60,6 +61,7 @@ def update_client(id, form_data: FormClient, usr, db: Session):
                 Client.chiefName: form_data.chiefName,
                 Client.phoneNumber: form_data.phoneNumber,
                 Client.extraPhoneNumber: form_data.extraPhoneNumber,
+                Client.inn: form_data.inn,
             })
             db.commit()
 

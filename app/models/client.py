@@ -7,6 +7,7 @@ class Client(Base):
     clientName = Column(String, unique=True)
     chiefName = Column(String, unique=True)
     phoneNumber = Column(Integer)
+    inn = Column(String(20))
     extraPhoneNumber = Column(Integer, nullable=True)
 
 

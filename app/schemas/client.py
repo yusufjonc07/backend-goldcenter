@@ -8,6 +8,7 @@ from app.models.client import *
 class FormClient(BaseModel):
     clientName: str
     chiefName: str
+    inn: str
     phoneNumber: int
     extraPhoneNumber: Optional[int] = None
 
