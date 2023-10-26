@@ -18,5 +18,5 @@ class User(Base):
     employeeId = Column(Integer, ForeignKey('employee.id'), default=0)
 
     branch = relationship('Branch', backref='users')
-    employee = relationship('Employee', backref='users')
+    employee = relationship('Employee', backref='users', lazy='joined')
 
