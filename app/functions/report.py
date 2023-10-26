@@ -9,6 +9,20 @@ from app.models.user import User
 from datetime import date
 
 MONTHS_COUNT = 12
+MONTHS = {
+    1:'Yanvar',
+    2:'Fevral',
+    3:'Mart',
+    4:'Aprel',
+    5:'May',
+    6:'Iyun',
+    7:'Iyul',
+    8:'Avgust',
+    9:'Sentabr',
+    10:'Oktabr',
+    11:'Noyabr',
+    12:'Dekabr',
+}
 
 def get_income(floor_id: int, usr: User, db:Session):
 
@@ -47,6 +61,10 @@ def get_income(floor_id: int, usr: User, db:Session):
                 "value": randint(2000000, 90000000),
                 "month": month
             })
+
+    for m in incomesByMonths:
+        m['monthName'] = MONTHS[m['month']]
+        del m['month']
 
     return {
         "incomesByMonths": incomesByMonths,
