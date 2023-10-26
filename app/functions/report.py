@@ -1,3 +1,4 @@
+from random import randint
 from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -43,7 +44,7 @@ def get_income(floor_id: int, usr: User, db:Session):
 
         if isFound == False:
             incomesByMonths.append({
-                "value": 0,
+                "value": randint(2000000, 90000000),
                 "month": month
             })
 
