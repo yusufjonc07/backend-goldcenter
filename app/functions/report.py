@@ -72,6 +72,7 @@ def get_income(floor_id: int, _year: int, _month: int, db:Session):
 
     incomesByMonths = []
 
+
     for month in rangeList:
 
         isFound = False
@@ -81,10 +82,9 @@ def get_income(floor_id: int, _year: int, _month: int, db:Session):
 
                 incomesByMonths.append({
                     'monthName': MONTHS[month] if _month == 0 else str(month),
-                    'value': income.value
+                    'value': income.value,
                 })
 
-                incomesByMonths.append(income)
                 yearlyIncome += income.value
                 isFound = True
 
@@ -93,6 +93,7 @@ def get_income(floor_id: int, _year: int, _month: int, db:Session):
                 'monthName': MONTHS[month] if _month == 0 else str(month),
                 'value': randint(2000000, 90000000),
             })
+
     return {
         "incomesByMonths": incomesByMonths,
         "yearlyIncome": yearlyIncome
