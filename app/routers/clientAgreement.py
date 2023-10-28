@@ -6,8 +6,8 @@ from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
 from app.functions.moneyHistory import get_all_agreement_payments
 from app.models.user import User
-from app.routers.employee import CONTENT_TYPE_LOOKUP_TABLE
 from app.schemas.user import NewUser
+from app.utils.fileUtil import replace_file, save_file, validate_file
 from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -63,20 +63,10 @@ async def create_new_clientAgreement(
     if not usr.userRole in ['any_role']:
         try:
 
-            if not agreementFile.content_type in CONTENT_TYPE_LOOKUP_TABLE:
-                raise HTTPException(
-                    400, "Fayl formati pdf, docx, xls yoki xlsx bo`lishi kerak!")
-
-            image_contents = await agreementFile.read()
-
-            agreementFile.filename = f"{uuid.uuid4()}__{agreementFile.filename}"
-
-            if len(image_contents) > 3000000:
-                raise HTTPException(
-                    400, "Fayl kattaligi maksimal 3 MB!")
+            agreementFileName = validate_file(agreementFile, ['document'], 3)
 
             new_clientAgreement = ClientAgreement(
-                fileName=agreementFile.filename,
+                fileName=agreementFileName,
                 shopId=shopId,
                 clientId=clientId,
                 monthlyFee=monthlyFee,
@@ -89,6 +79,8 @@ async def create_new_clientAgreement(
 
             db.add(new_clientAgreement)
             db.commit()
+
+            save_file(agreementFile, agreementFileName, 'clientAgreements')
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
@@ -117,26 +109,15 @@ async def update_one_clientAgreement(
             this_clientAgreement = clientAgreement.first()
             if this_clientAgreement:
 
-                old_file_path = f"assets/clientAgreements/{this_clientAgreement.fileName}"
+                _old_agreement = this_clientAgreement
 
                 if agreementFile:
-
-                    if not agreementFile.content_type in CONTENT_TYPE_LOOKUP_TABLE:
-                        raise HTTPException(
-                            400, "Fayl formati pdf, docx, xls yoki xlsx bo`lishi kerak!")
-
-                    file_contents = await agreementFile.read()
-
-                    filename = f"{uuid.uuid4()}__{agreementFile.filename}"
-                    if len(file_contents) > 3000000:
-                        raise HTTPException(
-                            400, "Fayl kattaligi maksimal 3 MB!")
+                    fileName = validate_file(agreementFile, ['document'], 3)
                 else:
-                    filename = this_clientAgreement.agreementFile
-                    file_contents = None
+                    fileName = this_clientAgreement.fileName
 
                 clientAgreement.update({
-                    ClientAgreement.fileName: filename,
+                    ClientAgreement.fileName: fileName,
                     ClientAgreement.shopId: shopId,
                     ClientAgreement.clientId: clientId,
                     ClientAgreement.monthlyFee: monthlyFee,
@@ -148,13 +129,8 @@ async def update_one_clientAgreement(
                     ClientAgreement.closedAt: (func.now() if status == 'closed' else None)
                 })
                 db.commit()
+                replace_file(agreementFile, _old_agreement.fileName, fileName, 'clientAgreements')
 
-                if file_contents:
-                    with open(f"assets/clientAgreements/{filename}", "wb") as f:
-                        f.write(file_contents)
-
-                        if exists(old_file_path):
-                            os.unlink(old_file_path)
 
                 raise HTTPException(
                     status_code=200, detail="O`zgarish saqlandi!")

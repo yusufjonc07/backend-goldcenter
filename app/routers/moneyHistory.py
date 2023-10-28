@@ -1,10 +1,11 @@
+from datetime import date
 import uuid
 from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
 from app.models.clientAgreement import ClientAgreement
-from app.routers.employee import CONTENT_TYPE_LOOKUP_TABLE
 from app.schemas.enums import MoneyHistoryTables
 from app.schemas.user import NewUser
+from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -45,17 +46,7 @@ async def create_new_moneyHistory(
     if not usr.userRole in ['any_role']:
         try:
 
-            if not fileName.content_type in CONTENT_TYPE_LOOKUP_TABLE:
-                raise HTTPException(
-                    400, "Fayl formati png, jpg, jpeg pdf, docx, xls yoki xlsx bo`lishi kerak!")
-
-            image_contents = await fileName.read()
-
-            fileName.filename = f"{uuid.uuid4()}__{fileName.filename}"
-
-            if len(image_contents) > 3000000:
-                raise HTTPException(
-                    400, "Fayl kattaligi maksimal 3 MB!")
+            _fileName = validate_file(fileName, ['document', 'image'], 3)
             
             if ownerTable in ['clientAgreement',] and value <= 0:
                 raise HTTPException(400, "Olinayotgan pul miqdori noto'g'ri")
@@ -94,12 +85,13 @@ async def create_new_moneyHistory(
                     comment=comment,
                     branchId=branchId,
                     userId=usr.id,
-                    fileName=fileName.filename,
+                    fileName=_fileName,
                     addingToFee=addingtofee
                 )
 
             db.add(new_moneyHistory)
             db.commit()
+            save_file(fileName, _fileName, f"moneyHistories/{date.year}/{date.month}/{date.day}")
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:

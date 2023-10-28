@@ -1,8 +1,9 @@
+from datetime import date
 import uuid
 from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
-from app.routers.employee import CONTENT_TYPE_LOOKUP_TABLE
 from app.schemas.user import NewUser
+from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -46,18 +47,8 @@ async def create_new_message(
             if fileName is None and context is None:
                 raise HTTPException(400, 'Xabar tarkibidi nimadir bo`lishi kerak')
 
-            if fileName is not None:
-                if not fileName.content_type in CONTENT_TYPE_LOOKUP_TABLE:
-                    raise HTTPException(400, "Fayl formati noto`g`ri!")
-
-                file_contents = await fileName.read()
-                _fileName = f"{uuid.uuid4()}__{fileName.filename}"
-
-                if len(file_contents) > 3000000:
-                    raise HTTPException(400, "Fayl kattaligi maksimal 3 MB!")
-
-                with open(f"assets/{forRole}/{_fileName}", "wb") as f:
-                    f.write(file_contents)
+            if fileName:
+                _fileName = validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
             else:
                 _fileName = None
 
@@ -74,6 +65,8 @@ async def create_new_message(
             db.commit()
             db.refresh(new_message)
 
+            save_file(fileName, _fileName, f"{new_message.forRole}/{date.year}/{date.month}/{date.day}")
+
             await manager.send_user(new_message, usr, db)
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
@@ -84,14 +77,14 @@ async def create_new_message(
 
 
 
-@message_router.put("/message/{id}/update", description="This router is able to update message")
-async def update_one_message(
-    id: int,
-    form_data: UpdateMessage,
-    db: Session = ActiveSession,
-    usr: NewUser = Depends(get_current_active_user)
-):
-    if not usr.userRole in ['any_role']:
-        return update_message(id, form_data, usr, db)
-    else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+# @message_router.put("/message/{id}/update", description="This router is able to update message")
+# async def update_one_message(
+#     id: int,
+#     form_data: UpdateMessage,
+#     db: Session = ActiveSession,
+#     usr: NewUser = Depends(get_current_active_user)
+# ):
+#     if not usr.userRole in ['any_role']:
+#         return update_message(id, form_data, usr, db)
+#     else:
+#         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

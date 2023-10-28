@@ -7,7 +7,7 @@ DB_URL = os.getenv("DB_URL")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-
+ASSETS_URL = 'assets'
 CONTENT_TYPES = {
     'audio': [
         "audio/wav",

@@ -5,6 +5,7 @@ from fastapi import Body, File, Form, HTTPException, APIRouter, Depends, UploadF
 from typing import Optional
 from app.schemas.enums import EmployeeRoles
 from app.schemas.user import NewUser
+from app.utils.fileUtil import replace_file, save_file, validate_file
 from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -34,10 +35,11 @@ async def create_new_employee(
     firstname: str = Body(..., max_length=20),
     lastname: str = Body(..., max_length=20),
     phoneNumber: int = Body(..., min=100000000, max=999999999),
-    passportSeriaNumber: str = Body(..., max_length=10),
+    agreementFile: UploadFile = File(...),
+    passportFile: UploadFile = File(...),
+    avatarFile: Optional[UploadFile] = File(None),
     salaryQuantity: float = Body(..., ge=0),
     role: EmployeeRoles = Body(...),
-    agreementFile: UploadFile = File(...),
     duty: str = Body(..., max_length=255),
     shiftId: int = Body(...),
     db: Session = ActiveSession,
@@ -45,14 +47,24 @@ async def create_new_employee(
 ):
     if not usr.userRole in ['any_role']:
         try:
+
+            agreementFileName = validate_file(agreementFile, ['document'], 3)
+            passportFileName = validate_file(passportFile, ['image'], 3)
+
+            if avatarFile:
+                avatarFileName = validate_file(avatarFile, ['image'], 3)
+            else:
+                avatarFileName = None
+
             new_employee = Employee(
                 firstname=firstname,
                 lastname=lastname,
                 phoneNumber=phoneNumber,
-                passportSeriaNumber=passportSeriaNumber,
+                avatarFile=avatarFileName,
+                passportFile=passportFileName,
                 salaryQuantity=salaryQuantity,
                 role=role,
-                agreementFile=agreementFile.filename,
+                agreementFile=agreementFileName,
                 duty=duty,
                 branchId=usr.branchId,
                 shiftId=shiftId,
@@ -61,7 +73,11 @@ async def create_new_employee(
             db.add(new_employee)
             db.commit()
 
+            if avatarFileName:
+                save_file(avatarFile, avatarFileName, 'employeeAvatars')
            
+            save_file(agreementFile, agreementFileName, 'employeeAgreements')
+            save_file(passportFile, passportFileName, 'employeePassports')
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
@@ -76,7 +92,8 @@ async def update_one_employee(
     firstname: str = Body(..., max_length=20),
     lastname: str = Body(..., max_length=20),
     phoneNumber: int = Body(..., min=100000000, max=999999999),
-    passportSeriaNumber: str = Body(..., max_length=10),
+    passportFile: UploadFile = File(None),
+    avatarFile: Optional[UploadFile] = File(None),
     salaryQuantity: float = Body(..., ge=0),
     role: EmployeeRoles = Body(...),
     agreementFile: Optional[UploadFile] = File(None),
@@ -90,46 +107,43 @@ async def update_one_employee(
         try:
             employee = db.query(Employee).filter(Employee.id == id)
             this_employee = employee.first()
-            if this_employee:
+            if this_employee:   
 
-                old_file_path = f"assets/employeeAgreements/{this_employee.agreementFile}"
+                _old_employee = this_employee
+
+                if avatarFile:
+                    avatarFileName = validate_file(avatarFile, ['image'], 3)
+                else:
+                    avatarFileName = this_employee.avatarFile
+
+                if passportFile:
+                    passportFileName = validate_file(passportFile, ['image'], 3)
+                else:
+                    passportFileName = this_employee.passportFile
 
                 if agreementFile:
-
-                    if not agreementFile.content_type in CONTENT_TYPE_LOOKUP_TABLE:
-                        raise HTTPException(
-                            400, "Fayl formati pdf, docx, xls yoki xlsx bo`lishi kerak!")
-
-                    file_contents = await agreementFile.read()
-
-                    filename = f"{uuid.uuid4()}__{agreementFile.filename}"
-                    if len(file_contents) > 3000000:
-                        raise HTTPException(
-                            400, "Fayl kattaligi maksimal 3 MB!")
+                    agreementFileName = validate_file(agreementFile, ['document'], 3)
                 else:
-                    filename = this_employee.agreementFile
-                    file_contents = None
+                    agreementFileName = this_employee.agreementFile
 
                 employee.update({
                     Employee.firstname: firstname,
                     Employee.lastname: lastname,
                     Employee.phoneNumber: phoneNumber,
-                    Employee.passportSeriaNumber: passportSeriaNumber,
                     Employee.salaryQuantity: salaryQuantity,
                     Employee.role: role,
-                    Employee.agreementFile: filename,
+                    Employee.agreementFile: agreementFileName,
+                    Employee.avatarFile: avatarFileName,
+                    Employee.passportFile: passportFileName,
                     Employee.duty: duty,
                     Employee.fired: fired,
                     Employee.shiftId: shiftId,
                 })
                 db.commit()
 
-                if file_contents:
-                    with open(f"assets/employeeAgreements/{filename}", "wb") as f:
-                        f.write(file_contents)
-
-                        if exists(old_file_path):
-                            os.unlink(old_file_path)
+                replace_file(passportFile, _old_employee.passportFile, passportFileName, 'employeePassports')
+                replace_file(agreementFile, _old_employee.agreementFile, agreementFileName, 'employeeAgreements')
+                replace_file(avatarFile, _old_employee.avatarFile, avatarFileName, 'employeeAvatars')
 
                 raise HTTPException(
                     status_code=200, detail="O`zgarish saqlandi!")
