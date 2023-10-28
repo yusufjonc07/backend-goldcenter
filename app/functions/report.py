@@ -8,6 +8,8 @@ from app.models.moneyHistory import MoneyHistory
 from app.models.user import User
 from datetime import date
 
+from app.schemas.enums import ReportTypes
+
 MONTHS_COUNT = 12
 MONTHS = {
     1:'Yanvar',
@@ -24,10 +26,47 @@ MONTHS = {
     12:'Dekabr',
 }
 
-def get_income(floor_id: int, usr: User, db:Session):
+def get_yearly_income(floor_id: int, type: ReportTypes, usr: User, db:Session):
+    total_income = 0
+    incomes = db.query(
+        label("value", func.sum(MoneyHistory.value)),
+        label("label", func.year(MoneyHistory.createdAt)),
+    ).filter(
+        MoneyHistory.floorId == floor_id,
+        MoneyHistory.value > 0
+    ).order_by(
+        func.year(MoneyHistory.createdAt).asc()
+    ).group_by(
+        func.year(MoneyHistory.createdAt)
+    ).all()
 
-    if not db.get(Floor, floor_id):
-        raise HTTPException(400, "Qavat topilmadi.")
+    incomesByYears = []
+
+    for year in range(2023, 2033):
+
+        isFound = False
+        for income in incomes:
+            if year == income.label:
+                incomesByYears.append(income)
+                yearlyIncome += income.value
+                isFound = True
+
+        if isFound == False:
+            incomesByYears.append({
+                "value": randint(2000000, 90000000),
+                "label": year
+            })
+
+    for m in incomesByYears:
+        m['labelName'] = MONTHS[m['label']]
+        del m['label']
+
+    return {
+        "incomesData": incomesByYears,
+        "totalIncome": total_income
+    }
+
+def get_income(floor_id: int, type: ReportTypes, usr: User, db:Session):
 
     yearlyIncome = 0
 

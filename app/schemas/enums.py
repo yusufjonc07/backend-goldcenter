@@ -70,3 +70,8 @@ class MediaTypes(str, Enum):
     audio="audio"
     video="video"
     document="document" 
+
+class ReportTypes(str, Enum):
+    yearly="yearly"
+    monthly="monthly"
+    daily="daily"
