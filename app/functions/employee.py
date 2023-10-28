@@ -13,8 +13,7 @@ def get_all_employees(search, page, limit, usr, db: Session):
         offset = (page-1) * limit
 
     employees = db.query(Employee).options(
-        joinedload(Employee.shift),
-        joinedload(Employee.users),
+        joinedload(Employee.shift)
     )
 
     # if search:

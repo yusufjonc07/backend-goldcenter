@@ -64,3 +64,9 @@ class AgreementType(str, Enum):
 
 class MoneyHistoryTables(str, Enum):
     clientAgreement = "clientAgreement"
+
+class MediaTypes(str, Enum):
+    image="image"
+    audio="audio"
+    video="video"
+    document="document" 

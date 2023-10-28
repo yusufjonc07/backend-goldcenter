@@ -15,21 +15,6 @@ from app.functions.employee import *
 employee_router = APIRouter(tags=['Employee Endpoint'])
 
 
-CONTENT_TYPE_LOOKUP_TABLE = [
-    "audio/wav",
-    "audio/mpeg",
-    "audio/mp4",
-    "video/mp4",
-    "video/mov",
-    "image/png",
-    "image/jpeg",
-    "application/pdf",
-    "application/x-excel",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-]
-
-
 @employee_router.get("/employees", description="This router returns list of the employees using pagination")
 async def get_employees_list(
     search: Optional[str] = "",
@@ -59,21 +44,7 @@ async def create_new_employee(
     usr: User = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-
         try:
-
-            if not agreementFile.content_type in CONTENT_TYPE_LOOKUP_TABLE:
-                raise HTTPException(
-                    400, "Fayl formati pdf, docx, xls yoki xlsx bo`lishi kerak!")
-
-            image_contents = await agreementFile.read()
-
-            agreementFile.filename = f"{uuid.uuid4()}__{agreementFile.filename}"
-
-            if len(image_contents) > 3000000:
-                raise HTTPException(
-                    400, "Fayl kattaligi maksimal 3 MB!")
-
             new_employee = Employee(
                 firstname=firstname,
                 lastname=lastname,
@@ -90,8 +61,7 @@ async def create_new_employee(
             db.add(new_employee)
             db.commit()
 
-            with open(f"assets/employeeAgreements/{agreementFile.filename}", "wb") as f:
-                f.write(image_contents)
+           
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
