@@ -6,7 +6,7 @@ from sqlalchemy.sql import label
 from app.models.floor import Floor
 from app.models.moneyHistory import MoneyHistory
 from app.models.user import User
-from datetime import date
+import calendar
 
 from app.schemas.enums import ReportTypes
 
@@ -26,85 +26,73 @@ MONTHS = {
     12:'Dekabr',
 }
 
-def get_yearly_income(floor_id: int, type: ReportTypes, usr: User, db:Session):
-    total_income = 0
-    incomes = db.query(
-        label("value", func.sum(MoneyHistory.value)),
-        label("label", func.year(MoneyHistory.createdAt)),
-    ).filter(
-        MoneyHistory.floorId == floor_id,
-        MoneyHistory.value > 0
-    ).order_by(
-        func.year(MoneyHistory.createdAt).asc()
-    ).group_by(
-        func.year(MoneyHistory.createdAt)
-    ).all()
-
-    incomesByYears = []
-
-    for year in range(2023, 2033):
-
-        isFound = False
-        for income in incomes:
-            if year == income.label:
-                incomesByYears.append(income)
-                yearlyIncome += income.value
-                isFound = True
-
-        if isFound == False:
-            incomesByYears.append({
-                "value": randint(2000000, 90000000),
-                "label": year
-            })
-
-    for m in incomesByYears:
-        m['labelName'] = MONTHS[m['label']]
-        del m['label']
-
-    return {
-        "incomesData": incomesByYears,
-        "totalIncome": total_income
-    }
-
-def get_income(floor_id: int, type: ReportTypes, usr: User, db:Session):
+def get_income(floor_id: int, _year: int, _month: int, db:Session):
 
     yearlyIncome = 0
 
-    incomes = db.query(
-        label("value", func.sum(MoneyHistory.value)),
-        label("month", func.month(MoneyHistory.createdAt)),
-    ).filter(
-        func.year(MoneyHistory.createdAt) == date.year,
-        MoneyHistory.floorId == floor_id,
-        MoneyHistory.value > 0
-    ).order_by(
-        func.month(MoneyHistory.createdAt).asc()
-    ).group_by(
-        func.month(MoneyHistory.createdAt)
-    ).all()
+    if floor_id > 0:
+        floorFilter = MoneyHistory.floorId == floor_id
+    else:
+        floorFilter = MoneyHistory.id > 0
+
+    if _month == 0:
+        incomes = db.query(
+            label("value", func.sum(MoneyHistory.value)),
+            label("month", func.month(MoneyHistory.createdAt)),
+        ).filter(
+            func.year(MoneyHistory.createdAt) == _year,
+            MoneyHistory.branchId==1,
+            MoneyHistory.value > 0
+        ).filter(floorFilter).order_by(
+            func.month(MoneyHistory.createdAt).asc()
+        ).group_by(
+            func.month(MoneyHistory.createdAt)
+        ).all()
+
+        rangeList = range(1, MONTHS_COUNT+1)
+
+    else:
+
+        incomes = db.query(
+            label("value", func.sum(MoneyHistory.value)),
+            label("month", func.DAY(MoneyHistory.createdAt)),
+        ).filter(
+            func.month(MoneyHistory.createdAt) == _month,
+            func.year(MoneyHistory.createdAt) == _year,
+            MoneyHistory.floorId == floor_id,
+            MoneyHistory.branchId==1,
+            MoneyHistory.value > 0
+        ).order_by(
+            func.DAY(MoneyHistory.createdAt).asc()
+        ).group_by(
+            func.DAY(MoneyHistory.createdAt)
+        ).all()
+
+        rangeList = range(1, calendar.monthrange(_year, _month)[1]+1)
 
     incomesByMonths = []
 
-    for month in range(1, MONTHS_COUNT+1):
+    for month in rangeList:
 
         isFound = False
 
         for income in incomes:
             if month == income.month:
+
+                incomesByMonths.append({
+                    'monthName': MONTHS[month] if _month == 0 else str(month),
+                    'value': income.value
+                })
+
                 incomesByMonths.append(income)
                 yearlyIncome += income.value
                 isFound = True
 
         if isFound == False:
             incomesByMonths.append({
-                "value": randint(2000000, 90000000),
-                "month": month
+                'monthName': MONTHS[month] if _month == 0 else str(month),
+                'value': randint(2000000, 90000000),
             })
-
-    for m in incomesByMonths:
-        m['monthName'] = MONTHS[m['month']]
-        del m['month']
-
     return {
         "incomesByMonths": incomesByMonths,
         "yearlyIncome": yearlyIncome

@@ -72,6 +72,5 @@ class MediaTypes(str, Enum):
     document="document" 
 
 class ReportTypes(str, Enum):
-    yearly="yearly"
     monthly="monthly"
     daily="daily"
