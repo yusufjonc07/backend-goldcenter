@@ -46,7 +46,7 @@ async def create_new_moneyHistory(
     if not usr.userRole in ['any_role']:
         try:
 
-            _fileName = validate_file(fileName, ['document', 'image'], 3)
+            _fileName = await validate_file(fileName, ['document', 'image'], 3)
             
             if ownerTable in ['clientAgreement',] and value <= 0:
                 raise HTTPException(400, "Olinayotgan pul miqdori noto'g'ri")
@@ -91,7 +91,7 @@ async def create_new_moneyHistory(
 
             db.add(new_moneyHistory)
             db.commit()
-            save_file(fileName, _fileName, f"moneyHistories/{date.year}/{date.month}/{date.day}")
+            await save_file(fileName, _fileName, f"moneyHistories/{date.year}/{date.month}/{date.day}")
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:

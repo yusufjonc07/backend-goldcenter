@@ -63,7 +63,7 @@ async def create_new_clientAgreement(
     if not usr.userRole in ['any_role']:
         try:
 
-            agreementFileName = validate_file(agreementFile, ['document'], 3)
+            agreementFileName = await validate_file(agreementFile, ['document'], 3)
 
             new_clientAgreement = ClientAgreement(
                 fileName=agreementFileName,
@@ -80,7 +80,7 @@ async def create_new_clientAgreement(
             db.add(new_clientAgreement)
             db.commit()
 
-            save_file(agreementFile, agreementFileName, 'clientAgreements')
+            await save_file(agreementFile, agreementFileName, 'clientAgreements')
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
@@ -112,7 +112,7 @@ async def update_one_clientAgreement(
                 _old_agreement = this_clientAgreement
 
                 if agreementFile:
-                    fileName = validate_file(agreementFile, ['document'], 3)
+                    fileName = await validate_file(agreementFile, ['document'], 3)
                 else:
                     fileName = this_clientAgreement.fileName
 
@@ -129,7 +129,7 @@ async def update_one_clientAgreement(
                     ClientAgreement.closedAt: (func.now() if status == 'closed' else None)
                 })
                 db.commit()
-                replace_file(agreementFile, _old_agreement.fileName, fileName, 'clientAgreements')
+                await replace_file(agreementFile, _old_agreement.fileName, fileName, 'clientAgreements')
 
 
                 raise HTTPException(

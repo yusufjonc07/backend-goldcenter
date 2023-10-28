@@ -15,11 +15,11 @@ async def validate_file(file: UploadFile, types: List[MediaTypes], maxSize: floa
     for type in types:
         if file.content_type in CONTENT_TYPES[type]: inValidFormat = False
             
-    if inValidFormat: raise HTTPException(400, "Fayl formati noto'g'ri!")
+    if inValidFormat: raise HTTPException(400, f"Fayl formati noto'g'ri! Sizniki: {file.content_type}")
 
     file_contents = await file.read()
 
-    filename = f"{uuid.uuid4()[:10]}__{file.filename}"
+    filename = f"{uuid.uuid4()}__{file.filename}"
 
     if len(file_contents) > maxSize * 1024 * 1024:
         raise HTTPException(
@@ -32,13 +32,13 @@ async def save_file(file: UploadFile, filename: str, url:Path):
     # read the file contents
     file_contents = await file.read()
     
-    upload_dir = os.path.join(os.getcwd(), url)
+    upload_dir = os.path.join(os.getcwd(), ASSETS_URL, url)
     # Create the upload directory if it doesn't exist
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
 
     # get the destination path
-    dest = os.path.join(upload_dir, filename)
+    dest = os.path.join(url, filename)
 
     # save the file
     with open(f"{ASSETS_URL}/{dest}", "wb") as f:

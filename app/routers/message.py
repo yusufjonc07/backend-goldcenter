@@ -48,7 +48,7 @@ async def create_new_message(
                 raise HTTPException(400, 'Xabar tarkibidi nimadir bo`lishi kerak')
 
             if fileName:
-                _fileName = validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
+                _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
             else:
                 _fileName = None
 
@@ -65,7 +65,7 @@ async def create_new_message(
             db.commit()
             db.refresh(new_message)
 
-            save_file(fileName, _fileName, f"{new_message.forRole}/{date.year}/{date.month}/{date.day}")
+            await save_file(fileName, _fileName, f"{new_message.forRole}/{date.year}/{date.month}/{date.day}")
 
             await manager.send_user(new_message, usr, db)
 

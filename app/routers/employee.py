@@ -48,11 +48,11 @@ async def create_new_employee(
     if not usr.userRole in ['any_role']:
         try:
 
-            agreementFileName = validate_file(agreementFile, ['document'], 3)
-            passportFileName = validate_file(passportFile, ['image'], 3)
+            agreementFileName = await validate_file(agreementFile, ['document', 'image'], 3)
+            passportFileName = await validate_file(passportFile, ['image'], 3)
 
             if avatarFile:
-                avatarFileName = validate_file(avatarFile, ['image'], 3)
+                avatarFileName = await validate_file(avatarFile, ['image'], 3)
             else:
                 avatarFileName = None
 
@@ -74,10 +74,10 @@ async def create_new_employee(
             db.commit()
 
             if avatarFileName:
-                save_file(avatarFile, avatarFileName, 'employeeAvatars')
+                await save_file(avatarFile, avatarFileName, 'employeeAvatars')
            
-            save_file(agreementFile, agreementFileName, 'employeeAgreements')
-            save_file(passportFile, passportFileName, 'employeePassports')
+            await save_file(agreementFile, agreementFileName, 'employeeAgreements')
+            await save_file(passportFile, passportFileName, 'employeePassports')
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
@@ -112,17 +112,17 @@ async def update_one_employee(
                 _old_employee = this_employee
 
                 if avatarFile:
-                    avatarFileName = validate_file(avatarFile, ['image'], 3)
+                    avatarFileName = await validate_file(avatarFile, ['image'], 3)
                 else:
                     avatarFileName = this_employee.avatarFile
 
                 if passportFile:
-                    passportFileName = validate_file(passportFile, ['image'], 3)
+                    passportFileName = await validate_file(passportFile, ['image'], 3)
                 else:
                     passportFileName = this_employee.passportFile
 
                 if agreementFile:
-                    agreementFileName = validate_file(agreementFile, ['document'], 3)
+                    agreementFileName = await validate_file(agreementFile, ['document'], 3)
                 else:
                     agreementFileName = this_employee.agreementFile
 
@@ -141,9 +141,9 @@ async def update_one_employee(
                 })
                 db.commit()
 
-                replace_file(passportFile, _old_employee.passportFile, passportFileName, 'employeePassports')
-                replace_file(agreementFile, _old_employee.agreementFile, agreementFileName, 'employeeAgreements')
-                replace_file(avatarFile, _old_employee.avatarFile, avatarFileName, 'employeeAvatars')
+                await replace_file(passportFile, _old_employee.passportFile, passportFileName, 'employeePassports')
+                await replace_file(agreementFile, _old_employee.agreementFile, agreementFileName, 'employeeAgreements')
+                await replace_file(avatarFile, _old_employee.avatarFile, avatarFileName, 'employeeAvatars')
 
                 raise HTTPException(
                     status_code=200, detail="O`zgarish saqlandi!")
