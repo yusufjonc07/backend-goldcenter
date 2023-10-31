@@ -17,16 +17,30 @@ from app.schemas.enums import messageTypeLabels
 message_router = APIRouter(tags=['Message Endpoint'])
 
 
-@message_router.get("/messages", description="This router returns list of the messages using pagination")
+
+@message_router.get("/messages")
 async def get_messages_list(
+    isOnlyUnread: Optional[bool] = False,
     search: Optional[str] = "",
+    forRole: ChatTypes = 'headCleaner',
     page: int = 1,
     limit: int = 10,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
+    '''
+    
+    `{
+        'accountant': 'Bugxalteriya',
+        'headConstructor': 'Xo\'jalik bo\'limi',
+        'headGuard': 'Xavfsizlik bo\'limi',
+        'headCleaner': 'Tozalik bo\'limi'
+    }`
+    
+    '''
+
     if not usr.userRole in ['any_role']:
-        return get_all_messages(search, page, limit, usr, db)
+        return get_all_messages(search, isOnlyUnread, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

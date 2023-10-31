@@ -34,9 +34,10 @@ messageTypeLabels = {
 
 
 class ChatTypes(str, Enum):
+    headCleaner = "headCleaner"
     headConstructor = "headConstructor"
     headGuard = "headGuard"
-    headCleaner = "headCleaner"
+    accountant = "accountant"
 
 
 class ExpenceTypes(str, Enum):

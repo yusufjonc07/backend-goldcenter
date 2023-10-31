@@ -1,3 +1,4 @@
+from datetime import date
 from os.path import exists
 import os
 import uuid
@@ -9,7 +10,7 @@ from app.utils.fileUtil import replace_file, save_file, validate_file
 from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import joinedload, Session, load_only
 from app.models.employee import *
 from app.functions.employee import *
 
@@ -28,6 +29,28 @@ async def get_employees_list(
         return get_all_employees(search, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+    
+@employee_router.get("/employee/{id}/details")
+async def get_employee_details(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    
+    '''
+    Hodimning avatarini olish: `/files/employeeAvatars/`\n
+    Hodimning passportini olish: `/files/employeePassports/`\n
+    Hodimning agreementini olish: `/files/employeeAgreements/`
+    '''
+
+    if not usr.userRole in ['any_role']:
+        return db.query(Employee)\
+            .options(joinedload(Employee.user).options(
+                load_only('username')
+            ))\
+            .filter_by(id=id).first()
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
 @employee_router.post("/employee/create", description="This router is able to add new employee")
@@ -39,6 +62,7 @@ async def create_new_employee(
     passportFile: UploadFile = File(...),
     avatarFile: Optional[UploadFile] = File(None),
     salaryQuantity: float = Body(..., ge=0),
+    birthDate: date = Body(...),
     role: EmployeeRoles = Body(...),
     duty: str = Body(..., max_length=255),
     shiftId: int = Body(...),
@@ -56,10 +80,18 @@ async def create_new_employee(
             else:
                 avatarFileName = None
 
+            if avatarFileName:
+                await save_file(avatarFile, avatarFileName, 'employeeAvatars')
+           
+            await save_file(agreementFile, agreementFileName, 'employeeAgreements')
+            await save_file(passportFile, passportFileName, 'employeePassports')
+
+
             new_employee = Employee(
                 firstname=firstname,
                 lastname=lastname,
                 phoneNumber=phoneNumber,
+                birthDate=birthDate,
                 avatarFile=avatarFileName,
                 passportFile=passportFileName,
                 salaryQuantity=salaryQuantity,
@@ -73,12 +105,7 @@ async def create_new_employee(
             db.add(new_employee)
             db.commit()
 
-            if avatarFileName:
-                await save_file(avatarFile, avatarFileName, 'employeeAvatars')
            
-            await save_file(agreementFile, agreementFileName, 'employeeAgreements')
-            await save_file(passportFile, passportFileName, 'employeePassports')
-
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
             raise HTTPException(400, e.args)
@@ -96,6 +123,7 @@ async def update_one_employee(
     avatarFile: Optional[UploadFile] = File(None),
     salaryQuantity: float = Body(..., ge=0),
     role: EmployeeRoles = Body(...),
+    birthDate: date = Body(...),
     agreementFile: Optional[UploadFile] = File(None),
     fired: Optional[bool] = Body(False),
     duty: str = Body(..., max_length=255),
@@ -133,6 +161,7 @@ async def update_one_employee(
                     Employee.salaryQuantity: salaryQuantity,
                     Employee.role: role,
                     Employee.agreementFile: agreementFileName,
+                    Employee.birthDate: birthDate,
                     Employee.avatarFile: avatarFileName,
                     Employee.passportFile: passportFileName,
                     Employee.duty: duty,

@@ -14,6 +14,7 @@ class Employee(Base):
     phoneNumber = Column(Integer, default=0)
     passportFile = Column(Text)
     agreementFile = Column(Text)
+    birthDate = Column(Date)
     avatarFile = Column(Text, default='')
     salaryQuantity = Column(String, default='')
     role = Column(String, default='')

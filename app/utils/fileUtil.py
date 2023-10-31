@@ -29,11 +29,15 @@ async def validate_file(file: UploadFile, types: List[MediaTypes], maxSize: floa
 
 async def save_file(file: UploadFile, filename: str, url:Path):
 
+     # set the file offset as 0
+    await file.seek(0)
     # read the file contents
     file_contents = await file.read()
+
+    print(len(file_contents))
     
     upload_dir = os.path.join(os.getcwd(), ASSETS_URL, url)
-    # Create the upload directory if it doesn't exist
+    # Create the upload directory if it doesn't exikst
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
 

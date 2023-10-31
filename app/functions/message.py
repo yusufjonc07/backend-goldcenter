@@ -1,18 +1,51 @@
+from cProfile import label
 import math
 from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.message import *
 from app.schemas.message import *
+from sqlalchemy.sql import label, or_
 
+CHAT_ROLES = ["headConstructor", "headGuard", "headCleaner", "accountant"]
 
-def get_all_messages(search, page, limit, usr, db: Session):
+def get_all_messages(search, isOnlyUnread, page, limit, usr, db: Session):
+    
     if page == 1 or page < 1:
         offset = 0
     else:
         offset = (page-1) * limit
 
-    messages = db.query(Message)
+    messages = db.query(
+        label('id', Message.id),
+        label('fileName', Message.fileName),
+        label('context', Message.context),
+        label('createdAt', Message.createdAt),
+        label('isViewed', Message.isViewed),
+        label('forRole', Message.forRole),
+        label('replyId', Message.replyId),
+        label('updated_at', Message.updated_at),
+        label('employeeName', func.concat(Employee.lastname, ' ', Employee.firstname)),
+        label('employeeRole', Employee.role),
+    ).join(Message.user).join(User.employee)
+
+    
+
+    if isOnlyUnread == True:
+
+        messages = messages.filter(Message.isViewed==False)
+
+        if usr.userRole in CHAT_ROLES:
+            messages = messages.filter(Message.forRole==usr.userRole)
+    else:
+        if usr.userRole in CHAT_ROLES:
+            messages = messages.filter(
+                or_(
+                    Message.forRole==usr.userRole,
+                    Message.userId==usr.Id
+                )
+            )
+
 
     # if search:
     # messages = messages.filter(

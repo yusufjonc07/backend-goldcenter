@@ -46,6 +46,66 @@ async def get_agreement_payments(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+@clientAgreement_router.post("/clientAgreementWithClient/create")
+async def create_new_clientAgreementWithClient(
+    clientName: str = Body(...),
+    chiefName: str = Body(...),
+    phoneNumber: int = Body(...),
+    inn: str = Body(...),
+    extraPhoneNumber: Optional[int] = Body(0),
+    liablePerson: str = Body(..., min_length=5),
+    shopId: int = Body(...),
+    monthlyFee: float = Body(..., ge=0),
+    balance: Optional[float] = Body(0),
+    status: Optional[AgreementStatus] = Body('active'),
+    startedAt: date = Body(...),
+    agreementFile: UploadFile = File(...),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        try:
+
+            agreementFileName = await validate_file(agreementFile, ['document'], 3)
+
+            new_client = Client(
+                clientName=clientName,
+                chiefName=chiefName,
+                phoneNumber=phoneNumber,
+                inn=inn,
+                extraPhoneNumber=extraPhoneNumber if extraPhoneNumber > 0 else None
+            )
+
+            db.add(new_client)
+            db.flush()
+
+            shop = db.get(Shop, shopId)
+            if not shop:
+                raise HTTPException(400, 'Do`kon topilmadi')
+
+            new_clientAgreement = ClientAgreement(
+                fileName=agreementFileName,
+                shopId=shopId,
+                clientId=new_client.id,
+                monthlyFee=monthlyFee if shop.floor.type == 'rent' else 0, 
+                balance=balance,
+                status=status,
+                type=shop.floor.type,
+                startedAt=startedAt,
+                liablePerson=liablePerson,
+            )
+
+            db.add(new_clientAgreement)
+            db.commit()
+
+            await save_file(agreementFile, agreementFileName, 'clientAgreements')
+
+            raise HTTPException(200, "Ma`lumotlar saqlandi!")
+        except IntegrityError as e:
+            raise integrityHandler(e)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 @clientAgreement_router.post("/clientAgreement/create", description="This router is able to add new clientAgreement")
 async def create_new_clientAgreement(
     liablePerson: str = Body(..., min_length=5),
@@ -93,6 +153,11 @@ async def update_one_clientAgreement(
     id: int,
     liablePerson: str = Body(..., min_length=5),
     shopId: int = Body(...),
+    clientName: str = Body(...),
+    chiefName: str = Body(...),
+    phoneNumber: int = Body(...),
+    inn: str = Body(...),
+    extraPhoneNumber: int = Body(...),
     clientId: str = Body(...),
     monthlyFee: float = Body(..., ge=0),
     balance: float = Body(...),
