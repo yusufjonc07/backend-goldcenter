@@ -16,6 +16,8 @@ def get_all_clientAgreements(floorId, status, page, limit, usr, db: Session):
     clientAgreements = db.query(
         label('id', ClientAgreement.id),
         label('clientName', Client.clientName),
+        label('chiefName', Client.chiefName),
+        label('liablePerson', ClientAgreement.liablePerson),
         label('shopNumber', Shop.number),
         label('shopArea', Shop.area),
         label('phoneNumber', Client.phoneNumber),
