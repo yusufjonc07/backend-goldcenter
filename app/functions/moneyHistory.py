@@ -17,6 +17,7 @@ def get_all_agreement_payments(id, page, limit, usr, db):
 
     moneyHistorys = db.query(
         label("id", MoneyHistory.id),
+        label("value", MoneyHistory.value),
         label("clientName", Client.clientName),
         label("shopNumber", Shop.number),
         label("liablePerson", ClientAgreement.liablePerson),

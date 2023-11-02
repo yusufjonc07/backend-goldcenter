@@ -59,17 +59,14 @@ async def create_new_clientAgreementWithClient(
     balance: Optional[float] = Body(0),
     status: Optional[AgreementStatus] = Body('active'),
     startedAt: date = Body(...),
-    agreementFile: Optional[UploadFile] = File(None),
+    agreementFile: UploadFile = File(...),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
         try:
 
-            if agreementFile:
-                agreementFileName = await validate_file(agreementFile, ['document'], 3)
-            else:
-                agreementFileName = None
+            agreementFileName = await validate_file(agreementFile, ['document'], 3)
 
             new_client = Client(
                 clientName=clientName,
@@ -101,8 +98,7 @@ async def create_new_clientAgreementWithClient(
             db.add(new_clientAgreement)
             db.commit()
 
-            if agreementFileName:
-                await save_file(agreementFile, agreementFileName, 'clientAgreements')
+            await save_file(agreementFile, agreementFileName, 'clientAgreements')
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:

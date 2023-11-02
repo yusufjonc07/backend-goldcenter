@@ -19,7 +19,7 @@ class MoneyHistory(Base):
     branchId = Column(Integer, ForeignKey('branch.id'), default=0)
     comment = Column(String, default='')
     userId = Column(Integer, ForeignKey('user.id'), default=0)
-    fileName = Column(Text, default='')
+    fileName = Column(Text, nullable=True)
     createdAt = Column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
     addingToFee = Column(Enum(ExpenceTypes), default='none')
 
