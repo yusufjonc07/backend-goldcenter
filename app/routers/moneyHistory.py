@@ -37,7 +37,7 @@ async def create_new_moneyHistory(
     value: float = Body(...),
     moneyFormId: int =  Body(...),
     comment: str =  Body(..., min_length=5),
-    fileName: Optional[UploadFile] = File(None),
+    fileName: UploadFile = None,
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
@@ -46,7 +46,7 @@ async def create_new_moneyHistory(
     if not usr.userRole in ['any_role']:
         try:
 
-            if fileName:
+            if fileName != 'none':
                 _fileName = await validate_file(fileName, ['document', 'image'], 3)
             else:
                 _fileName = None
