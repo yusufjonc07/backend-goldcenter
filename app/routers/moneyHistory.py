@@ -37,7 +37,7 @@ async def create_new_moneyHistory(
     value: float = Body(...),
     moneyFormId: int =  Body(...),
     comment: str =  Body(..., min_length=5),
-    fileName: UploadFile = None,
+    # fileName: UploadFile = None,
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
@@ -46,10 +46,10 @@ async def create_new_moneyHistory(
     if not usr.userRole in ['any_role']:
         try:
 
-            if fileName != 'none':
-                _fileName = await validate_file(fileName, ['document', 'image'], 3)
-            else:
-                _fileName = None
+            # if fileName != 'none':
+            #     _fileName = await validate_file(fileName, ['document', 'image'], 3)
+            # else:
+            #     _fileName = None
             
             if ownerTable in ['clientAgreement',] and value <= 0:
                 raise HTTPException(400, "Olinayotgan pul miqdori noto'g'ri")
@@ -88,15 +88,15 @@ async def create_new_moneyHistory(
                     comment=comment,
                     branchId=branchId,
                     userId=usr.id,
-                    fileName=_fileName,
+                    # fileName=_fileName,
                     addingToFee=addingtofee
                 )
 
             db.add(new_moneyHistory)
             db.commit()
 
-            if _fileName:
-                await save_file(fileName, _fileName, f"moneyHistories/{date.year}/{date.month}/{date.day}")
+            # if _fileName:
+            #     await save_file(fileName, _fileName, f"moneyHistories/{date.year}/{date.month}/{date.day}")
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
