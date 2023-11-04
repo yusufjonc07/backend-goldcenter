@@ -27,7 +27,7 @@ class Employee(Base):
         return f"{self.firstname} {self.lastname}"
     
     UniqueConstraint('firstname', 'lastname')
-
+    
     branch = relationship('Branch', backref='employees')
     shift = relationship('Shift', backref='employees')
 

@@ -3,8 +3,11 @@ from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import label
+from app.models.clientAgreement import ClientAgreement
 from app.models.floor import Floor
-from app.models.moneyHistory import MoneyHistory
+from app.models.expense import Expense
+from app.models.income import Income
+from app.models.shop import Shop
 from app.models.user import User
 import calendar
 
@@ -12,66 +15,67 @@ from app.schemas.enums import ReportTypes
 
 MONTHS_COUNT = 12
 MONTHS = {
-    1:'Yanvar',
-    2:'Fevral',
-    3:'Mart',
-    4:'Aprel',
-    5:'May',
-    6:'Iyun',
-    7:'Iyul',
-    8:'Avgust',
-    9:'Sentabr',
-    10:'Oktabr',
-    11:'Noyabr',
-    12:'Dekabr',
+    1: 'Yanvar',
+    2: 'Fevral',
+    3: 'Mart',
+    4: 'Aprel',
+    5: 'May',
+    6: 'Iyun',
+    7: 'Iyul',
+    8: 'Avgust',
+    9: 'Sentabr',
+    10: 'Oktabr',
+    11: 'Noyabr',
+    12: 'Dekabr',
 }
 
-def get_income(floor_id: int, _year: int, _month: int, db:Session):
+
+def get_income(floor_id: int, _year: int, _month: int, db: Session):
 
     yearlyIncome = 0
 
-    if floor_id > 0:
-        floorFilter = MoneyHistory.floorId == floor_id
-    else:
-        floorFilter = MoneyHistory.id > 0
-
     if _month == 0:
         incomes = db.query(
-            label("value", func.sum(MoneyHistory.value)),
-            label("month", func.month(MoneyHistory.createdAt)),
+            label("value", func.sum(Income.value)),
+            label("month", func.month(Income.createdAt)),
         ).filter(
-            func.year(MoneyHistory.createdAt) == _year,
-            MoneyHistory.branchId==1,
-            MoneyHistory.value > 0
-        ).filter(floorFilter).order_by(
-            func.month(MoneyHistory.createdAt).asc()
+            func.year(Income.createdAt) == _year,
+            Income.branchId == 1,
+            Income.value > 0
+        )
+        
+        if floor_id > 0:
+            incomes = incomes.join(Income.clientAgreement)\
+                .join(ClientAgreement.shop).filter(Shop.floorId==floor_id)
+
+        incomes = incomes.order_by(
+            func.month(Income.createdAt).asc()
         ).group_by(
-            func.month(MoneyHistory.createdAt)
-        ).all()
+            func.month(Income.createdAt)
+        )
 
         rangeList = range(1, MONTHS_COUNT+1)
 
     else:
 
         incomes = db.query(
-            label("value", func.sum(MoneyHistory.value)),
-            label("month", func.DAY(MoneyHistory.createdAt)),
+            label("value", func.sum(Income.value)),
+            label("month", func.DAY(Income.createdAt)),
         ).filter(
-            func.month(MoneyHistory.createdAt) == _month,
-            func.year(MoneyHistory.createdAt) == _year,
-            MoneyHistory.floorId == floor_id,
-            MoneyHistory.branchId==1,
-            MoneyHistory.value > 0
+            func.month(Income.createdAt) == _month,
+            func.year(Income.createdAt) == _year,
+            Income.floorId == floor_id,
+            Income.branchId == 1,
+            Income.value > 0
         ).order_by(
-            func.DAY(MoneyHistory.createdAt).asc()
+            func.DAY(Income.createdAt).asc()
         ).group_by(
-            func.DAY(MoneyHistory.createdAt)
+            func.DAY(Income.createdAt)
         ).all()
 
         rangeList = range(1, calendar.monthrange(_year, _month)[1]+1)
 
     incomesByMonths = []
-
 
     for month in rangeList:
 

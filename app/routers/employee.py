@@ -4,7 +4,6 @@ import os
 import uuid
 from fastapi import Body, File, Form, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
-from app.functions.moneyHistory import get_all_wages
 from app.schemas.enums import EmployeeRoles
 from app.schemas.user import NewUser
 from app.utils.fileUtil import replace_file, save_file, validate_file
@@ -16,7 +15,6 @@ from app.models.employee import *
 from app.functions.employee import *
 
 employee_router = APIRouter(tags=['Employee Endpoint'])
-
 
 @employee_router.get("/employees", description="This router returns list of the employees using pagination")
 async def get_employees_list(
@@ -31,20 +29,6 @@ async def get_employees_list(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
-@employee_router.get("/employee/wages", description="This router returns list of the employees using pagination")
-async def get_employees_wages_list(
-    search: Optional[str] = "",
-    ownerId: Optional[int] = 0,
-    page: int = 1,
-    limit: int = 10,
-    db: Session = ActiveSession,
-    usr: NewUser = Depends(get_current_active_user)
-):
-    if not usr.userRole in ['any_role']:
-        return get_all_wages(search, ownerId, page, limit, usr, db)
-    else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
-    
 @employee_router.get("/employee/{id}/details")
 async def get_employee_details(
     id: int,
