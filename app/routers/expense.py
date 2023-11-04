@@ -1,44 +1,95 @@
-from fastapi import HTTPException, APIRouter, Depends
+from hashlib import file_digest
+from fastapi import Body, HTTPException, APIRouter, Depends, UploadFile, File
 from typing import Optional
+
+from pydantic import Field
 from app.schemas.user import NewUser
+from app.utils.fileUtil import save_file, validate_file
+from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import Session
 from app.models.expense import *
 from app.functions.expense import *
 from app.schemas.expense import *
 
 expense_router = APIRouter(tags=['Expense Endpoint'])
 
+
 @expense_router.get("/expenses", description="This router returns list of the expenses using pagination")
 async def get_expenses_list(
     search: Optional[str] = "",
+    expenseType: Optional[ExpenceTypes] = 'other',
+    employeeId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
-    db:Session = ActiveSession,
-    usr: NewUser = Depends(get_current_active_user)
-):   
-    if not usr.userRole in ['any_role']:
-        return get_all_expenses(search, page, limit, usr, db)  
-    else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
-
-@expense_router.post("/expense/create", description="This router is able to add new expense")
-async def create_new_expense(
-    form_data: NewExpense,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return create_expense(form_data, usr, db)
+        return get_all_expenses(search, expenseType, employeeId,  page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@expense_router.post("/expense/create")
+async def create_new_income(
+    type: ExpenceTypes = Body(...),
+    employeeId: Optional[int] = Body(None),
+    value: float = Body(..., gt=0),
+    moneyFormId: int = Body(...),
+    comment: str = Body(..., min_length=5),
+    file: UploadFile = File(...),
+    floorId: int | None = None,
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+
+    if not usr.userRole in ['any_role']:
+        try:
+
+            isProceed = False
+
+            fileName = await validate_file(file, ['document', 'image'], 3)
+
+            if type == 'salary':
+                employee = db.get(Employee, employeeId)
+
+                if not employee:
+                    raise HTTPException(400, "Mijoz shartnomasi topilmadi")
+
+            isProceed = True
+
+            if isProceed:
+                new_expense = Expense(
+                    type=type,
+                    employeeId=employeeId,
+                    value=value,
+                    moneyFormId=moneyFormId,
+                    floorId=floorId,
+                    branchId=usr.branchId,
+                    comment=comment,
+                    userId=usr.id,
+                    fileName=fileName,
+                )
+            db.add(new_expense)
+            db.commit()
+
+            await save_file(file, fileName, f"expenses")
+
+            raise HTTPException(200, "Ma`lumotlar saqlandi!")
+        except IntegrityError as e:
+            raise HTTPException(400, e.args)
+            # raise integrityHandler(e)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @expense_router.put("/expense/{id}/update", description="This router is able to update expense")
 async def update_one_expense(
     id: int,
     form_data: UpdateExpense,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:

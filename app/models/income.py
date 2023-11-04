@@ -17,7 +17,8 @@ class Income(Base):
     userId = Column(Integer, ForeignKey('user.id'), default=0)
     createdAt = Column(TIMESTAMP, nullable=True)
 
-    clientAgreement = relationship('Clientagreement', backref='incomes')
+    
+    clientAgreement = relationship('ClientAgreement', backref='incomes')
     moneyForm = relationship('Moneyform', backref='incomes')
     user = relationship('User', backref='incomes')
 

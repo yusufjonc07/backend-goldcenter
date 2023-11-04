@@ -14,7 +14,7 @@ class Expense(Base):
     __tablename__ = "expense"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     type = Column(Enum(ExpenceTypes), default='other', nullable=False)
-    employeeId = Column(Integer, nullable=True)
+    employeeId = Column(Integer, ForeignKey('employee.id'), nullable=True)
     value = Column(DOUBLE, nullable=False)
     moneyFormId = Column(Integer, ForeignKey('moneyForm.id'), nullable=False)
     floorId = Column(Integer, ForeignKey('floor.id'), nullable=True)
@@ -25,8 +25,8 @@ class Expense(Base):
     createdAt = Column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
     
 
-    employee = relationship('Employee', backref='moneyHistorys')
-    moneyForm = relationship('Moneyform', backref='moneyHistorys')
-    branch = relationship('Branch', backref='moneyHistorys')
-    user = relationship('User', backref='moneyHistorys')
+    employee = relationship('Employee', backref='expenses')
+    moneyForm = relationship('Moneyform', backref='expenses')
+    branch = relationship('Branch', backref='expenses')
+    user = relationship('User', backref='expenses')
 

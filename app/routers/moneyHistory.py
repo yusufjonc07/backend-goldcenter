@@ -17,54 +17,7 @@ from app.functions.moneyHistory import *
 
 moneyHistory_router = APIRouter(tags=['Moneyhistory Endpoint'])
 
-@moneyHistory_router.post("/expense/create")
-async def create_new_income(
-    type: ExpenceTypes = Body(...),
-    employeeId: Optional[int] = Body(None),
-    value: float = Body(..., gt=0),
-    moneyFormId: int =  Body(...),
-    comment: str =  Body(..., min_length=5),
-    file: UploadFile = File(...),
-    db: Session = ActiveSession,
-    usr: User = Depends(get_current_active_user)
-):
 
-    if not usr.userRole in ['any_role']:
-        try:
-
-            isProceed = False
-            floorId = 0
-
-            fileName = await validate_file(file, ['document', 'image'], 3)
-            
-            if type=='salary':
-                employee = db.get(Employee, employeeId)
-
-                if not employee: 
-                    raise HTTPException(400, "Mijoz shartnomasi topilmadi")
-                
-            isProceed = True
-
-            if isProceed:
-                new_expense = Expense(
-                    type=type,
-                    employeeId=employeeId,
-                    value=value,
-                    moneyFormId=moneyFormId,
-                    floorId=floorId,
-                    branchId=usr.branchId,
-                    comment=comment,
-                    userId=usr.id,
-                    fileName=fileName,
-                )
-            db.add(new_expense)
-            db.commit()
-
-            raise HTTPException(200, "Ma`lumotlar saqlandi!")
-        except IntegrityError as e:
-            raise integrityHandler(e)
-    else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
     
 # @moneyHistory_router.post("/expense/create")
 # async def create_new_expense(
