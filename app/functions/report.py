@@ -8,6 +8,7 @@ from app.models.clientAgreement import ClientAgreement
 from app.models.floor import Floor
 from app.models.expense import Expense
 from app.models.income import Income
+from app.models.moneyForm import Moneyform
 from app.models.shop import Shop
 from app.models.user import User
 import calendar
@@ -98,4 +99,30 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
 
 def get_report_index(fromDate: date, toDate: date, db: Session, usr: User):
 
-    pas = ''
+    incomes = db.query(
+        label("method", Moneyform.name),
+        label("value", func.sum(Income.value)),
+    ).select_from(Income).join(Income.moneyForm).join(Income.clientAgreement)\
+    .join(ClientAgreement.shop).join(Shop.floor)\
+    .filter(
+        func.date(Income.createdAt) >= fromDate, 
+        func.date(Income.createdAt) <= toDate,
+        Floor.branchId==usr.branchId
+    ).group_by(Income.moneyFormId).order_by(Moneyform.name.asc())\
+    .all()
+
+    expenses = db.query(
+        label("method", Moneyform.name),
+        label("value", func.sum(Expense.value)),
+    ).select_from(Expense).join(Expense.moneyForm)\
+    .filter(
+        func.date(Expense.createdAt) >= fromDate, 
+        func.date(Expense.createdAt) <= toDate,
+        Expense.branchId==usr.branchId
+    ).group_by(Expense.moneyFormId).order_by(Moneyform.name.asc())\
+    .all()
+    
+    return {
+        "incomes": incomes,
+        "expenses": expenses,
+    }
