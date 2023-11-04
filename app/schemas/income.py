@@ -3,22 +3,16 @@ from pydantic import BaseModel
 from app.models.income import *
 
 class NewIncome(BaseModel):
-    type: str
-    clientagreementid: int
+    clientAgreementId: int
     value: float
-    moneyformid: int
+    moneyFormId: int
     comment: str
-    userid: int
-    createdat: str
 
 
 class UpdateIncome(BaseModel):
-    type: str
-    clientagreementid: int
+    clientAgreementId: int
     value: float
-    moneyformid: int
+    moneyFormId: int
     comment: str
-    userid: int
-    createdat: str
 
         
