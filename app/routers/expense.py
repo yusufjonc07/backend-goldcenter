@@ -1,4 +1,4 @@
-from hashlib import file_digest
+from click import Option
 from fastapi import Body, HTTPException, APIRouter, Depends, UploadFile, File
 from typing import Optional
 
@@ -35,12 +35,12 @@ async def get_expenses_list(
 @expense_router.post("/expense/create")
 async def create_new_income(
     type: ExpenceTypes = Body(...),
-    employeeId: Optional[int] = Body(None),
+    employeeId: Optional[int] = Body(0),
     value: float = Body(..., gt=0),
     moneyFormId: int = Body(...),
     comment: str = Body(..., min_length=5),
     file: UploadFile = File(...),
-    floorId: int | None = None,
+    floorId: Optional[int] = Body(0),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
@@ -63,10 +63,10 @@ async def create_new_income(
             if isProceed:
                 new_expense = Expense(
                     type=type,
-                    employeeId=employeeId,
+                    employeeId=employeeId if employeeId > 0 else None,
                     value=value,
                     moneyFormId=moneyFormId,
-                    floorId=floorId,
+                    floorId=floorId if floorId > 0 else None,
                     branchId=usr.branchId,
                     comment=comment,
                     userId=usr.id,
