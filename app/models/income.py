@@ -9,7 +9,6 @@ from app.models.user import *
 class Income(Base):
     __tablename__ = "income"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    type = Column(String, default='')
     clientAgreementId = Column(Integer, ForeignKey('clientAgreement.id'), default=0)
     value = Column(Numeric, default=0)
     moneyFormId = Column(Integer, ForeignKey('moneyForm.id'), default=0)

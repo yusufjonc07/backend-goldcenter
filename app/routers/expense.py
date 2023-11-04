@@ -13,7 +13,7 @@ from app.models.expense import *
 from app.functions.expense import *
 from app.schemas.expense import *
 
-expense_router = APIRouter(tags=['Expense Endpoint'])
+expense_router = APIRouter(tags=['Kassa Endpoint'])
 
 
 @expense_router.get("/expenses", description="This router returns list of the expenses using pagination")
@@ -57,6 +57,9 @@ async def create_new_income(
 
                 if not employee:
                     raise HTTPException(400, "Mijoz shartnomasi topilmadi")
+                else:
+                    employee.balance -= value
+                    db.flush()
 
             isProceed = True
 

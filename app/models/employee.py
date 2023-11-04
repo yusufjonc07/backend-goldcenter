@@ -4,7 +4,7 @@ from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.branch import * 
 from app.models.shift import * 
-
+from sqlalchemy.dialects.mysql import DOUBLE
 
 class Employee(Base):
     __tablename__ = "employee"
@@ -12,6 +12,7 @@ class Employee(Base):
     firstname = Column(String, default='')
     lastname = Column(String, default='')
     phoneNumber = Column(Integer, default=0)
+    balance = Column(Numeric, default=0)
     passportFile = Column(Text)
     agreementFile = Column(Text)
     birthDate = Column(Date)

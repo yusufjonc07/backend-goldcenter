@@ -40,9 +40,9 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
             label("month", func.month(Income.createdAt)),
         ).filter(
             func.year(Income.createdAt) == _year,
-            Income.branchId == 1,
+            Floor.branchId == 1,
             Income.value > 0
-        )
+        ).join(Income.clientAgreement).join(ClientAgreement.shop).join(Shop.floor)
         
         if floor_id > 0:
             incomes = incomes.join(Income.clientAgreement)\
@@ -64,10 +64,10 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
         ).filter(
             func.month(Income.createdAt) == _month,
             func.year(Income.createdAt) == _year,
-            Income.floorId == floor_id,
-            Income.branchId == 1,
+            Shop.floorId == floor_id,
+            Floor.branchId == 1,
             Income.value > 0
-        ).order_by(
+        ).join(Income.clientAgreement).join(ClientAgreement.shop).join(Shop.floor).order_by(
             func.DAY(Income.createdAt).asc()
         ).group_by(
             func.DAY(Income.createdAt)
@@ -78,9 +78,6 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
     incomesByMonths = []
 
     for month in rangeList:
-
-        isFound = False
-
         for income in incomes:
             if month == income.month:
 
@@ -90,13 +87,8 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
                 })
 
                 yearlyIncome += income.value
-                isFound = True
 
-        if isFound == False:
-            incomesByMonths.append({
-                'monthName': MONTHS[month] if _month == 0 else str(month),
-                'value': randint(2000000, 90000000),
-            })
+       
 
     return {
         "incomesByMonths": incomesByMonths,
