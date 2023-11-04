@@ -63,8 +63,17 @@ class AgreementType(str, Enum):
     rent = "rent"
     sold = "sold"
 
-class MoneyHistoryTables(str, Enum):
+class IncomeTables(str, Enum):
     clientAgreement = "clientAgreement"
+
+class MoneyHistoryTables(str, Enum):
+    income = "income"
+    expense = "expense"
+    clientAgreement = "clientAgreement"
+    employee = "employee"
+
+class ExpenseTables(str, Enum):
+    employee = "employee"
 
 class MediaTypes(str, Enum):
     image="image"

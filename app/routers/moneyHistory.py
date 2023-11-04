@@ -3,7 +3,7 @@ import uuid
 from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
 from app.models.clientAgreement import ClientAgreement
-from app.schemas.enums import MoneyHistoryTables
+from app.schemas.enums import ExpenseTables, IncomeTables, MoneyHistoryTables
 from app.schemas.user import NewUser
 from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -30,14 +30,15 @@ async def get_moneyHistorys_list(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
 
-@moneyHistory_router.post("/moneyHistory/create")
-async def create_new_moneyHistory(
-    ownerTable: MoneyHistoryTables = Body(...),
+
+
+@moneyHistory_router.post("/income/create")
+async def create_new_income(
+    ownerTable: IncomeTables = Body(...),
     ownerId: int = Body(...),
     value: float = Body(...),
     moneyFormId: int =  Body(...),
     comment: str =  Body(..., min_length=5),
-    # fileName: UploadFile = None,
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
@@ -46,11 +47,6 @@ async def create_new_moneyHistory(
     if not usr.userRole in ['any_role']:
         try:
 
-            # if fileName != 'none':
-            #     _fileName = await validate_file(fileName, ['document', 'image'], 3)
-            # else:
-            #     _fileName = None
-            
             if ownerTable in ['clientAgreement',] and value <= 0:
                 raise HTTPException(400, "Olinayotgan pul miqdori noto'g'ri")
             
@@ -65,7 +61,6 @@ async def create_new_moneyHistory(
                 if not clientAgreement: 
                     raise HTTPException(400, "Mijoz shartnomasi topilmadi")
                 else:
-                    # raise HTTPException(400, f"{type(clientAgreement.balance).__name__} {type(value).__name__}")
                     clientAgreement.balance += value 
                     try:
                         db.commit()
@@ -88,21 +83,94 @@ async def create_new_moneyHistory(
                     comment=comment,
                     branchId=branchId,
                     userId=usr.id,
-                    # fileName=_fileName,
                     addingToFee=addingtofee
                 )
 
             db.add(new_moneyHistory)
             db.commit()
 
-            # if _fileName:
-            #     await save_file(fileName, _fileName, f"moneyHistories/{date.year}/{date.month}/{date.day}")
-
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
             raise integrityHandler(e)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+    
+@moneyHistory_router.post("/expense/create")
+async def create_new_expense(
+    ownerTable: ExpenseTables = Body(...),
+    ownerId: int = Body(...),
+    value: float = Body(...),
+    moneyFormId: int =  Body(...),
+    comment: str =  Body(..., min_length=5),
+    fileName: Optional[UploadFile] = File(...),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    
+
+    if not usr.userRole in ['any_role']:
+        try:
+
+            if fileName != 'none':
+                _fileName = await validate_file(fileName, ['document', 'image'], 3)
+            else:
+                _fileName = None
+            
+            if ownerTable in ['clientAgreement',] and value <= 0:
+                raise HTTPException(400, "Olinayotgan pul miqdori noto'g'ri")
+            
+            isProceed = False
+            floorId = 0
+            branchId = usr.branchId
+            addingtofee = 'none'
+            
+            # if ownerTable=='clientAgreement':
+                
+            #     clientAgreement = db.get(ClientAgreement, ownerId)
+            #     if not clientAgreement: 
+            #         raise HTTPException(400, "Mijoz shartnomasi topilmadi")
+            #     else:
+            #         # raise HTTPException(400, f"{type(clientAgreement.balance).__name__} {type(value).__name__}")
+            #         clientAgreement.balance += value 
+            #         try:
+            #             db.commit()
+            #             isProceed = True
+            #             floorId = clientAgreement.shop.floorId
+            #             branchId = clientAgreement.shop.floor.branchId
+            #         except Exception as e:
+            #             integrityHandler(e)
+            # else:
+            #     isProceed = True
+
+            isProceed = True
+               
+
+            if isProceed:
+                new_moneyHistory = MoneyHistory(
+                    ownerTable=ownerTable,
+                    ownerId=ownerId,
+                    value=value,
+                    moneyFormId=moneyFormId,
+                    floorId=floorId,
+                    comment=comment,
+                    branchId=branchId,
+                    userId=usr.id,
+                    fileName=_fileName,
+                    addingToFee=addingtofee
+                )
+
+            db.add(new_moneyHistory)
+            db.commit()
+
+            if _fileName:
+                await save_file(fileName, _fileName, f"moneyHistories/{date.year}/{date.month}/{date.day}")
+
+            raise HTTPException(200, "Ma`lumotlar saqlandi!")
+        except IntegrityError as e:
+            raise HTTPException(400, e.args)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 # @moneyHistory_router.put("/moneyHistory/{id}/update")
 # async def update_one_moneyHistory(
