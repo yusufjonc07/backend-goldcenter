@@ -41,10 +41,9 @@ class ChatTypes(str, Enum):
 
 
 class ExpenceTypes(str, Enum):
-    none = "none"
-    forFloor = "forFloor"
-    forBranch = "forBranch"
-
+    salary = "salary"
+    construction = "construction"
+    other = "other"
 
 class UserRoles(str, Enum):
     director = "director"
