@@ -9,7 +9,7 @@ from app.models.shop import *
 from app.functions.shop import *
 from app.schemas.shop import *
 
-shop_router = APIRouter(tags=['Shop Endpoint'])
+shop_router = APIRouter(tags=['Do`kon Endpoint'])
 
 @shop_router.get("/shops", description="This router returns list of the shops using pagination")
 async def get_shops_list(

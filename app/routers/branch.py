@@ -8,7 +8,7 @@ from app.models.branch import *
 from app.functions.branch import *
 from app.schemas.branch import *
 
-branch_router = APIRouter(tags=['Branch Endpoint'])
+branch_router = APIRouter(tags=['Filial Endpoint'])
 
 @branch_router.get("/branchs", description="This router returns list of the branchs using pagination")
 async def get_branchs_list(

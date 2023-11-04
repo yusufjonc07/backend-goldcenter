@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from app.models.clientAgreement import *
 from app.functions.clientAgreement import *
 
-clientAgreement_router = APIRouter(tags=['Clientagreement Endpoint'])
+clientAgreement_router = APIRouter(tags=['Klient Shartnomalari Endpoint'])
 
 @clientAgreement_router.get("/clientAgreements", description="This router returns list of the clientAgreements using pagination")
 async def get_clientAgreements_list(

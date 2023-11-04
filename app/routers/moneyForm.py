@@ -8,7 +8,7 @@ from app.models.moneyForm import *
 from app.functions.moneyForm import *
 from app.schemas.moneyForm import *
 
-moneyForm_router = APIRouter(tags=['Moneyform Endpoint'])
+moneyForm_router = APIRouter(tags=['To`lov turi Endpoint'])
 
 @moneyForm_router.get("/moneyForms", description="This router returns list of the moneyForms using pagination")
 async def get_moneyForms_list(

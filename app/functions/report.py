@@ -1,3 +1,4 @@
+from datetime import date
 from random import randint
 from fastapi import HTTPException
 from sqlalchemy import func
@@ -94,3 +95,7 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
         "incomesByMonths": incomesByMonths,
         "yearlyIncome": yearlyIncome
     }
+
+def get_report_index(fromDate: date, toDate: date, db: Session, usr: User):
+
+    pas = ''

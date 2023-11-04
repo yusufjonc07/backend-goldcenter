@@ -8,7 +8,7 @@ from app.models.income import *
 from app.functions.income import *
 from app.schemas.income import *
 
-income_router = APIRouter(tags=['Income Endpoint'])
+income_router = APIRouter(tags=['Kassa Endpoint'])
 
 @income_router.get("/incomes", description="This router returns list of the incomes using pagination")
 async def get_incomes_list(

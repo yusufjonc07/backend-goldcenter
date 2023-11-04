@@ -8,7 +8,7 @@ from app.models.client import *
 from app.functions.client import *
 from app.schemas.client import *
 
-client_router = APIRouter(tags=['Client Endpoint'])
+client_router = APIRouter(tags=['Klient Endpoint'])
 
 @client_router.get("/clients", description="This router returns list of the clients using pagination")
 async def get_clients_list(

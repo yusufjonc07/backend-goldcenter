@@ -14,7 +14,7 @@ from sqlalchemy.orm import joinedload, Session, load_only
 from app.models.employee import *
 from app.functions.employee import *
 
-employee_router = APIRouter(tags=['Employee Endpoint'])
+employee_router = APIRouter(tags=['Hodimalar Endpoint'])
 
 @employee_router.get("/employees", description="This router returns list of the employees using pagination")
 async def get_employees_list(

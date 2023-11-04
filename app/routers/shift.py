@@ -8,7 +8,7 @@ from app.models.shift import *
 from app.functions.shift import *
 from app.schemas.shift import *
 
-shift_router = APIRouter(tags=['Shift Endpoint'])
+shift_router = APIRouter(tags=['Smena Endpoint'])
 
 @shift_router.get("/shifts", description="This router returns list of the shifts using pagination")
 async def get_shifts_list(

@@ -8,7 +8,7 @@ from app.models.attandance import *
 from app.functions.attandance import *
 from app.schemas.attandance import *
 
-attandance_router = APIRouter(tags=['Attandance Endpoint'])
+attandance_router = APIRouter(tags=['Davomat Endpoint'])
 
 @attandance_router.get("/attandances", description="This router returns list of the attandances using pagination")
 async def get_attandances_list(

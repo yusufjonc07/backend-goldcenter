@@ -14,7 +14,7 @@ from app.schemas.message import *
 from app.utils.wsmanager import manager
 from app.schemas.enums import messageTypeLabels
 
-message_router = APIRouter(tags=['Message Endpoint'])
+message_router = APIRouter(tags=['Xabar Endpoint'])
 
 
 

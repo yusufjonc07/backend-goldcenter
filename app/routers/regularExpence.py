@@ -8,7 +8,7 @@ from app.models.regularExpence import *
 from app.functions.regularExpence import *
 from app.schemas.regularExpence import *
 
-regularExpence_router = APIRouter(tags=['Regularexpence Endpoint'])
+regularExpence_router = APIRouter(tags=['Doimiy Chiqim Endpoint'])
 
 # @regularExpence_router.get("/regularExpences", description="This router returns list of the regularExpences using pagination")
 # async def get_regularExpences_list(

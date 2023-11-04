@@ -8,7 +8,7 @@ from app.models.user import *
 from app.functions.user import *
 from app.schemas.user import *
 
-user_router = APIRouter(tags=['User Endpoint'])
+user_router = APIRouter(tags=['Foydalanuvchilar Endpoint'])
 
 @user_router.get("/users", description="This router returns list of the users using pagination")
 async def get_users_list(

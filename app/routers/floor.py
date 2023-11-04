@@ -8,7 +8,7 @@ from app.models.floor import *
 from app.functions.floor import *
 from app.schemas.floor import *
 
-floor_router = APIRouter(tags=['Floor Endpoint'])
+floor_router = APIRouter(tags=['Qavat Endpoint'])
 
 @floor_router.get("/floors", description="This router returns list of the floors using pagination")
 async def get_floors_list(
