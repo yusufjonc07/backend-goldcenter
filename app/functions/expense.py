@@ -13,13 +13,18 @@ def get_all_expenses(search, type, employeeId, page, limit, usr, db: Session):
         offset = (page-1) * limit
     
     worker_alias = aliased(Employee, name='worker_alias')
+
+    worker = db.query(func.concat(worker_alias.firstname, ' ', worker_alias.lastname)).filter_by(id=Expense.employeeId).subquery()
     
-    expenses = db.query(Expense)\
-        .options(
-            joinedload(Expense.user).subqueryload(User.employee),
-            joinedload(Expense.moneyForm),
-            joinedload(Expense.employee),
-        )
+    expenses = db.query(
+        label('type', Expense.type),    
+        label('worker', worker),    
+        label('comment', Expense.comment),    
+        label('user', func.concat(Employee.firstname, ' ', Employee.lastname)),    
+        label('createdAt', Expense.createdAt),    
+        label('value', Expense.value),    
+        label('moneyForm', Moneyform.name),    
+    ).join(Expense.user).join(User.employee).join(Expense.moneyForm)
         
     if type:
        expenses = expenses.filter(Expense.type==type)
