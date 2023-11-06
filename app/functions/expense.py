@@ -14,22 +14,24 @@ def get_all_expenses(search, type, employeeId, page, limit, usr, db: Session):
     
     worker_alias = aliased(Employee, name='worker_alias')
     
-    moneyHistorys = db.query(Expense)\
+    expenses = db.query(Expense)\
         .options(
             joinedload(Expense.user).subqueryload(User.employee),
             joinedload(Expense.moneyForm),
             joinedload(Expense.employee),
-        )\
-        .filter(Expense.type==type)\
+        )
+        
+    if type:
+       expenses = expenses.filter(Expense.type==type)
 
     # if search:
-    # moneyHistorys = moneyHistorys.filter(
+    # expenses = expenses.filter(
     # Expense.id.like(f"%{search}%"),
     # )
 
-    all_data = moneyHistorys.order_by(
+    all_data = expenses.order_by(
         Expense.id.desc()).offset(offset).limit(limit)
-    count_data = moneyHistorys.count()
+    count_data = expenses.count()
 
     return {
         "data": all_data.all(),

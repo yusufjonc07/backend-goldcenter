@@ -19,7 +19,7 @@ expense_router = APIRouter(tags=['Kassa Endpoint'])
 @expense_router.get("/expenses", description="This router returns list of the expenses using pagination")
 async def get_expenses_list(
     search: Optional[str] = "",
-    expenseType: Optional[ExpenceTypes] = 'other',
+    expenseType: Optional[ExpenceTypes] = None,
     employeeId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
