@@ -35,3 +35,15 @@ async def get_reports_list(
         return get_report_index(fromDate, toDate, db, usr) 
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!") 
+    
+@report_router.get("/report/income/floor")
+async def get_reports_income_floor_list(
+    fromDate: Optional[date] = date.today(),
+    toDate: Optional[date] = date.today(),
+    db:Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):   
+    if not usr.userRole in ['any_role']:
+        return get_report_index_income_floor(fromDate, toDate, db, usr) 
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!") 

@@ -7,21 +7,23 @@ from sqlalchemy.orm import joinedload, Session
 from app.models.income import *
 from app.functions.income import *
 from app.schemas.income import *
+from app.functions.moneyHistory import get_all_agreement_payments
 
 income_router = APIRouter(tags=['Kassa Endpoint'])
 
-@income_router.get("/incomes", description="This router returns list of the incomes using pagination")
-async def get_incomes_list(
-    search: Optional[str] = "",
+
+@income_router.get("/incomes")
+async def get_agreement_payments(
+    id: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
-):   
+):
     if not usr.userRole in ['any_role']:
-        return get_all_incomes(search, page, limit, usr, db)  
+        return get_all_agreement_payments(id, page, limit, usr, db)  
     else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 @income_router.post("/income/create", description="This router is able to add new income")
 async def create_new_income(
