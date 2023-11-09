@@ -16,26 +16,7 @@ def get_all_messages(search, isOnlyUnread, page, limit, usr, db: Session):
     else:
         offset = (page-1) * limit
 
-    ReplyModel: Message = aliased(Message, 'ReplyModel')
-    ReplyUser: User = aliased(User, 'ReplyUser')
-    ReplyEmployee: Employee = aliased(Employee, 'ReplyEmployee')
 
-    replies_subquery = db.query(
-        label('id', ReplyModel.id),
-        label('fileName', ReplyModel.fileName),
-        label('context', ReplyModel.context),
-        label('createdAt', ReplyModel.createdAt),
-        label('isViewed', ReplyModel.isViewed),
-        label('forRole', ReplyModel.forRole),
-        label('replyId', ReplyModel.replyId),
-        label('updated_at', ReplyModel.updated_at),
-        label('employeeName', func.concat(ReplyEmployee.lastname, ' ', ReplyEmployee.firstname)),
-        label('employeeRole', ReplyEmployee.role),
-    ).join(
-        ReplyUser, ReplyModel.userId == ReplyUser.id
-    ).join(
-        ReplyEmployee, ReplyEmployee.id == ReplyUser.employeeId
-    )
 
     messages = db.query(
         label('id', Message.id),
@@ -48,12 +29,8 @@ def get_all_messages(search, isOnlyUnread, page, limit, usr, db: Session):
         label('updated_at', Message.updated_at),
         label('employeeName', func.concat(Employee.lastname, ' ', Employee.firstname)),
         label('employeeRole', Employee.role),
-        label('employeeRole', Employee.role),
-        label('replies', Employee.role),
-
     ).join(Message.user).join(User.employee).filter(Message.type == 'request')
 
-    
 
     if isOnlyUnread == True:
 
@@ -79,8 +56,28 @@ def get_all_messages(search, isOnlyUnread, page, limit, usr, db: Session):
     all_data = messages.order_by(Message.id.desc()).offset(offset).limit(limit)
     count_data = messages.count()
 
+    data_all = []
+
+    for data_one in all_data.all():
+        data_item = dict(data_one)
+        data_item['replies'] = db.query(
+            label('id', Message.id),
+            label('fileName', Message.fileName),
+            label('context', Message.context),
+            label('createdAt', Message.createdAt),
+            label('isViewed', Message.isViewed),
+            label('forRole', Message.forRole),
+            label('replyId', Message.replyId),
+            label('updated_at', Message.updated_at),
+            label('type', Message.type),
+            # label('employeeName', func.concat(Employee.lastname, ' ', Employee.firstname)),
+            # label('employeeRole', Employee.role),
+        ).filter(Message.replyId==data_one.id).all()
+
+        data_all.append(data_item)
+
     return {
-        "data": all_data.all(),
+        "data": data_all,
         "page_count": math.ceil(count_data / limit),
         "data_count": count_data,
         "current_page": page,
