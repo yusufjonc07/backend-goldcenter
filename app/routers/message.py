@@ -50,6 +50,7 @@ async def create_new_message(
     context: Optional[str] = Body(None),
     fileName: Optional[UploadFile] = File(None),
     forRole: ChatTypes = Body(...),
+    mTtype: MessageTypes = Body(...),
     replyId: int = Body(0),
     branchId: Optional[int] = Body(...),
     db: Session = ActiveSession,
@@ -57,6 +58,9 @@ async def create_new_message(
 ):
     if not usr.userRole in ['any_role']:
         try:
+
+            if mTtype != 'request' and replyId <= 0:
+                raise HTTPException(400, 'Bu sizga chat emas!')
 
             if fileName is None and context is None:
                 raise HTTPException(400, 'Xabar tarkibidi nimadir bo`lishi kerak')
@@ -70,6 +74,7 @@ async def create_new_message(
                 fileName=_fileName,
                 context=context,
                 forRole=forRole,
+                type=mTtype,
                 replyId=replyId if replyId > 0 else None,
                 userId=usr.id,
                 branchId=branchId,

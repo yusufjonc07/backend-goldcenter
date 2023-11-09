@@ -1,6 +1,6 @@
 from cProfile import label
 import math
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import subqueryload, Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.message import *
@@ -16,6 +16,27 @@ def get_all_messages(search, isOnlyUnread, page, limit, usr, db: Session):
     else:
         offset = (page-1) * limit
 
+    ReplyModel: Message = aliased(Message, 'ReplyModel')
+    ReplyUser: User = aliased(User, 'ReplyUser')
+    ReplyEmployee: Employee = aliased(Employee, 'ReplyEmployee')
+
+    replies_subquery = db.query(
+        label('id', ReplyModel.id),
+        label('fileName', ReplyModel.fileName),
+        label('context', ReplyModel.context),
+        label('createdAt', ReplyModel.createdAt),
+        label('isViewed', ReplyModel.isViewed),
+        label('forRole', ReplyModel.forRole),
+        label('replyId', ReplyModel.replyId),
+        label('updated_at', ReplyModel.updated_at),
+        label('employeeName', func.concat(ReplyEmployee.lastname, ' ', ReplyEmployee.firstname)),
+        label('employeeRole', ReplyEmployee.role),
+    ).join(
+        ReplyUser, ReplyModel.userId == ReplyUser.id
+    ).join(
+        ReplyEmployee, ReplyEmployee.id == ReplyUser.employeeId
+    )
+
     messages = db.query(
         label('id', Message.id),
         label('fileName', Message.fileName),
@@ -27,7 +48,10 @@ def get_all_messages(search, isOnlyUnread, page, limit, usr, db: Session):
         label('updated_at', Message.updated_at),
         label('employeeName', func.concat(Employee.lastname, ' ', Employee.firstname)),
         label('employeeRole', Employee.role),
-    ).join(Message.user).join(User.employee)
+        label('employeeRole', Employee.role),
+        label('replies', Employee.role),
+
+    ).join(Message.user).join(User.employee).filter(Message.type == 'request')
 
     
 

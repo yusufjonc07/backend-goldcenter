@@ -18,12 +18,6 @@ class FloorTypes(str, Enum):
     sold = "sold"
 
 
-class MessageTypes(str, Enum):
-    text = "text"
-    image = "image"
-    video = "video"
-    audio = "audio"
-
 
 messageTypeLabels = {
     "text": "matnli",
@@ -38,6 +32,11 @@ class ChatTypes(str, Enum):
     headConstructor = "headConstructor"
     headGuard = "headGuard"
     accountant = "accountant"
+
+class MessageTypes(str, Enum):
+    request = "request"
+    negative = "negative"
+    positive = "positive"
 
 
 class ExpenceTypes(str, Enum):
