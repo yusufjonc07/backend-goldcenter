@@ -1,7 +1,7 @@
 from datetime import date
 import uuid
 from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
-from typing import Optional
+from typing import Optional, List
 from app.schemas.user import NewUser
 from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -12,11 +12,8 @@ from app.models.message import *
 from app.functions.message import *
 from app.schemas.message import *
 from app.utils.wsmanager import manager
-from app.schemas.enums import messageTypeLabels
 
 message_router = APIRouter(tags=['Xabar Endpoint'])
-
-
 
 @message_router.get("/messages")
 async def get_messages_list(
@@ -94,6 +91,19 @@ async def create_new_message(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+@message_router.delete("/message/{id}/delete")
+async def remove_messages(
+    ids: List[int],
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    
+    try:
+        db.query(Message).filter(Message.id.in_(ids), Message.userId==usr.id).delete()
+        db.commit()
+        return HTTPException(200, 'O\'chirildi!')
+    except IntegrityError as e: 
+        integrityHandler(e)
 
 
 # @message_router.put("/message/{id}/update", description="This router is able to update message")
