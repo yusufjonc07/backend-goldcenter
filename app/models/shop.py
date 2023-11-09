@@ -3,7 +3,7 @@ from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.floor import * 
 from app.models.client import * 
-
+from sqlalchemy.dialects.mysql import DOUBLE
 
 class Shop(Base):
     __tablename__ = "shop"
@@ -12,7 +12,11 @@ class Shop(Base):
     number = Column(String, default='')
     floorId = Column(Integer, ForeignKey('floor.id'), default=0)
     clientId = Column(Integer, ForeignKey('client.id'), nullable=True)
-    area = Column(String, default='')
+    area = Column(DOUBLE, default=0)
+    fromTop = Column(DOUBLE, default=0)
+    fromLeft = Column(DOUBLE, default=0)
+    boxWith = Column(DOUBLE, default=0)
+    boxHeight = Column(DOUBLE, default=0)
 
     UniqueConstraint("number", "floorId")
 

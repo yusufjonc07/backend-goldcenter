@@ -15,12 +15,13 @@ shop_router = APIRouter(tags=['Do`kon Endpoint'])
 async def get_shops_list(
     search: Optional[str] = "",
     page: int = 1,
+    floorId: Optional[int] = 0,
     limit: int = 10,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):   
     if not usr.userRole in ['any_role']:
-        return get_all_shops(search, page, limit, usr, db)  
+        return get_all_shops(floorId, search, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
 

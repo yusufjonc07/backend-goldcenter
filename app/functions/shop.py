@@ -6,13 +6,16 @@ from app.models.shop import *
 from app.schemas.shop import *
 from app.utils.handler import integrityHandler
 
-def get_all_shops(search, page, limit, usr, db: Session):
+def get_all_shops(floorId, search, page, limit, usr, db: Session):
     if page == 1 or page < 1:
         offset = 0
     else:
         offset = (page-1) * limit
     
     shops = db.query(Shop)
+
+    if floorId > 0:
+        shops = shops.filter(Shop.floorId==floorId)
 
     #if search:
        #shops = shops.filter(
