@@ -46,7 +46,7 @@ async def create_new_clientAgreementWithClient(
     monthlyFee: float = Body(..., ge=0),
     balance: Optional[float] = Body(0),
     status: Optional[AgreementStatus] = Body('active'),
-    startedAt: date = Body(...),
+    startedAt: str = Body(...),
     agreementFile: UploadFile = File(...),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
