@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship, backref
 from app.models.client import * 
 from app.models.moneyForm import * 
 from app.models.user import * 
+from sqlalchemy.dialects.mysql import DOUBLE
 
 
 class Income(Base):

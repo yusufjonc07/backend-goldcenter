@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Enum, String, Integer, Text, ForeignKey, Date, UniqueConstraint
+from sqlalchemy import Column, Enum, String, Integer, Text, ForeignKey, Date, UniqueConstraint, Numeric     
 from sqlalchemy.dialects.mysql import DOUBLE
 from app.schemas.enums import AgreementStatus, AgreementType
 from databases.main import Base
@@ -18,7 +18,7 @@ class Client(Base):
     liablePerson = Column(String(255))
     shopId = Column(Integer, ForeignKey('shop.id'), default=0)
     monthlyFee = Column(DOUBLE, default=0)
-    balance = Column(DOUBLE, default=0)
+    balance = Column(Numeric, default=0)
     status = Column(Enum(AgreementStatus), default='active')
     type = Column(Enum(AgreementType))
     startedAt = Column(Date)

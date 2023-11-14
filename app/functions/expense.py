@@ -14,7 +14,7 @@ def get_all_expenses(search, type, employeeId, page, limit, usr, db: Session):
     
     worker_alias = aliased(Employee, name='worker_alias')
 
-    worker = db.query(func.concat(worker_alias.firstname, ' ', worker_alias.lastname)).filter_by(id=Expense.employeeId).subquery()
+    worker = db.query(func.concat(worker_alias.firstname, ' ', worker_alias.lastname)).filter_by(id=Expense.employeeId).scalar_subquery()
     
     expenses = db.query(
         label('type', Expense.type),    

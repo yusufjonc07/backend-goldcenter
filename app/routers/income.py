@@ -29,7 +29,7 @@ async def get_agreement_payments(
 async def create_new_income(
     form_data: NewIncome,
     db:Session = ActiveSession,
-    usr: NewUser = Depends(get_current_active_user)
+    usr: NewUser = Depends(get_current_active_user) 
 ):
     if not usr.userRole in ['any_role']:
         return create_income(form_data, usr, db)
