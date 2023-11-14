@@ -21,11 +21,12 @@ async def get_employees_list(
     search: Optional[str] = "",
     page: int = 1,
     limit: int = 10,
+    roles: str = "",
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_employees(search, page, limit, usr, db)
+        return get_all_employees(search, roles, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

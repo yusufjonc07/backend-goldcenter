@@ -6,7 +6,7 @@ from app.models.employee import *
 from app.models.user import User
 
 
-def get_all_employees(search, page, limit, usr, db: Session):
+def get_all_employees(search, roles, page, limit, usr, db: Session):
     if page == 1 or page < 1:
         offset = 0
     else:
@@ -16,6 +16,8 @@ def get_all_employees(search, page, limit, usr, db: Session):
         joinedload(Employee.shift)
     )
 
+    if len(roles.split(';')) > 0:
+        employees = employees.filter(Employee.role.in_(roles.split(';')))
     # if search:
     # employees = employees.filter(
     # Employee.id.like(f"%{search}%"),

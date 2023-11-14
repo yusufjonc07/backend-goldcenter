@@ -7,8 +7,13 @@ from app.models.shop import *
 from app.models.client import * 
 
 
-class ClientAgreement(Base):
-    __tablename__ = "clientAgreement"
+class Client(Base):
+    __tablename__ = "client"
+    clientName = Column(String, unique=True)
+    chiefName = Column(String, unique=True)
+    phoneNumber = Column(Integer)
+    inn = Column(String(20))
+    extraPhoneNumber = Column(Integer, nullable=True)
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     fileName = Column(Text, nullable=False)
     liablePerson = Column(String(255))
