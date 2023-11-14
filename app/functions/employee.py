@@ -16,7 +16,7 @@ def get_all_employees(search, roles, page, limit, usr, db: Session):
         joinedload(Employee.shift)
     )
 
-    if len(roles.split(';')) > 0:
+    if len(roles) > 0:
         employees = employees.filter(Employee.role.in_(roles.split(';')))
     # if search:
     # employees = employees.filter(
