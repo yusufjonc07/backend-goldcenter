@@ -4,7 +4,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import label
 from fastapi import HTTPException
 from app.models.client import Client
-from app.models.clientAgreement import ClientAgreement
 from app.models.expense import *
 from app.models.income import *
 from app.models.shop import Shop
@@ -21,16 +20,16 @@ def get_all_agreement_payments(id, page, limit, usr, db):
         label("value", Income.value),
         label("clientName", Client.clientName),
         label("shopNumber", Shop.number),
-        label("liablePerson", ClientAgreement.liablePerson),
+        label("liablePerson", Client.liablePerson),
         label("createdAt", Income.createdAt),
         label("moneyForm", Moneyform.name),
         label("comment", Income.comment),
     ).select_from(Income)\
-        .join(Income.clientAgreement).join(ClientAgreement.client)\
-        .join(ClientAgreement.shop).join(Income.moneyForm)\
+        .join(Income.client).join(Client.client)\
+        .join(Client.shop).join(Income.moneyForm)\
 
     if id > 0:
-        incomesData = incomesData.filter(Income.clientAgreementId == id)
+        incomesData = incomesData.filter(Income.clientId == id)
 
     # if search:
        # incomesData = incomesData.filter(

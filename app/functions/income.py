@@ -36,7 +36,7 @@ def create_income(form_data: NewIncome, usr, db: Session):
 
     try:
         new_income = Income(
-            clientAgreementId=form_data.clientAgreementId,
+            clientId=form_data.clientId,
             value=form_data.value,
             moneyFormId=form_data.moneyFormId,
             comment=form_data.comment,
@@ -46,7 +46,7 @@ def create_income(form_data: NewIncome, usr, db: Session):
         db.add(new_income)
         db.flush()
         db.refresh(new_income)
-        new_income.clientAgreement.balance += new_income.value
+        new_income.client.balance += new_income.value
         db.commit()
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
@@ -61,7 +61,7 @@ def update_income(id, form_data: UpdateIncome, usr, db: Session):
         this_income = income.first()
         if this_income:
             income.update({
-                Income.clientAgreementId: form_data.clientAgreementId,
+                Income.clientId: form_data.clientId,
                 Income.value: form_data.value,
                 Income.moneyFormId: form_data.moneyFormId,
                 Income.comment: form_data.comment,

@@ -1,47 +1,143 @@
-from fastapi import HTTPException, APIRouter, Depends
+from datetime import date
+from os.path import exists
+from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
+
+from app.models.user import User
 from app.schemas.user import NewUser
+from app.utils.fileUtil import replace_file, save_file, validate_file
+from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import Session
 from app.models.client import *
 from app.functions.client import *
-from app.schemas.client import *
 
-client_router = APIRouter(tags=['Klient Endpoint'])
+client_router = APIRouter(tags=['Klient  Endpoint'])
 
 @client_router.get("/clients", description="This router returns list of the clients using pagination")
 async def get_clients_list(
-    search: Optional[str] = "",
+    floorId: Optional[int] = 0,
+    clientId: Optional[int] = 0,
+    status: Optional[AgreementStatus] = "active",
     page: int = 1,
     limit: int = 10,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):   
     if not usr.userRole in ['any_role']:
-        return get_all_clients(search, page, limit, usr, db)  
+        return get_all_clients(floorId, clientId, status, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
+    
 
-@client_router.post("/client/create", description="This router is able to add new client")
-async def create_new_client(
-    form_data: FormClient,
-    db:Session = ActiveSession,
-    usr: NewUser = Depends(get_current_active_user)
+@client_router.post("/clientWithClient/create")
+async def create_new_clientWithClient(
+    clientName: str = Body(...),
+    chiefName: str = Body(...),
+    phoneNumber: int = Body(...),
+    inn: str = Body(...),
+    extraPhoneNumber: Optional[int] = Body(0),
+    liablePerson: str = Body(..., min_length=5),
+    shopId: int = Body(...),
+    monthlyFee: float = Body(..., ge=0),
+    balance: Optional[float] = Body(0),
+    status: Optional[AgreementStatus] = Body('active'),
+    startedAt: str = Body(...),
+    File: UploadFile = File(...),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return create_client(form_data, usr, db)
+        try:
+
+            FileName = await validate_file(File, ['document'], 3)
+            shop = db.get(Shop, shopId)
+            if not shop:
+                raise HTTPException(400, 'Do`kon topilmadi')
+
+            new_client = Client(
+                clientName=clientName,
+                chiefName=chiefName,
+                phoneNumber=phoneNumber,
+                inn=inn,
+                extraPhoneNumber=extraPhoneNumber if extraPhoneNumber > 0 else None,
+                fileName=FileName,
+                shopId=shopId,
+                monthlyFee=monthlyFee if shop.floor.type == 'rent' else 0, 
+                balance=balance,
+                status=status,
+                type=shop.floor.type,
+                startedAt=startedAt,
+                liablePerson=liablePerson,
+            )
+
+            db.add(new_client)
+            db.commit()
+
+            await save_file(File, FileName, 'clients')
+
+            raise HTTPException(200, "Ma`lumotlar saqlandi!")
+        except IntegrityError as e:
+            raise integrityHandler(e)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 @client_router.put("/client/{id}/update", description="This router is able to update client")
 async def update_one_client(
     id: int,
-    form_data: FormClient,
-    db:Session = ActiveSession,
-    usr: NewUser = Depends(get_current_active_user)
+    liablePerson: str = Body(..., min_length=5),
+    shopId: int = Body(...),
+    clientName: str = Body(...),
+    chiefName: str = Body(...),
+    phoneNumber: int = Body(...),
+    inn: str = Body(...),
+    extraPhoneNumber: int = Body(...),
+    clientId: str = Body(...),
+    monthlyFee: float = Body(..., ge=0),
+    balance: float = Body(...),
+    status: AgreementStatus = Body(...),
+    type: AgreementStatus = Body(...),
+    startedAt: date = Body(...),
+    File: Optional[UploadFile] = File(None),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return update_client(id, form_data, usr, db)
+        try:
+            client = db.query(Client).filter(Client.id == id)
+            this_client = client.first()
+            if this_client:
+
+                _old_ = this_client
+
+                if File:
+                    fileName = await validate_file(File, ['document'], 3)
+                else:
+                    fileName = this_client.fileName
+
+                client.update({
+                    Client.fileName: fileName,
+                    Client.shopId: shopId,
+                    Client.clientId: clientId,
+                    Client.monthlyFee: monthlyFee,
+                    Client.balance: balance,
+                    Client.status: status,
+                    Client.type: type,
+                    Client.startedAt: startedAt,
+                    Client.liablePerson: liablePerson,
+                    Client.closedAt: (func.now() if status == 'closed' else None)
+                })
+                db.commit()
+                await replace_file(File, _old_.fileName, fileName, 'clients')
+
+
+                raise HTTPException(
+                    status_code=200, detail="O`zgarish saqlandi!")
+            else:
+                raise HTTPException(
+                    status_code=400, detail="So`rovda xatolik!")
+        except IntegrityError as e:
+            integrityHandler(e)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

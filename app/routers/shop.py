@@ -1,6 +1,5 @@
 from fastapi import HTTPException, APIRouter, Depends
 from typing import Optional
-from app.models.clientAgreement import ClientAgreement
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession

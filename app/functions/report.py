@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import label
-from app.models.clientAgreement import ClientAgreement
+from app.models.client import Client
 from app.models.floor import Floor
 from app.models.expense import Expense
 from app.models.income import Income
@@ -44,11 +44,11 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
             func.year(Income.createdAt) == _year,
             Floor.branchId == 1,
             Income.value > 0
-        ).join(Income.clientAgreement).join(ClientAgreement.shop).join(Shop.floor)
+        ).join(Income.client).join(Client.shop).join(Shop.floor)
         
         if floor_id > 0:
-            incomes = incomes.join(Income.clientAgreement)\
-                .join(ClientAgreement.shop).filter(Shop.floorId==floor_id)
+            incomes = incomes.join(Income.client)\
+                .join(Client.shop).filter(Shop.floorId==floor_id)
 
         incomes = incomes.order_by(
             func.month(Income.createdAt).asc()
@@ -69,7 +69,7 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
             Shop.floorId == floor_id,
             Floor.branchId == 1,
             Income.value > 0
-        ).join(Income.clientAgreement).join(ClientAgreement.shop).join(Shop.floor).order_by(
+        ).join(Income.client).join(Client.shop).join(Shop.floor).order_by(
             func.DAY(Income.createdAt).asc()
         ).group_by(
             func.DAY(Income.createdAt)
@@ -102,8 +102,8 @@ def get_report_index(fromDate: date, toDate: date, db: Session, usr: User):
     incomes = db.query(
         label("method", Moneyform.name),
         label("value", func.sum(Income.value)),
-    ).select_from(Income).join(Income.moneyForm).join(Income.clientAgreement)\
-    .join(ClientAgreement.shop).join(Shop.floor)\
+    ).select_from(Income).join(Income.moneyForm).join(Income.client)\
+    .join(Client.shop).join(Shop.floor)\
     .filter(
         func.date(Income.createdAt) >= fromDate, 
         func.date(Income.createdAt) <= toDate,
@@ -134,8 +134,8 @@ def get_report_index_income_floor(fromDate: date, toDate: date, db: Session, usr
         label("floorType", func.IF(Floor.type == 'sold', 'Patta', 'Ijara')),
         label("floorNumber", Floor.number),
         label("value", func.sum(Income.value)),
-    ).select_from(Income).join(Income.clientAgreement)\
-    .join(ClientAgreement.shop).join(Shop.floor)\
+    ).select_from(Income).join(Income.client)\
+    .join(Client.shop).join(Shop.floor)\
     .filter(
         func.date(Income.createdAt) >= fromDate, 
         func.date(Income.createdAt) <= toDate,
