@@ -24,7 +24,7 @@ def get_all_clients(floorId, clientId, status, page, limit, usr, db: Session):
         label('balance', Client.balance),
         label('monthlyFee', Client.monthlyFee),
         label('nextPaymentDate', Client.startedAt),
-    ).join(Client.client).join(Client.shop)\
+    ).join(Client.shop)\
     .filter(Client.status==status)
 
     if clientId > 0:

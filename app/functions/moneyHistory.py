@@ -25,7 +25,7 @@ def get_all_agreement_payments(id, page, limit, usr, db):
         label("moneyForm", Moneyform.name),
         label("comment", Income.comment),
     ).select_from(Income)\
-        .join(Income.client).join(Client.client)\
+        .join(Income.client)\
         .join(Client.shop).join(Income.moneyForm)\
 
     if id > 0:

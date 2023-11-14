@@ -2,7 +2,6 @@ from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, B
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.floor import * 
-from app.models.client import * 
 from sqlalchemy.dialects.mysql import DOUBLE
 
 class Shop(Base):
@@ -11,7 +10,7 @@ class Shop(Base):
     name = Column(String, default='')
     number = Column(String, default='')
     floorId = Column(Integer, ForeignKey('floor.id'), default=0)
-    clientId = Column(Integer, ForeignKey('client.id'), nullable=True)
+    clientId = Column(Integer, nullable=True)
     area = Column(DOUBLE, default=0)
     fromTop = Column(DOUBLE, default=0)
     fromLeft = Column(DOUBLE, default=0)
@@ -21,5 +20,4 @@ class Shop(Base):
     UniqueConstraint("number", "floorId")
 
     floor = relationship('Floor', backref='shops')
-    client = relationship('Client', backref='shops')
 

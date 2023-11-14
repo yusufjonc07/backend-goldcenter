@@ -31,8 +31,8 @@ async def get_clients_list(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
     
 
-@client_router.post("/clientWithClient/create")
-async def create_new_clientWithClient(
+@client_router.post("/client/create")
+async def create_new_client(
     clientName: str = Body(...),
     chiefName: str = Body(...),
     phoneNumber: int = Body(...),
@@ -64,7 +64,7 @@ async def create_new_clientWithClient(
                 extraPhoneNumber=extraPhoneNumber if extraPhoneNumber > 0 else None,
                 fileName=FileName,
                 shopId=shopId,
-                monthlyFee=monthlyFee if shop.floor.type == 'rent' else 0, 
+                monthlyFee=monthlyFee, 
                 balance=balance,
                 status=status,
                 type=shop.floor.type,

@@ -6,7 +6,7 @@ import string
 events_router = APIRouter()
 
 @events_router.on_event("startup")
-@repeat_every(seconds=10, wait_first=True)
+@repeat_every(seconds=300, wait_first=True)
 async def auto_committer():
 
     try:
