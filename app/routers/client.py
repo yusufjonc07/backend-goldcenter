@@ -1,7 +1,7 @@
 from datetime import date
 from os.path import exists
 from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
-from typing import Optional
+from typing import Optional, Union
 
 from app.models.user import User
 from app.schemas.user import NewUser
@@ -12,6 +12,7 @@ from databases.main import ActiveSession
 from sqlalchemy.orm import Session
 from app.models.client import *
 from app.functions.client import *
+from sqlalchemy import func
 
 client_router = APIRouter(tags=['Klient  Endpoint'])
 
@@ -44,14 +45,18 @@ async def create_new_client(
     balance: Optional[float] = Body(0),
     status: Optional[AgreementStatus] = Body('active'),
     startedAt: str = Body(...),
-    File: UploadFile = File(...),
+    File: Union[UploadFile, None, str] = File(None),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
         try:
 
-            FileName = await validate_file(File, ['document'], 3)
+            if File:
+                FileName = await validate_file(File, ['document'], 3)
+            else:
+                FileName = None
+
             shop = db.get(Shop, shopId)
             if not shop:
                 raise HTTPException(400, 'Do`kon topilmadi')
@@ -75,11 +80,12 @@ async def create_new_client(
             db.add(new_client)
             db.commit()
 
-            await save_file(File, FileName, 'clients')
+            if File:
+                await save_file(File, FileName, 'clients')
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
-            raise integrityHandler(e)
+            raise HTTPException(400, e.args)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

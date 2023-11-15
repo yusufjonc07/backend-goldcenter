@@ -14,7 +14,7 @@ class Client(Base):
     inn = Column(String(20))
     extraPhoneNumber = Column(Integer, nullable=True)
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    fileName = Column(Text, nullable=False)
+    fileName = Column(Text, nullable=True)
     liablePerson = Column(String(255))
     shopId = Column(Integer, ForeignKey('shop.id'), default=0)
     monthlyFee = Column(DOUBLE, default=0)
