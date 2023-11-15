@@ -34,31 +34,42 @@ def get_all_shops(floorId, search, page, limit, usr, db: Session):
         "page_limit": limit,
     }
 
-def divide_shop(shopId:int, db: Session):
-    shop: Shop = db.query(Shop, shopId)
-    newShop = Shop(
-        name=f"{shop.name}.b",
-        number=f"{shop.number}.b",
-        floorId=shop.floorId,
-        area=shop.area
-    )
+def divide_shop(form_data: DivideShop, db: Session):
 
-    if shop.boxHeight > shop.boxWith:
-        shop.boxHeight /= 2
-        
-#         fromTop
-# fromLeft
-# boxWith
-# boxHeight
+    SHOPS_GAP = 1
 
+    try:
+        shop: Shop = db.query(Shop).filter_by(id=form_data.shopId).first()
+        newShop = Shop(
+            name=f"{shop.name}.b",
+            number=f"{shop.number}.b",
+            floorId=shop.floorId,
+            area=shop.area
+        )
 
-    else:
-        shop.boxWith /= 2
+        if shop.boxHeight > shop.boxWith:
+            shop.boxHeight /= 2
+            newShop.fromLeft = shop.fromLeft
+            newShop.fromTop = shop.fromTop + shop.boxHeight + SHOPS_GAP
+            newShop.boxWith = shop.boxWith
+            newShop.boxHeight = shop.boxHeight
+        else:
+            shop.boxWith /= 2
+            newShop.fromTop = shop.fromTop
+            newShop.fromLeft = shop.fromLeft + shop.boxWith + SHOPS_GAP
+            newShop.boxWith = shop.boxWith
+            newShop.boxHeight = shop.boxHeight
 
-
-    shop.number += ".a"
-    shop.name += ".a"
-
+        shop.number += ".a"
+        shop.name += ".a"
+        shop.area = form_data.areaA
+        newShop.area = form_data.areaB
+        db.add(newShop)
+        db.commit()
+        return HTTPException(200, 'Xona 2 ga bo`lindi!')
+    
+    except Exception as e:
+        integrityHandler(e)
 
 def create_shop(form_data: NewShop, usr, db: Session):
     

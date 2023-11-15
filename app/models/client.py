@@ -26,5 +26,5 @@ class Client(Base):
 
     UniqueConstraint("clientId", "shopId", "status")
 
-    shop = relationship('Shop')
+    shop = relationship('Shop', backref='clients')
 

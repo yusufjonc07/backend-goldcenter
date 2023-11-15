@@ -15,8 +15,10 @@ class NewShop(BaseModel):
 
     
 
-
-
+class DivideShop(BaseModel):
+    shopId: int
+    areaA: float
+    areaB: float
 
 
 class UpdateShop(BaseModel):

@@ -1,5 +1,6 @@
 from fastapi import HTTPException, APIRouter, Depends
 from typing import Optional
+from app.models.client import Client
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -37,12 +38,12 @@ async def create_new_shop(
 
 @shop_router.post("/shop/divide", description="This router is able to divide shop into two")
 async def divide_func_shop(
-    shopId: int,
+    form_data: DivideShop,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return divide_shop(shopId, db)
+        return divide_shop(form_data, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -54,7 +55,7 @@ async def shop_view(
 ):
     if not usr.userRole in ['any_role']:
         return db.query(Shop).options(
-            joinedload(Shop.clientAgreement.and_(ClientAgreement.clientId==Shop.clientId)).joinedload(ClientAgreement.client    )
+            joinedload(Shop.clients.and_(Client.status.in_(['active', 'paused'])))
         ).filter(Shop.id==shop_id).first()
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
