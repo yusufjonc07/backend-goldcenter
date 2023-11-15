@@ -35,6 +35,17 @@ async def create_new_shop(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+@shop_router.post("/shop/divide", description="This router is able to divide shop into two")
+async def divide_func_shop(
+    shopId: int,
+    db:Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return divide_shop(shopId, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 @shop_router.get("/shop/detail")
 async def shop_view(
     shop_id: int,

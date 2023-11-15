@@ -34,14 +34,45 @@ def get_all_shops(floorId, search, page, limit, usr, db: Session):
         "page_limit": limit,
     }
 
+def divide_shop(shopId:int, db: Session):
+    shop: Shop = db.query(Shop, shopId)
+    newShop = Shop(
+        name=f"{shop.name}.b",
+        number=f"{shop.number}.b",
+        floorId=shop.floorId,
+        area=shop.area
+    )
+
+    if shop.boxHeight > shop.boxWith:
+        shop.boxHeight /= 2
+        
+#         fromTop
+# fromLeft
+# boxWith
+# boxHeight
+
+
+    else:
+        shop.boxWith /= 2
+
+
+    shop.number += ".a"
+    shop.name += ".a"
+
+
 def create_shop(form_data: NewShop, usr, db: Session):
     
     try:
+
         new_shop = Shop(
             name=form_data.name,
             number=form_data.number,
             floorId=form_data.floorId,
             area=form_data.area,
+            fromTop=form_data.fromTop,
+            fromLeft=form_data.fromLeft,
+            boxWith=form_data.boxWith,
+            boxHeight=form_data.boxHeight,
         )
 
         db.add(new_shop)
@@ -62,6 +93,10 @@ def update_shop(id, form_data: UpdateShop, usr, db: Session):
                 Shop.number: form_data.number,
                 Shop.floorId: form_data.floorId,
                 Shop.area: form_data.area,
+                Shop.fromTop: form_data.fromTop,
+                Shop.fromLeft: form_data.fromLeft,
+                Shop.boxWith: form_data.boxWith,
+                Shop.boxHeight: form_data.boxHeight,
             })
             db.commit()
 

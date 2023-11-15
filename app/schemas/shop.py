@@ -8,6 +8,15 @@ class NewShop(BaseModel):
     number: str
     floorId: int
     area: float
+    fromTop: float
+    fromLeft: float
+    boxWith: float
+    boxHeight: float
+
+    
+
+
+
 
 
 class UpdateShop(BaseModel):
@@ -15,5 +24,9 @@ class UpdateShop(BaseModel):
     number: str
     floorId: int
     area: float
+    fromTop: float
+    fromLeft: float
+    boxWith: float
+    boxHeight: float
 
         
