@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.client import *
 
-def get_all_clients(floorId, clientId, status, page, limit, usr, db: Session):
+def get_all_clients(floorId, status, page, limit, usr, db: Session):
     if page == 1 or page < 1:
         offset = 0
     else:
@@ -27,8 +27,6 @@ def get_all_clients(floorId, clientId, status, page, limit, usr, db: Session):
     ).join(Client.shop)\
     .filter(Client.status==status)
 
-    if clientId > 0:
-        clients = clients.filter(Client.clientId==clientId)
     if floorId > 0:
         clients = clients.filter(Shop.floorId==floorId)
 
@@ -36,8 +34,6 @@ def get_all_clients(floorId, clientId, status, page, limit, usr, db: Session):
        #clients = clients.filter(
            #Client.id.like(f"%{search}%"),
        #)
-
-    
     all_data = clients.order_by(Shop.number.asc()).offset(offset).limit(limit)
     count_data = clients.count()
 
