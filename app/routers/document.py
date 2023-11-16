@@ -1,12 +1,13 @@
-from fastapi import HTTPException, APIRouter, Depends
+from fastapi import HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
 from app.schemas.user import NewUser
+from app.utils.fileUtil import save_file, validate_file
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
 from sqlalchemy.orm import joinedload, Session
+from sqlalchemy import func
 from app.models.document import *
 from app.functions.document import *
-from app.schemas.document import *
 
 document_router = APIRouter(tags=['Document Endpoint'])
 
@@ -25,23 +26,30 @@ async def get_documents_list(
 
 @document_router.post("/document/create", description="This router is able to add new document")
 async def create_new_document(
-    form_data: NewDocument,
+    fileName: UploadFile,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return create_document(form_data, usr, db)
-    else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+        try:
 
-@document_router.put("/document/{id}/update", description="This router is able to update document")
-async def update_one_document(
-    id: int,
-    form_data: UpdateDocument,
-    db:Session = ActiveSession,
-    usr: NewUser = Depends(get_current_active_user)
-):
-    if not usr.userRole in ['any_role']:
-        return update_document(id, form_data, usr, db)
+            if db.query(Document).filter_by(fileName=fileName.filename).first():
+                raise HTTPException(400, "Bu nomli hujjat mavjud")
+
+            await validate_file(fileName, ['document'], 3)
+
+            new_document = Document(
+                fileName=fileName.filename,
+                createdAt=func.now(),
+            )
+
+            db.add(new_document)
+            db.commit()
+
+            await save_file(fileName, fileName.filename, 'documents')
+
+            raise HTTPException(200, "Ma`lumotlar saqlandi!")
+        except IntegrityError as e:
+            raise HTTPException(400, e.args)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

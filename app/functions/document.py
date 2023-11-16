@@ -14,7 +14,7 @@ def get_all_documents(search, page, limit, usr, db: Session):
     documents = db.query(Document)
 
     all_data = documents.order_by(
-        Document.id.desc()).offset(offset).limit(limit)
+        Document.fileName.asc()).offset(offset).limit(limit)
     count_data = documents.count()
 
     return {
