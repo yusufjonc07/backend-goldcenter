@@ -1,5 +1,29 @@
 from enum import Enum
 
+ROLES = [
+    "director",
+    "accountant",
+    'headConstructor',
+    'constructor',
+    'guard',
+    'headGuard',
+    'headCleaner',
+    'cleaner',
+    'clerk',
+]
+
+ROLE_LABELS = {
+    "director": "Direktor",
+    "accountant": 'Buxgalter',
+    'headConstructor': 'Xo`z bo`limi boshlig`i',
+    'constructor': 'Xo`z bo`limi hodimi',
+    'guard': 'Qorovul',
+    'headGuard': 'Xavfsizlik bo`limi boshlig`i',
+    'headCleaner': 'Tozalik bo`limi boshlig`i',
+    'cleaner': 'Tozalik bo`limi hodimi',
+    'clerk': 'Pattachi',
+}
+
 
 class EmployeeRoles(str, Enum):
     director = "director"
@@ -18,7 +42,6 @@ class FloorTypes(str, Enum):
     sold = "sold"
 
 
-
 messageTypeLabels = {
     "text": "matnli",
     "image": "rasmli",
@@ -33,6 +56,7 @@ class ChatTypes(str, Enum):
     headGuard = "headGuard"
     accountant = "accountant"
 
+
 class MessageTypes(str, Enum):
     request = "request"
     negative = "negative"
@@ -44,6 +68,7 @@ class ExpenceTypes(str, Enum):
     construction = "construction"
     other = "other"
 
+
 class UserRoles(str, Enum):
     director = "director"
     accountant = "accountant"
@@ -52,17 +77,21 @@ class UserRoles(str, Enum):
     headCleaner = "headCleaner"
     clerk = "clerk"
 
+
 class AgreementStatus(str, Enum):
     active = "active"
     paused = "paused"
     closed = "closed"
 
+
 class AgreementType(str, Enum):
     rent = "rent"
     sold = "sold"
 
+
 class IncomeTables(str, Enum):
     clientAgreement = "clientAgreement"
+
 
 class MoneyHistoryTables(str, Enum):
     income = "income"
@@ -70,15 +99,18 @@ class MoneyHistoryTables(str, Enum):
     clientAgreement = "clientAgreement"
     employee = "employee"
 
+
 class ExpenseTables(str, Enum):
     employee = "employee"
 
+
 class MediaTypes(str, Enum):
-    image="image"
-    audio="audio"
-    video="video"
-    document="document" 
+    image = "image"
+    audio = "audio"
+    video = "video"
+    document = "document"
+
 
 class ReportTypes(str, Enum):
-    monthly="monthly"
-    daily="daily"
+    monthly = "monthly"
+    daily = "daily"

@@ -4,7 +4,7 @@ import os
 import uuid
 from fastapi import Body, File, Form, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
-from app.schemas.enums import EmployeeRoles
+from app.schemas.enums import ROLE_LABELS, ROLES, EmployeeRoles
 from app.schemas.user import NewUser
 from app.utils.fileUtil import replace_file, save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -34,20 +34,19 @@ async def get_employees_list(
 
 @employee_router.get("/employee/roles")
 async def get_employees_roles(
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return {
-            "director": "Direktor",
-            "accountant": 'Buxgalter',
-            'headConstructor': 'Xo`z bo`limi boshlig`i',
-            'constructor': 'Xo`z bo`limi hodimi',
-            'guard': 'Qorovul',
-            'headGuard': 'Xavfsizlik bo`limi boshlig`i',
-            'headCleaner': 'Tozalik bo`limi boshlig`i',
-            'cleaner': 'Tozalik bo`limi hodimi',
-            'clerk': 'Pattachi',
-        }
+        roles = []
+        for role in ROLES:
+            roles.append({
+                'role': role,
+                'label': ROLE_LABELS[role],
+                'count': db.query(Employee).filter_by(role=role).count(),
+            })
+        return roles
+
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

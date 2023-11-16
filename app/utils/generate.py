@@ -16,7 +16,7 @@ async def get_home(db: Session = ActiveSession):
 
     # Beginning of Routes binding generation part
 
-    tables_names = ['income', 'expense']
+    tables_names = ['document']
 
     for table_name in tables_names:
 
