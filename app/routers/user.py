@@ -13,13 +13,14 @@ user_router = APIRouter(tags=['Foydalanuvchilar Endpoint'])
 @user_router.get("/users", description="This router returns list of the users using pagination")
 async def get_users_list(
     search: Optional[str] = "",
+    employeeId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):   
     if not usr.userRole in ['any_role']:
-        return get_all_users(search, page, limit, usr, db)  
+        return get_all_users(search, employeeId, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
 

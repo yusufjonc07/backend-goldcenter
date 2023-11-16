@@ -78,6 +78,10 @@ async def create_new_client(
 
             db.add(new_client)
             db.commit()
+            db.refresh(new_client)
+
+            shop.clientId = new_client.id
+            db.commit()
 
             if File:
                 await save_file(File, FileName, 'clients')
@@ -98,7 +102,6 @@ async def update_one_client(
     phoneNumber: int = Body(...),
     inn: str = Body(...),
     extraPhoneNumber: int = Body(...),
-    clientId: str = Body(...),
     monthlyFee: float = Body(..., ge=0),
     balance: float = Body(...),
     status: AgreementStatus = Body(...),
@@ -124,7 +127,11 @@ async def update_one_client(
                 client.update({
                     Client.fileName: fileName,
                     Client.shopId: shopId,
-                    Client.clientId: clientId,
+                    Client.clientName: clientName,
+                    Client.chiefName: chiefName,
+                    Client.phoneNumber: phoneNumber,
+                    Client.inn: inn,
+                    Client.extraPhoneNumber: extraPhoneNumber if extraPhoneNumber > 0 else None,
                     Client.monthlyFee: monthlyFee,
                     Client.balance: balance,
                     Client.status: status,
@@ -133,6 +140,7 @@ async def update_one_client(
                     Client.liablePerson: liablePerson,
                     Client.closedAt: (func.now() if status == 'closed' else None)
                 })
+                
                 db.commit()
                 await replace_file(File, _old_.fileName, fileName, 'clients')
 

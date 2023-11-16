@@ -8,13 +8,16 @@ from app.utils.handler import integrityHandler
 from security.auth import get_password_hash
 
 
-def get_all_users(search, page, limit, usr, db: Session):
+def get_all_users(search, employeeId, page, limit, usr, db: Session):
     if page == 1 or page < 1:
         offset = 0
     else:
         offset = (page-1) * limit
 
     users = db.query(User)
+
+    if employeeId > 0:
+        users = users.filter(User.employeeId==employeeId)
 
     # if search:
     # users = users.filter(

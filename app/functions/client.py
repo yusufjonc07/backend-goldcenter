@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from app.models.client import *
 
 def get_all_clients(floorId, status, page, limit, usr, db: Session):
+    
     if page == 1 or page < 1:
         offset = 0
     else:
@@ -15,6 +16,8 @@ def get_all_clients(floorId, status, page, limit, usr, db: Session):
 
     clients = db.query(
         label('id', Client.id),
+        label('inn', Client.inn),
+        label('stratedAt', Client.startedAt),
         label('clientName', Client.clientName),
         label('chiefName', Client.chiefName),
         label('liablePerson', Client.liablePerson),

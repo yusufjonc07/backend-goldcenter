@@ -16,6 +16,7 @@ from app.functions.employee import *
 
 employee_router = APIRouter(tags=['Hodimalar Endpoint'])
 
+
 @employee_router.get("/employees", description="This router returns list of the employees using pagination")
 async def get_employees_list(
     search: Optional[str] = "",
@@ -30,13 +31,34 @@ async def get_employees_list(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+
+@employee_router.get("/employee/roles")
+async def get_employees_roles(
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return {
+            "director": "Direktor",
+            "accountant": 'Buxgalter',
+            'headConstructor': 'Xo`z bo`limi boshlig`i',
+            'constructor': 'Xo`z bo`limi hodimi',
+            'guard': 'Qorovul',
+            'headGuard': 'Xavfsizlik bo`limi boshlig`i',
+            'headCleaner': 'Tozalik bo`limi boshlig`i',
+            'cleaner': 'Tozalik bo`limi hodimi',
+            'clerk': 'Pattachi',
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
 @employee_router.get("/employee/{id}/details")
 async def get_employee_details(
     id: int,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
-    
+
     '''
     Hodimning avatarini olish: `/files/employeeAvatars/`\n
     Hodimning passportini olish: `/files/employeePassports/`\n
@@ -82,10 +104,9 @@ async def create_new_employee(
 
             if avatarFileName:
                 await save_file(avatarFile, avatarFileName, 'employeeAvatars')
-           
+
             await save_file(agreementFile, agreementFileName, 'employeeAgreements')
             await save_file(passportFile, passportFileName, 'employeePassports')
-
 
             new_employee = Employee(
                 firstname=firstname,
@@ -105,7 +126,6 @@ async def create_new_employee(
             db.add(new_employee)
             db.commit()
 
-           
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
             raise HTTPException(400, e.args)
@@ -135,7 +155,7 @@ async def update_one_employee(
         try:
             employee = db.query(Employee).filter(Employee.id == id)
             this_employee = employee.first()
-            if this_employee:   
+            if this_employee:
 
                 _old_employee = this_employee
 
