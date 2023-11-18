@@ -8,7 +8,7 @@ from app.models.parkingCar import *
 from app.functions.parkingCar import *
 from app.schemas.parkingCar import *
 
-parkingCar_router = APIRouter(tags=['ParkingCar Endpoint'])
+parkingCar_router = APIRouter(tags=['Parkovka Endpoint'])
 
 @parkingCar_router.get("/parkingCars", description="This router returns list of the parkingCars using pagination")
 async def get_parkingCars_list(
