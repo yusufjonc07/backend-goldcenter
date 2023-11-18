@@ -14,7 +14,7 @@ async def get_home(db: Session = ActiveSession):
 
     inspector = inspect(engine)
 
-    tables_names = ['document']
+    tables_names = ['parkingZone']
 
     for table_name in tables_names:
 
@@ -100,37 +100,25 @@ class {model_name}(Base):
 ''')
 
         with open(f'./app/functions/{table_name}.py', 'w') as f:
-            f.write(f'''import math
-from sqlalchemy.orm import joinedload, Session
+            f.write(f'''from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.{table_name} import *
 from app.schemas.{table_name} import *
+from app.utils.handler import integrityHandler
+from app.utils.pagination import pagination 
 
 def get_all_{table_name}s(search, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
     
     {table_name}s = db.query({model_name})
 
     #if search:
        #{table_name}s = {table_name}s.filter(
-           #{model_name}.id.like(f"%{a_bracet}search{b_bracet}%"),
+           #{model_name}.name.like(f"%{a_bracet}search{b_bracet}%"),
        #)
 
+    return pagination({table_name}s, page, limit)
     
-    all_data = {table_name}s.order_by({model_name}.id.desc()).offset(offset).limit(limit)
-    count_data = {table_name}s.count()
-
-    return {a_bracet}
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    {b_bracet}
 
 def create_{table_name}(form_data: {schema_name}, usr, db: Session):
     
@@ -143,7 +131,7 @@ def create_{table_name}(form_data: {schema_name}, usr, db: Session):
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
     except IntegrityError as e:
-        raise HTTPException(400, e.args)
+        integrityHandler(e)
 
 def update_{table_name}(id, form_data: Update{model_name}, usr, db: Session):
     

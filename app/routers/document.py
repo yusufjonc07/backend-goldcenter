@@ -4,7 +4,8 @@ from app.schemas.user import NewUser
 from app.utils.fileUtil import save_file, validate_file
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.document import *
 from app.functions.document import *
