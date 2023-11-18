@@ -1,16 +1,13 @@
 import math
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.moneyForm import *
 from app.schemas.moneyForm import *
+from app.utils.pagination import pagination 
 
 def get_all_moneyForms(search, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
-    
+   
     moneyForms = db.query(Moneyform)
 
     #if search:
@@ -18,17 +15,7 @@ def get_all_moneyForms(search, page, limit, usr, db: Session):
            #Moneyform.id.like(f"%{search}%"),
        #)
 
-    
-    all_data = moneyForms.order_by(Moneyform.id.desc()).offset(offset).limit(limit)
-    count_data = moneyForms.count()
-
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    return pagination(moneyForms, page, limit)
 
 def create_moneyForm(form_data: NewMoneyform, usr, db: Session):
     

@@ -1,15 +1,13 @@
 import math
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.shift import *
 from app.schemas.shift import *
+from app.utils.pagination import pagination 
+
 
 def get_all_shifts(search, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
     
     shifts = db.query(Shift)
 
@@ -17,18 +15,9 @@ def get_all_shifts(search, page, limit, usr, db: Session):
        #shifts = shifts.filter(
            #Shift.id.like(f"%{search}%"),
        #)
-
     
-    all_data = shifts.order_by(Shift.id.desc()).offset(offset).limit(limit)
-    count_data = shifts.count()
+    return pagination(shifts, page, limit)
 
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
 
 def create_shift(form_data: NewShift, usr, db: Session):
     

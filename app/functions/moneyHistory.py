@@ -7,6 +7,8 @@ from app.models.client import Client
 from app.models.expense import *
 from app.models.income import *
 from app.models.shop import Shop
+from app.utils.pagination import pagination 
+
 
 
 def get_all_agreement_payments(id, page, limit, usr, db):
@@ -36,16 +38,6 @@ def get_all_agreement_payments(id, page, limit, usr, db):
         # Income.id.like(f"%{search}%"),
        # )
 
-    all_data = incomesData.order_by(
-        Income.createdAt.desc()).offset(offset).limit(limit)
-    count_data = incomesData.count()
-
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
-
+    return pagination(incomesData, page, limit)
+    
 

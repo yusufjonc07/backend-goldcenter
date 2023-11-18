@@ -6,6 +6,8 @@ from fastapi import HTTPException
 from app.models.message import *
 from app.schemas.message import *
 from sqlalchemy.sql import label, or_
+from app.utils.pagination import pagination 
+
 
 CHAT_ROLES = ["headConstructor", "headGuard", "headCleaner", "accountant"]
 

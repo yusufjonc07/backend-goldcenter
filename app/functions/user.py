@@ -6,14 +6,12 @@ from app.models.user import *
 from app.schemas.user import *
 from app.utils.handler import integrityHandler
 from security.auth import get_password_hash
+from app.utils.pagination import pagination 
+
 
 
 def get_all_users(search, employeeId, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
-
+    
     users = db.query(User)
 
     if employeeId > 0:
@@ -24,16 +22,7 @@ def get_all_users(search, employeeId, page, limit, usr, db: Session):
     # User.id.like(f"%{search}%"),
     # )
 
-    all_data = users.order_by(User.id.desc()).offset(offset).limit(limit)
-    count_data = users.count()
-
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    return pagination(users, page, limit)
 
 
 def create_user(form_data: NewUser, usr: User, db: Session):

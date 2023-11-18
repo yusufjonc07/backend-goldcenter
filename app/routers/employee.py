@@ -4,6 +4,7 @@ import os
 import uuid
 from fastapi import Body, File, Form, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
+from app.models.user import User
 from app.schemas.enums import ROLE_LABELS, ROLES, EmployeeRoles
 from app.schemas.user import NewUser
 from app.utils.fileUtil import replace_file, save_file, validate_file
@@ -13,6 +14,7 @@ from databases.main import ActiveSession
 from sqlalchemy.orm import joinedload, Session, load_only
 from app.models.employee import *
 from app.functions.employee import *
+from sqlalchemy.exc import IntegrityError
 
 employee_router = APIRouter(tags=['Hodimalar Endpoint'])
 

@@ -5,12 +5,10 @@ from fastapi import HTTPException
 from app.models.shop import *
 from app.schemas.shop import *
 from app.utils.handler import integrityHandler
+from app.utils.pagination import pagination 
+
 
 def get_all_shops(floorId, search, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
     
     shops = db.query(Shop)
 
@@ -22,17 +20,7 @@ def get_all_shops(floorId, search, page, limit, usr, db: Session):
            #Shop.id.like(f"%{search}%"),
        #)
 
-    
-    all_data = shops.order_by(Shop.id.desc()).offset(offset).limit(limit)
-    count_data = shops.count()
-
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    return pagination(shops, page, limit)
 
 def divide_shop(form_data: DivideShop, db: Session):
 
