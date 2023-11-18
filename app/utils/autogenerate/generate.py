@@ -14,12 +14,12 @@ async def get_home(db: Session = ActiveSession):
 
     inspector = inspect(engine)
 
-    tables_names = ['parkingZone']
+    tables_names = ['parkingCar']
 
     for table_name in tables_names:
 
         model_content = schema_content = create_of_crud = update_of_crud = ""
-        model_name = table_name.title()
+        model_name = table_name.capitalize()
         schema_name = "New" + model_name
         relationships = ""
         relationships_imports = ""
@@ -78,7 +78,7 @@ async def get_home(db: Session = ActiveSession):
                 foreign = ""
                 if colName[-2:] == 'Id':
                     foreign = f", ForeignKey('{colName[:-2]}.id')"
-                    relationships += f"    {colName[:-2]} = relationship('{colName[:-2].title()}', backref='{table_name}s')\n"
+                    relationships += f"    {colName[:-2]} = relationship('{colName[:-2].capitalize()}', backref='{table_name}s')\n"
                     relationships_imports += f"from app.models.{colName[:-2]} import * \n"
 
                 model_content += f"    {column['name']} = Column({col_type}{foreign}, {def_name})\n"
