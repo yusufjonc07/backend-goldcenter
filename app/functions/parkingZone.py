@@ -24,7 +24,7 @@ def create_parkingZone(form_data: NewParkingZone, usr, db: Session):
     try:
         new_parkingZone = ParkingZone(
             name=form_data.name,
-            hourlyFee=form_data.hourlyfee,
+            hourlyFee=form_data.hourlyFee,
             branchId=usr.branchId,
         )
 
@@ -44,7 +44,7 @@ def update_parkingZone(id, form_data: UpdateParkingZone, usr, db: Session):
         if this_parkingZone:
             parkingZone.update({
                 ParkingZone.name: form_data.name,
-                ParkingZone.hourlyFee: form_data.hourlyfee,
+                ParkingZone.hourlyFee: form_data.hourlyFee,
             })
             db.commit()
 

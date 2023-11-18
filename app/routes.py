@@ -13,9 +13,7 @@ app_routers.include_router(notification_router, prefix="/ws")
 
 app_routers.dependencies = [ActiveUser]
 
-
 routers = glob.glob("app/routers/*.py")
-
 
 for router_file in routers:
     router_name = router_file.split(".py")[0].split("app/routers/")[1]
