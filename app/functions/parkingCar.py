@@ -6,6 +6,7 @@ from app.schemas.parkingCar import *
 from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
 import math
+from datetime import datetime, timedelta
 
 def get_all_parkingCars(search, page, limit, usr, db: Session):
 
@@ -53,12 +54,13 @@ def exit_parkingCar(form_data: UpdateParkingCar, usr, db: Session):
         ).order_by(ParkingCar.enteredAt.desc()).first()
         
         if parkingCar:
-            print(type(form_data.exitedAt).__name__)
-            print(type(parkingCar.enteredAt).__name__)
+            
             if form_data.exitedAt <= parkingCar.enteredAt:
                 raise HTTPException(status_code=400, detail="So`rovda xatolik!")
             else:
-                parkingSeconds = parkingCar.enteredAt - form_data.exitedAt
+                parkingTime =  form_data.exitedAt - parkingCar.enteredAt
+                parkingSeconds = parkingTime.total_seconds()
+
                 parkingCeiledHours = math.ceil(parkingSeconds / 60 / 60)
 
                 parkingCar.totalFee = parkingCeiledHours * parkingCar.hourlyFee
@@ -66,7 +68,7 @@ def exit_parkingCar(form_data: UpdateParkingCar, usr, db: Session):
 
                 db.commit()
 
-                raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")
+                raise parkingCar
         else:
             raise HTTPException(status_code=400, detail="So`rovda xatolik!")
     except IntegrityError as e:

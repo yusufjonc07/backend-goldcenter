@@ -5,11 +5,8 @@ from app.models.parkingCar import *
 class NewParkingCar(BaseModel):
     number: str
     parkingZoneId: int
-    enteredAt: datetime
+    enteredAt: datetime = datetime.strptime(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
 
 class UpdateParkingCar(BaseModel):
     number: str
-    exitedAt: datetime
-
-  
-        
+    exitedAt: datetime = datetime.strptime(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
