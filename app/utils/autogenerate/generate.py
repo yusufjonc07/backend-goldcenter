@@ -14,8 +14,6 @@ async def get_home(db: Session = ActiveSession):
 
     inspector = inspect(engine)
 
-    # Beginning of Routes binding generation part
-
     tables_names = ['document']
 
     for table_name in tables_names:

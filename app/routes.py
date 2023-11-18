@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi import APIRouter, Depends
 from security.auth import get_current_active_user
-from . utils.generate import generate_router
+from app.utils.autogenerate.generate import generate_router
 from . routers.notification import notification_router
 import glob
 
