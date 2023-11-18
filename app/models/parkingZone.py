@@ -12,4 +12,3 @@ class ParkingZone(Base):
     branchId = Column(Integer, ForeignKey('branch.id'))
 
     branch = relationship('Branch', backref='parkingZones')
-
