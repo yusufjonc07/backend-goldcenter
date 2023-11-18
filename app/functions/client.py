@@ -1,18 +1,11 @@
 from datetime import date
-import math
-from sqlalchemy.sql import label, text
-from sqlalchemy.orm import joinedload, Session
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException
+from sqlalchemy.sql import label
+from sqlalchemy.orm import Session
 from app.models.client import *
+from app.utils.pagination import pagination
 
 def get_all_clients(floorId, status, page, limit, usr, db: Session):
     
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
-
 
     clients = db.query(
         label('id', Client.id),
@@ -33,19 +26,7 @@ def get_all_clients(floorId, status, page, limit, usr, db: Session):
     if floorId > 0:
         clients = clients.filter(Shop.floorId==floorId)
 
-    #if search:
-       #clients = clients.filter(
-           #Client.id.like(f"%{search}%"),
-       #)
-    all_data = clients.order_by(Shop.number.asc()).offset(offset).limit(limit)
-    count_data = clients.count()
+    clients = clients.order_by(Shop.number.asc())
 
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    return pagination(clients, page, limit)
 
-    

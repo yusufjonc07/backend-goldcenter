@@ -4,31 +4,19 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.attandance import *
 from app.schemas.attandance import *
+from app.utils.pagination import pagination
+
 
 def get_all_attandances(search, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
     
     attandances = db.query(Attandance)
 
     #if search:
-       #attandances = attandances.filter(
-           #Attandance.id.like(f"%{search}%"),
-       #)
+        #attandances = attandances.filter(
+            #Attandance.id.like(f"%{search}%"),
+        #)
 
-    
-    all_data = attandances.order_by(Attandance.id.desc()).offset(offset).limit(limit)
-    count_data = attandances.count()
-
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    return pagination(attandances, page, limit)
 
 def create_attandance(form_data: NewAttandance, usr, db: Session):
     

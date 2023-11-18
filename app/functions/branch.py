@@ -1,15 +1,11 @@
-import math
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import  Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.branch import *
 from app.schemas.branch import *
+from app.utils.pagination import pagination
 
 def get_all_branchs(search, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
     
     branchs = db.query(Branch)
 
@@ -17,18 +13,8 @@ def get_all_branchs(search, page, limit, usr, db: Session):
        #branchs = branchs.filter(
            #Branch.id.like(f"%{search}%"),
        #)
-
     
-    all_data = branchs.order_by(Branch.id.desc()).offset(offset).limit(limit)
-    count_data = branchs.count()
-
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    return pagination(branchs, page, limit)
 
 def create_branch(form_data: NewBranch, usr, db: Session):
     

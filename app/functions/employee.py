@@ -1,16 +1,11 @@
 import math
 from sqlalchemy.orm import joinedload, Session
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException
 from app.models.employee import *
-from app.models.user import User
+from app.utils.pagination import pagination
+
 
 
 def get_all_employees(search, roles, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
 
     employees = db.query(Employee).options(
         joinedload(Employee.shift)
@@ -18,19 +13,10 @@ def get_all_employees(search, roles, page, limit, usr, db: Session):
 
     if len(roles) > 0:
         employees = employees.filter(Employee.role.in_(roles.split(';')))
-    # if search:
-    # employees = employees.filter(
-    # Employee.id.like(f"%{search}%"),
-    # )
+    
+    #if search:
+        #employees = employees.filter(
+            #Employee.id.like(f"%{search}%"),
+        #)
 
-    all_data = employees.order_by(
-        Employee.id.desc()).offset(offset).limit(limit)
-    count_data = employees.count()
-
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    return pagination(employees, page, limit)

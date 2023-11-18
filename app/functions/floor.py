@@ -4,12 +4,10 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.floor import *
 from app.schemas.floor import *
+from app.utils.pagination import pagination 
+
 
 def get_all_floors(search, page, limit, usr, db: Session):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
     
     floors = db.query(Floor)
 
@@ -18,17 +16,9 @@ def get_all_floors(search, page, limit, usr, db: Session):
            #Floor.id.like(f"%{search}%"),
        #)
 
-    
-    all_data = floors.order_by(Floor.id.desc()).offset(offset).limit(limit)
-    count_data = floors.count()
+    return pagination(floors, page, limit)
 
-    return {
-        "data": all_data.all(),
-        "page_count": math.ceil(count_data / limit),
-        "data_count": count_data,
-        "current_page": page,
-        "page_limit": limit,
-    }
+    
 
 def create_floor(form_data: NewFloor, usr, db: Session):
     
