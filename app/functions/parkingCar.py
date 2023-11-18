@@ -53,7 +53,8 @@ def exit_parkingCar(form_data: UpdateParkingCar, usr, db: Session):
         ).order_by(ParkingCar.enteredAt.desc()).first()
         
         if parkingCar:
-
+            print(type(form_data.exitedAt).__name__)
+            print(type(parkingCar.enteredAt).__name__)
             if form_data.exitedAt <= parkingCar.enteredAt:
                 raise HTTPException(status_code=400, detail="So`rovda xatolik!")
             else:

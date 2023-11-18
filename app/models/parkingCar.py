@@ -11,8 +11,8 @@ class ParkingCar(Base):
     hourlyFee = Column(Numeric, default=0)
     totalFee = Column(Numeric, default=0)
     parkingZoneId = Column(Integer, ForeignKey('parkingZone.id'), nullable=True)
-    enteredAt = Column(TIMESTAMP, nullable=True)
-    exitedAt = Column(TIMESTAMP, nullable=True)
+    enteredAt = Column(DateTime, nullable=False)
+    exitedAt = Column(DateTime, nullable=True)
 
     parkingZone = relationship('ParkingZone', backref='parkingCars')
 

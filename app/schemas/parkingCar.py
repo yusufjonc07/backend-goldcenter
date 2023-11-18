@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from app.models.parkingCar import *
 
 class NewParkingCar(BaseModel):
@@ -7,9 +7,9 @@ class NewParkingCar(BaseModel):
     parkingZoneId: int
     enteredAt: datetime
 
-
 class UpdateParkingCar(BaseModel):
     number: str
     exitedAt: datetime
 
+  
         
