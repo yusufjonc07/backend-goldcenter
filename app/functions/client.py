@@ -5,7 +5,6 @@ from app.models.client import *
 from app.utils.pagination import pagination
 
 def get_all_clients(floorId, status, page, limit, usr, db: Session):
-    
 
     clients = db.query(
         label('id', Client.id),
@@ -19,7 +18,7 @@ def get_all_clients(floorId, status, page, limit, usr, db: Session):
         label('phoneNumber', Client.phoneNumber),
         label('balance', Client.balance),
         label('monthlyFee', Client.monthlyFee),
-        label('nextPaymentDate', Client.startedAt),
+        label('fileName', Client.fileName),
     ).join(Client.shop)\
     .filter(Client.status==status)
 

@@ -10,6 +10,7 @@ from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.models.client import *
 from app.functions.client import *
 from sqlalchemy import func
@@ -44,15 +45,15 @@ async def create_new_client(
     balance: Optional[float] = Body(0),
     status: Optional[AgreementStatus] = Body('active'),
     startedAt: str = Body(...),
-    File: Union[UploadFile, None, str] = File(None),
+    agreementFile: Union[UploadFile, None, str] = File(None),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
         try:
 
-            if File:
-                FileName = await validate_file(File, ['document'], 3)
+            if agreementFile:
+                FileName = await validate_file(agreementFile, ['document'], 3)
             else:
                 FileName = None
 
@@ -83,12 +84,12 @@ async def create_new_client(
             shop.clientId = new_client.id
             db.commit()
 
-            if File:
-                await save_file(File, FileName, 'clients')
+            if agreementFile:
+                await save_file(agreementFile, FileName, 'clients')
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
-            raise HTTPException(400, e.args)
+            integrityHandler(e)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
