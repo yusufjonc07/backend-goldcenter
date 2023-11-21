@@ -28,12 +28,22 @@ def enter_parkingCar(form_data: NewParkingCar, usr, db: Session):
         if not parkingZone:
             raise HTTPException(400, "Parkovka topilmadi")
         
+        orderNumber = 1
 
+        lastParkingCar = db.query(ParkingCar).filter(
+            func.date(ParkingCar.enteredAt)==func.date(func.now()),
+            ParkingCar.parkingZoneId == form_data.parkingZoneId
+        ).order_by(ParkingCar.enteredAt.desc()).first()
+
+        if lastParkingCar:
+            orderNumber = lastParkingCar.orderNumber + 1
+        
         new_parkingCar = ParkingCar(
             number=form_data.number,
             hourlyFee=parkingZone.hourlyFee,
             parkingZoneId=parkingZone.id,
             enteredAt=form_data.enteredAt,
+            orderNumber=orderNumber
         )
 
         db.add(new_parkingCar)
@@ -49,8 +59,7 @@ def exit_parkingCar(form_data: UpdateParkingCar, usr, db: Session):
     try:
         parkingCar: ParkingCar = db.query(ParkingCar).filter(
             ParkingCar.number == form_data.number, 
-            ParkingCar.exitedAt == None,
-
+            # ParkingCar.exitedAt == None,
         ).order_by(ParkingCar.enteredAt.desc()).first()
         
         if parkingCar:
@@ -67,8 +76,9 @@ def exit_parkingCar(form_data: UpdateParkingCar, usr, db: Session):
                 parkingCar.exitedAt = form_data.exitedAt
 
                 db.commit()
-
-                raise parkingCar
+                db.refresh(parkingCar)
+                
+                return  parkingCar
         else:
             raise HTTPException(status_code=400, detail="So`rovda xatolik!")
     except IntegrityError as e:
