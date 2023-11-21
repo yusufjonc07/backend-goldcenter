@@ -1,5 +1,4 @@
 from datetime import date
-from random import randint
 from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session

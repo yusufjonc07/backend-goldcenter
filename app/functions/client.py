@@ -9,7 +9,7 @@ def get_all_clients(floorId, status, page, limit, usr, db: Session):
     clients = db.query(
         label('id', Client.id),
         label('inn', Client.inn),
-        label('stratedAt', Client.startedAt),
+        label('startedAt', Client.startedAt),
         label('clientName', Client.clientName),
         label('chiefName', Client.chiefName),
         label('liablePerson', Client.liablePerson),
