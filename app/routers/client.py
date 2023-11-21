@@ -17,20 +17,53 @@ from sqlalchemy import func
 
 client_router = APIRouter(tags=['Klient  Endpoint'])
 
+
 @client_router.get("/clients", description="This router returns list of the clients using pagination")
 async def get_clients_list(
     floorId: Optional[int] = 0,
     status: Optional[AgreementStatus] = "active",
     page: int = 1,
     limit: int = 10,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
-):   
+):
     if not usr.userRole in ['any_role']:
-        return get_all_clients(floorId, status, page, limit, usr, db)  
+        return get_all_clients(floorId, status, page, limit, usr, db)
     else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
-    
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@client_router.get("/client/{id}")
+async def get_client_one(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        client = db.get(Client, id)
+        if client:
+            return {
+                "id": client.id,
+                "inn": client.inn,
+                "startedAt": client.startedAt,
+                "clientName": client.clientName,
+                "chiefName": client.chiefName,
+                "liablePerson": client.liablePerson,        
+                "shopNumber": client.shop.number,
+                "shopArea": client.shop.area,
+                "phoneNumber": client.phoneNumber,
+                "balance": client.balance,
+                "monthlyFee": client.monthlyFee,
+                "fileName": client.fileName,
+                "type": client.type,
+            }
+        else:
+            raise HTTPException(
+                status_code=400, detail="Bunday mijoz mavjud emas!")
+
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @client_router.post("/client/create")
 async def create_new_client(
@@ -69,7 +102,7 @@ async def create_new_client(
                 extraPhoneNumber=extraPhoneNumber if extraPhoneNumber > 0 else None,
                 fileName=FileName,
                 shopId=shopId,
-                monthlyFee=monthlyFee, 
+                monthlyFee=monthlyFee,
                 balance=balance,
                 status=status,
                 type=shop.floor.type,
@@ -92,6 +125,7 @@ async def create_new_client(
             integrityHandler(e)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @client_router.put("/client/{id}/update", description="This router is able to update client")
 async def update_one_client(
@@ -139,12 +173,12 @@ async def update_one_client(
                     Client.type: type,
                     Client.startedAt: startedAt,
                     Client.liablePerson: liablePerson,
-                    Client.closedAt: (func.now() if status == 'closed' else None)
+                    Client.closedAt: (func.now() if status ==
+                                      'closed' else None)
                 })
-                
+
                 db.commit()
                 await replace_file(File, _old_.fileName, fileName, 'clients')
-
 
                 raise HTTPException(
                     status_code=200, detail="O`zgarish saqlandi!")

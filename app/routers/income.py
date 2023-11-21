@@ -14,14 +14,14 @@ income_router = APIRouter(tags=['Kassa Endpoint'])
 
 @income_router.get("/incomes")
 async def get_agreement_payments(
-    id: Optional[int] = 0,
+    clientId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_agreement_payments(id, page, limit, usr, db)  
+        return get_all_agreement_payments(clientId, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

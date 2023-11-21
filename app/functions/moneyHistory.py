@@ -11,15 +11,13 @@ from app.utils.pagination import pagination
 
 
 
-def get_all_agreement_payments(id, page, limit, usr, db):
-    if page == 1 or page < 1:
-        offset = 0
-    else:
-        offset = (page-1) * limit
+def get_all_agreement_payments(clientId, page, limit, usr, db):
+   
 
     incomesData = db.query(
         label("id", Income.id),
         label("value", Income.value),
+        label("clientId", Income.clientId),
         label("clientName", Client.clientName),
         label("shopNumber", Shop.number),
         label("liablePerson", Client.liablePerson),
@@ -30,8 +28,8 @@ def get_all_agreement_payments(id, page, limit, usr, db):
         .join(Income.client)\
         .join(Client.shop).join(Income.moneyForm)\
 
-    if id > 0:
-        incomesData = incomesData.filter(Income.clientId == id)
+    if clientId > 0:
+        incomesData = incomesData.filter(Income.clientId == clientId)
 
     # if search:
        # incomesData = incomesData.filter(
