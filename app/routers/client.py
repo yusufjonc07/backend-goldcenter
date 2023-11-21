@@ -40,7 +40,7 @@ async def get_client_one(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        client = db.get(Client, id)
+        client: Client = db.get(Client, id)
         if client:
             return {
                 "id": client.id,
@@ -52,6 +52,7 @@ async def get_client_one(
                 "shopNumber": client.shop.number,
                 "shopArea": client.shop.area,
                 "phoneNumber": client.phoneNumber,
+                "extraPhoneNumber": client.extraPhoneNumber,
                 "balance": client.balance,
                 "monthlyFee": client.monthlyFee,
                 "fileName": client.fileName,

@@ -8,12 +8,12 @@ from app.models.shop import Shop
 
 class Client(Base):
     __tablename__ = "client"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     clientName = Column(String, unique=True)
     chiefName = Column(String, unique=True)
     phoneNumber = Column(Integer)
     inn = Column(String(20))
     extraPhoneNumber = Column(Integer, nullable=True)
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     fileName = Column(Text, nullable=True)
     liablePerson = Column(String(255))
     shopId = Column(Integer, ForeignKey('shop.id'), default=0)
@@ -23,6 +23,8 @@ class Client(Base):
     type = Column(Enum(AgreementType))
     startedAt = Column(Date)
     closedAt = Column(Date, nullable=True)
+    placeName = Column(String, nullable=True)
+    placePrice = Column(Numeric, nullable=True)
 
     UniqueConstraint("clientId", "shopId", "status")
 

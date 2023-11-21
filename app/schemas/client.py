@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 from fastapi import HTTPException
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, Field
 from app.models.client import *
 
 
@@ -20,3 +20,7 @@ class FormClient(BaseModel):
         if values.get('extraPhoneNumber') is not None and len(str(values.get('extraPhoneNumber'))) != 9: raise errMsg
         
         return values
+
+class FormWarehouseClient(BaseModel):
+    placeName: str = Field(..., max_length=10)
+    placePrice: float = Field(..., gt=0)
