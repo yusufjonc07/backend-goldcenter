@@ -19,6 +19,7 @@ def get_all_clients(floorId, status, page, limit, usr, db: Session):
         label('balance', Client.balance),
         label('monthlyFee', Client.monthlyFee),
         label('fileName', Client.fileName),
+        label('type', Client.type),
     ).join(Client.shop)\
     .filter(Client.status==status)
 
