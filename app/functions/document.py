@@ -5,7 +5,7 @@ from app.utils.fileUtil import file_size
 from app.utils.pagination import pagination 
 
 
-async def get_all_documents(search, page, limit, usr, db: Session):
+def get_all_documents(search, page, limit, usr, db: Session):
     
     documents = db.query(Document)
    
@@ -26,10 +26,8 @@ async def get_all_documents(search, page, limit, usr, db: Session):
     data_res = []
 
     for data_one in data_all:
-        
-        data_res.append({
-            'size': await file_size(data_one.fileName, 'documents')
-        })
+        data_one.__dict__['size'] = file_size(data_one.fileName, 'documents')
+        data_res.append(data_one.__dict__)
 
     return {
         "data": data_res,
