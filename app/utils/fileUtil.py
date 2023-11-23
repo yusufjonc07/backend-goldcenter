@@ -1,4 +1,5 @@
 import os
+import math
 from typing import List, Optional
 import uuid
 from anyio import Path
@@ -7,6 +8,11 @@ from fastapi import HTTPException, UploadFile
 from app.schemas.enums import MediaTypes
 from config import ASSETS_URL, CONTENT_TYPES
 
+def file_size(fileName: str, url: str) -> str:
+
+    # save the file
+    dest = os.path.join(os.getcwd(), ASSETS_URL, url, fileName)
+    return round(os.path.getsize(dest) / 1024 * 100) / 100
 
 async def validate_file(file: UploadFile, types: List[MediaTypes], maxSize: float) -> str:
 
