@@ -81,7 +81,9 @@ async def create_new_message(
             db.commit()
             db.refresh(new_message)
 
-            await save_file(fileName, _fileName, f"{new_message.forRole}/{date.year}/{date.month}/{date.day}")
+            dateTime = date.today().strftime("%Y/%m/%d")
+
+            await save_file(fileName, _fileName, f"{new_message.forRole}/{dateTime}")
 
             await manager.send_user(new_message, usr, db)
 
