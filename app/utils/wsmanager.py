@@ -26,9 +26,11 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections = []
 
-    async def connect(self, websocket, user):
+    async def connect(self, websocket: WebSocket, user):
         await websocket.accept()
         self.active_connections.append((websocket, user))
+        await websocket.send_text("Siz WebSocketga Ulandingiz!")
+
 
     async def disconnect(self, websocket: WebSocket):
         for connection in self.active_connections:
