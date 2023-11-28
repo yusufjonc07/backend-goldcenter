@@ -26,8 +26,8 @@ async def get_reports_list(
     
 @report_router.get("/report/index")
 async def get_reports_list(
-    fromDate: Optional[date] = date.today(),
-    toDate: Optional[date] = date.today(),
+    fromDate: Optional[date] = None,
+    toDate: Optional[date] = None,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):   

@@ -9,7 +9,7 @@ from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
 
 
-def get_all_expenses(search, type, employeeId, page, limit, usr, db: Session):
+def get_all_expenses(search, type, fromDate, toDate, employeeId, page, limit, usr, db: Session):
 
     worker_alias = aliased(Employee, name='worker_alias')
 
@@ -31,6 +31,12 @@ def get_all_expenses(search, type, employeeId, page, limit, usr, db: Session):
 
     if employeeId > 0:
         expenses = expenses.filter(Expense.employeeId == employeeId)
+
+    if fromDate and toDate:
+        expenses = expenses.filter(
+            func.date(Expense.createdAt) >= fromDate,
+            func.date(Expense.createdAt) <= toDate,
+        )
 
     # if search:
         # expenses = expenses.filter(

@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.models.expense import *
 from app.functions.expense import *
 from app.schemas.expense import *
+from datetime import date
 
 expense_router = APIRouter(tags=['Kassa Endpoint'])
 
@@ -20,6 +21,8 @@ expense_router = APIRouter(tags=['Kassa Endpoint'])
 async def get_expenses_list(
     search: Optional[str] = "",
     expenseType: Optional[ExpenceTypes] = None,
+    fromDate: Optional[date] = date.today(),
+    toDate: Optional[date] = date.today(),
     employeeId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
@@ -27,7 +30,7 @@ async def get_expenses_list(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_expenses(search, expenseType, employeeId,  page, limit, usr, db)
+        return get_all_expenses(search, expenseType, fromDate, toDate, employeeId,  page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
