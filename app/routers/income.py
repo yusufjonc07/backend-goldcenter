@@ -8,6 +8,7 @@ from app.models.income import *
 from app.functions.income import *
 from app.schemas.income import *
 from app.functions.moneyHistory import get_all_agreement_payments
+from datetime import date
 
 income_router = APIRouter(tags=['Kassa Endpoint'])
 
@@ -15,13 +16,15 @@ income_router = APIRouter(tags=['Kassa Endpoint'])
 @income_router.get("/incomes")
 async def get_agreement_payments(
     clientId: Optional[int] = 0,
+    fromDate: Optional[date] = None,
+    toDate: Optional[date] = None,
     page: int = 1,
     limit: int = 10,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_agreement_payments(clientId, page, limit, usr, db)  
+        return get_all_agreement_payments(clientId, fromDate, toDate, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

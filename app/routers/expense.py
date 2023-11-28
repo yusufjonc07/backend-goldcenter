@@ -21,8 +21,8 @@ expense_router = APIRouter(tags=['Kassa Endpoint'])
 async def get_expenses_list(
     search: Optional[str] = "",
     expenseType: Optional[ExpenceTypes] = None,
-    fromDate: Optional[date] = date.today(),
-    toDate: Optional[date] = date.today(),
+    fromDate: Optional[date] = None,
+    toDate: Optional[date] = None,
     employeeId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,

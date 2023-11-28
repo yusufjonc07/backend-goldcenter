@@ -11,7 +11,7 @@ from app.utils.pagination import pagination
 
 
 
-def get_all_agreement_payments(clientId, page, limit, usr, db):
+def get_all_agreement_payments(clientId, fromDate, toDate, page, limit, usr, db):
    
 
     incomesData = db.query(
@@ -30,6 +30,12 @@ def get_all_agreement_payments(clientId, page, limit, usr, db):
 
     if clientId > 0:
         incomesData = incomesData.filter(Income.clientId == clientId)
+
+    if fromDate and toDate:
+        incomesData = incomesData.filter(
+            func.date(Income.createdAt) >= fromDate,
+            func.date(Income.createdAt) <= toDate,
+        )
 
     # if search:
        # incomesData = incomesData.filter(
