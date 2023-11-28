@@ -5,6 +5,7 @@ from app.models.message import Message
 from app.models.user import User
 from app.models.notification import Notification
 
+
 def get_clean_message_dict(record: Message):
     return {
         "id": record.id,
@@ -30,7 +31,6 @@ class ConnectionManager:
         await websocket.accept()
         self.active_connections.append((websocket, user))
         await websocket.send_text("Siz WebSocketga Ulandingiz!")
-
 
     async def disconnect(self, websocket: WebSocket):
         for connection in self.active_connections:
@@ -64,27 +64,40 @@ class ConnectionManager:
     async def broadcast_json(self, message):
         for connection in self.active_connections:
             websocket, user = connection
-            try: 
+            try:
                 await websocket.send_json(message)
             except WebSocketDisconnect:
                 await self.disconnect(websocket)
 
-    async def send_user(self, message: Message, usr: User, db: Session):
+    async def send_user(self, notification, usr: User, db: Session):
 
-        users = db.query(User.id).filter_by(userRole=message.forRole).all()
+        users = db.query(User.id).filter(
+            User.userRole.in_(notification['roles']),
+            User.id != usr.id, User.disabled == False
+        ).all()
+
         for employee in users:
+            sent = False
             for connection in self.active_connections:
                 websocket, user = connection
                 try:
-
-                    
                     if user.id == employee.id:
-                        await websocket.send_json(get_clean_message_dict(message))
-                        message.isViewed = True
-                        db.commit()
-
+                        await websocket.send_json(notification)
+                        sent = True
                 except WebSocketDisconnect:
                     await self.disconnect(websocket)
+
+            if sent == False:
+                new_notification = Notification(
+                    title=f"{usr.employee.firstname} {usr.employee.firstname}",
+                    body=notification['text'],
+                    imgUrl=notification['imgUrl'],
+                    user_id=employee.id
+                )
+                db.add(new_notification)
+                db.commit()
+
         return
+
 
 manager = ConnectionManager()
