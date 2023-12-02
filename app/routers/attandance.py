@@ -1,4 +1,6 @@
-from fastapi import HTTPException, APIRouter, Depends
+from datetime import datetime
+import json
+from fastapi import HTTPException, APIRouter, Depends, Request
 from typing import Optional
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
@@ -45,3 +47,43 @@ async def update_one_attandance(
         return update_attandance(id, form_data, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+@attandance_router.post("/attandance/face-id", include_in_schema=False)
+async def get_attandance_users_list(
+    req: Request,
+    db:Session = ActiveSession,
+):   
+    
+    try:
+        data  = await req.body()
+        data_str = data.decode()
+        data_str = data_str.split("\n",3)[3]
+        data_str = data_str[:-20]
+
+        # with open(f"{uuid.uuid4()}.json", "w") as f:
+        #     f.write(data_str)
+        
+        data_dict = json.loads(data_str)
+        AccessControllerEvent = data_dict['AccessControllerEvent']
+        user_id = AccessControllerEvent['employeeNoString']
+        attendanceStatus = AccessControllerEvent['attendanceStatus']
+        deviceName = AccessControllerEvent['deviceName']
+
+       
+
+        date_str = data_dict['dateTime']
+        date_obj = datetime.fromisoformat(date_str[:-6])  # remove timezone offset
+        formatted_date = date_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+        if attendanceStatus == 'checkIn':
+            type = 'entry'
+        else:
+            type = 'exit'
+
+        if attendanceStatus:
+
+            await makeDavomat(user_id, type, formatted_date, deviceName, db)
+
+            return "success"
+    except Exception as e:
+        print(e.args)
