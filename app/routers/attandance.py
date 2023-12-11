@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 from fastapi import HTTPException, APIRouter, Depends, Request
-from typing import Optional
+from typing import Optional, List
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -27,12 +27,14 @@ async def get_attandances_list(
 
 @attandance_router.post("/attandance/create", description="This router is able to add new attandance")
 async def create_new_attandance(
-    form_data: NewAttandance,
+    form_datas: List[NewAttandance],
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return create_attandance(form_data, usr, db)
+        for form_data in form_datas:
+            makeDavomat(form_data.employeeId, form_data.type, form_data.created_at, usr.employee.name, db)
+        return 'success'
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -86,4 +88,4 @@ async def get_attandance_users_list(
 
             return "success"
     except Exception as e:
-        print(e.args)
+        print('xatolik')

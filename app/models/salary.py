@@ -4,14 +4,12 @@ from sqlalchemy.orm import relationship, backref
 from app.models.employee import * 
 
 
-class Attandance(Base):
-    __tablename__ = "attandance"
+class Salary(Base):
+    __tablename__ = "salary"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    type = Column(String)
     employeeId = Column(Integer, ForeignKey('employee.id'), default=0)
-    workTime = Column(String, default='')
-    authorizator = Column(Integer, default=0)
-    created_at = Column(TIMESTAMP, default=func.now())
+    calcWage = Column(Numeric, default=0)
+    createdAt = Column(DateTime, default=func.now())
 
-    employee = relationship('Employee', backref='attandances', lazy='joined')
+    employee = relationship('Employee', backref='salarys', lazy='joined')
 

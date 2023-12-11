@@ -3,8 +3,10 @@ from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.attandance import *
+from app.models.salary import *
 from app.schemas.attandance import *
 from app.utils.pagination import pagination
+from datetime import date, datetime
 
 
 def get_all_attandances(search, page, limit, usr, db: Session):
@@ -17,25 +19,6 @@ def get_all_attandances(search, page, limit, usr, db: Session):
     # )
 
     return pagination(attandances, page, limit)
-
-
-def create_attandance(form_data: NewAttandance, usr, db: Session):
-
-    try:
-        new_attandance = Attandance(
-            type=form_data.type,
-            employeeId=form_data.employeeid,
-            workTime=form_data.worktime,
-            authorizator=form_data.authorizator,
-            created_at=form_data.created_at,
-        )
-
-        db.add(new_attandance)
-        db.commit()
-
-        raise HTTPException(200, "Ma`lumotlar saqlandi!")
-    except IntegrityError as e:
-        raise HTTPException(400, e.args)
 
 
 def update_attandance(id, form_data: UpdateAttandance, usr, db: Session):
@@ -71,14 +54,11 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
 
     error = workTime = 0
 
-    
-
     dav_type = 'entry'
     if type == 'any':
         if last_davomat:
             if last_davomat.type == 'entry':
                 dav_type = 'exit'
-               
 
     elif type == 'entry':
 
@@ -98,6 +78,26 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
             error += 1
 
     if error == 0:
+
+        attandance_count = db.query(func.count(Attandance.id)).filter(
+            func.year(Attandance.created_at) == datetime.strptime(
+                dateTime, "%Y"),
+            func.month(Attandance.created_at) == datetime.strptime(
+                dateTime, "%m"),
+            Attandance.employeeId == employee.id,
+            Attandance.type == 'entry',
+        ).count()
+
+        if attandance_count == 0:
+            new_salary = Salary(
+                employeeId=employee.id,
+                calcWage=employee.salaryQuantity,
+                createdAt=dateTime,
+            )
+
+            db.add(new_salary)
+        
+
         new_attandance = Attandance(
             type=dav_type,
             employeeId=employee.id,

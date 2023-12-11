@@ -34,6 +34,7 @@ async def get_employees_list(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
+
 @employee_router.get("/employee/roles")
 async def get_employees_roles(
     db: Session = ActiveSession,
