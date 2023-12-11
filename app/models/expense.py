@@ -21,7 +21,7 @@ class Expense(Base):
     branchId = Column(Integer, ForeignKey('branch.id'), nullable=False)
     comment = Column(String(255))
     userId = Column(Integer, ForeignKey('user.id'), nullable=False)
-    fileName = Column(Text, nullable=False)
+    fileName = Column(Text, nullable=True)
     createdAt = Column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
     
 

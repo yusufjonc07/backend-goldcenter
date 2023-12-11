@@ -10,7 +10,7 @@ from app.utils.pagination import pagination
 from sqlalchemy.sql import label, distinct
 
 
-def get_all_salarys(search, year, month,  usr, db: Session, employeeId=0):
+def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
 
     # how many days employee attandanded in a month
     attandance_count = db.query(func.count(distinct(func.date(Attandance.created_at)))).filter(
@@ -34,6 +34,7 @@ def get_all_salarys(search, year, month,  usr, db: Session, employeeId=0):
         label("employeeName", func.concat(Employee.firstname, ' ', Employee.lastname)),
         label("attandanceCount", attandance_count),
         label("calcWage", Salary.calcWage),
+        label("isConfirmed", Salary.isConfirmed),
         label("salaryAdvance", func.coalesce(advance_sum, 0)),
     ).join(Salary.employee).filter(
         func.year(Salary.createdAt) == year,
@@ -52,7 +53,7 @@ def get_all_salarys(search, year, month,  usr, db: Session, employeeId=0):
 
     return salarys.all()
 
-def pay_all_salarys(salariesId: list, usr, db):
+def pay_all_salarys(salariesId: list, moneyFormId: int, usr, db):
     for salaryId in salariesId:
 
         salary: Salary = db.get(Salary, salaryId)
@@ -64,44 +65,23 @@ def pay_all_salarys(salariesId: list, usr, db):
             Expense.type=='salary',
         ).scalar()
 
-        
-        
-        # how many 
-
-        if not salary:
+        if not salary or salary.isConfirmed == True:
             raise HTTPException(400, "Bu oy uchun yozilgan maosh topilmadi")
+        elif salary.calcWage > advance_sum:
+            raise HTTPException(400, "Oylik maosh to'liq to'lanmadi")
         else:
 
             employee = salary.employee
-            if salary.calcWage > advance_sum:
-                value = salary.calcWage - advance_sum
-                # new_expense = Expense(
-                #     type=type,
-                #     employeeId=employee.id,
-                #     value=value,
-                #     moneyFormId=moneyFormId,
-                #     floorId=floorId if floorId > 0 else None,
-                #     branchId=usr.branchId,
-                #     comment=comment,
-                #     userId=usr.id,
-                #     fileName=fileName,
-                # )
-                db.add(new_expense)
-
-
-                employee.balance -= value
-
             employee.balance += salary.calcWage
+            salary.isConfirmed = True
             
-
-            
-            db.commit()
+    db.commit()
 
 
 def update_salary(id, form_data: UpdateSalary, usr, db: Session):
 
     try:
-        salary = db.query(Salary).filter(Salary.id == id)
+        salary = db.query(Salary).filter(Salary.id == id, Salary.isConfirmed==False)
         this_salary = salary.first()
         if this_salary:
             salary.update({
