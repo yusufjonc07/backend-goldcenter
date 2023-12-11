@@ -9,6 +9,7 @@ class Salary(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     employeeId = Column(Integer, ForeignKey('employee.id'), default=0)
     calcWage = Column(Numeric, default=0)
+    isConfirmed = Column(Boolean, default=False)
     createdAt = Column(DateTime, default=func.now())
 
     employee = relationship('Employee', backref='salarys', lazy='joined')

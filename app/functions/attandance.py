@@ -79,11 +79,13 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
 
     if error == 0:
 
-        attandance_count = db.query(func.count(Attandance.id)).filter(
-            func.year(Attandance.created_at) == datetime.strptime(
-                dateTime, "%Y"),
-            func.month(Attandance.created_at) == datetime.strptime(
-                dateTime, "%m"),
+        yearMonth = datetime.strptime(dateTime, "%Y-%m-%d %H:%M:%S")
+
+        print(dateTime)
+
+        attandance_count = db.query(Attandance).filter(
+            func.year(Attandance.created_at) == yearMonth.year,
+            func.month(Attandance.created_at) == yearMonth.month,
             Attandance.employeeId == employee.id,
             Attandance.type == 'entry',
         ).count()

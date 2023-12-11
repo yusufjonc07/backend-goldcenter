@@ -33,7 +33,7 @@ async def create_new_attandance(
 ):
     if not usr.userRole in ['any_role']:
         for form_data in form_datas:
-            makeDavomat(form_data.employeeId, form_data.type, form_data.created_at, usr.employee.name, db)
+            await makeDavomat(form_data.employeeId, form_data.type, form_data.created_at, usr.employee.fullname(), db)
         return 'success'
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

@@ -1,5 +1,5 @@
-from fastapi import HTTPException, APIRouter, Depends
-from typing import Optional
+from fastapi import HTTPException, APIRouter, Depends, Body
+from typing import Optional, List
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -8,7 +8,7 @@ from app.models.salary import *
 from app.functions.salary import *
 from app.schemas.salary import *
 
-salary_router = APIRouter(tags=['Salary Endpoint'])
+salary_router = APIRouter(tags=['Maoshlar Endpoint'])
 
 @salary_router.get("/salaries", description="This router returns list of the salarys using pagination")
 async def get_salarys_list(
@@ -23,6 +23,17 @@ async def get_salarys_list(
         return get_all_salarys(search, year, month, usr, db, employeeId)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
+    
+@salary_router.post("/salaries/pay")
+async def get_salarys_list(
+    salariesId: List[int] = Body(...),
+    db:Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):   
+    if not usr.userRole in ['any_role']:
+        return pay_all_salarys(salariesId, usr, db)  
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
 @salary_router.put("/salary/{id}/update", description="This router is able to update salary")

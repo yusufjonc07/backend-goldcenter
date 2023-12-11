@@ -7,20 +7,20 @@ from app.models.attandance import *
 from app.schemas.salary import *
 from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
-from sqlalchemy.sql import label
-
+from sqlalchemy.sql import label, distinct
 
 
 def get_all_salarys(search, year, month,  usr, db: Session, employeeId=0):
 
-
-    attandance_count = db.query(func.count(Attandance.id)).filter(
-        func.year(Attandance.created_at)==year,
-        func.month(Attandance.created_at)==month,
-        Attandance.employeeId==Salary.employeeId,
+    # how many days employee attandanded in a month
+    attandance_count = db.query(func.count(distinct(func.date(Attandance.created_at)))).filter(
+        func.year(Attandance.created_at) == year,
+        func.month(Attandance.created_at) == month,
+        Attandance.employeeId == Salary.employeeId,
         Attandance.type == 'entry',
-    ).group_by(func.date(Attandance.created_at)).subquery()
+    ).group_by(Attandance.employeeId).subquery()
 
+    # how many salary advance employee received in a month
     advance_sum = db.query(func.sum(Expense.value)).filter(
         func.year(Expense.createdAt)==year,
         func.month(Expense.createdAt)==month,
@@ -35,9 +35,7 @@ def get_all_salarys(search, year, month,  usr, db: Session, employeeId=0):
         label("attandanceCount", attandance_count),
         label("calcWage", Salary.calcWage),
         label("salaryAdvance", func.coalesce(advance_sum, 0)),
-    ).join(Salary.employee)
-
-    salarys = salarys.filter(
+    ).join(Salary.employee).filter(
         func.year(Salary.createdAt) == year,
         func.month(Salary.createdAt) == month,
     )
@@ -53,6 +51,51 @@ def get_all_salarys(search, year, month,  usr, db: Session, employeeId=0):
         )
 
     return salarys.all()
+
+def pay_all_salarys(salariesId: list, usr, db):
+    for salaryId in salariesId:
+
+        salary: Salary = db.get(Salary, salaryId)
+        # how many salary advance employee received in a month
+        advance_sum = db.query(func.sum(Expense.value)).filter(
+            func.year(Expense.createdAt)==func.year(salary.createdAt),
+            func.month(Expense.createdAt)==func.month(salary.createdAt),
+            Expense.employeeId==salary.employeeId,
+            Expense.type=='salary',
+        ).scalar()
+
+        
+        
+        # how many 
+
+        if not salary:
+            raise HTTPException(400, "Bu oy uchun yozilgan maosh topilmadi")
+        else:
+
+            employee = salary.employee
+            if salary.calcWage > advance_sum:
+                value = salary.calcWage - advance_sum
+                # new_expense = Expense(
+                #     type=type,
+                #     employeeId=employee.id,
+                #     value=value,
+                #     moneyFormId=moneyFormId,
+                #     floorId=floorId if floorId > 0 else None,
+                #     branchId=usr.branchId,
+                #     comment=comment,
+                #     userId=usr.id,
+                #     fileName=fileName,
+                # )
+                db.add(new_expense)
+
+
+                employee.balance -= value
+
+            employee.balance += salary.calcWage
+            
+
+            
+            db.commit()
 
 
 def update_salary(id, form_data: UpdateSalary, usr, db: Session):
@@ -70,4 +113,4 @@ def update_salary(id, form_data: UpdateSalary, usr, db: Session):
         else:
             raise HTTPException(status_code=400, detail="So`rovda xatolik!")
     except IntegrityError as e:
-        raise HTTPException(400, e.args)
+        raise integrityHandler(e)
