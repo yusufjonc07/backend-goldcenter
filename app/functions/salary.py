@@ -65,6 +65,9 @@ def pay_all_salarys(salariesId: list, moneyFormId: int, usr, db):
             Expense.type=='salary',
         ).scalar()
 
+        if not advance_sum:
+            advance_sum = 0
+
         if not salary or salary.isConfirmed == True:
             raise HTTPException(400, "Bu oy uchun yozilgan maosh topilmadi")
         elif salary.calcWage > advance_sum:
