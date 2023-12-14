@@ -26,13 +26,12 @@ async def get_salarys_list(
     
 @salary_router.post("/salaries/pay")
 async def get_salarys_list(
-    moneyFormId: int,
-    salariesId: List[int] = Body(...),
+    salariesIds: SalaryIdList,
     db:Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):   
     if not usr.userRole in ['any_role']:
-        return pay_all_salarys(salariesId, moneyFormId, usr, db)  
+        return pay_all_salarys(salariesIds, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

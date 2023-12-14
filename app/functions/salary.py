@@ -53,7 +53,7 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
 
     return salarys.all()
 
-def pay_all_salarys(salariesId: list, moneyFormId: int, usr, db):
+def pay_all_salarys(salariesId: list, usr, db):
     for salaryId in salariesId:
 
         salary: Salary = db.get(Salary, salaryId)
