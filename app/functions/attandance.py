@@ -1,7 +1,7 @@
 import math
 from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql import label
+from sqlalchemy.sql import label, or_
 from fastapi import HTTPException
 from app.models.attandance import *
 from app.models.salary import *
@@ -25,7 +25,7 @@ def get_all_attandances(search, page, limit, usr, db: Session):
 
 
 
-def get_attended_employees(search, page, limit, usr, db: Session):
+def get_attended_employees(search, aDate, page, limit, usr, db: Session):
 
     attandanded_employees = db.query(
         label('employeeId', Employee.id),
@@ -35,12 +35,15 @@ def get_attended_employees(search, page, limit, usr, db: Session):
         label('workEndTime', Shift.workEndTime),
         label('date', func.date(Attandance.created_at)),
     ).select_from(Employee).join(Employee.shift).join(Employee.attandances)\
-    .group_by(func.date(Attandance.created_at))
+    .filter(func.date(Attandance.created_at)==aDate)
 
-    # if search:
-    #   attandances = attandances.filter(
-    #   Attandance.id.like(f"%{search}%"),
-    # )
+    if search:
+        attandances = attandances.filter(
+            or_(
+                Employee.firstname.like(f"%{search}%"),
+                Employee.lastname.like(f"%{search}%"),
+            )
+        )
 
     return pagination(attandanded_employees, page, limit)
 

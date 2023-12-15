@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 import json
 from fastapi import HTTPException, APIRouter, Depends, Request
 from typing import Optional, List
@@ -14,6 +14,7 @@ attandance_router = APIRouter(tags=['Davomat Endpoint'])
 
 @attandance_router.get("/attandances", description="This router returns list of the attandances using pagination")
 async def get_attandances_list(
+    aDate: date,
     search: Optional[str] = "",
     page: int = 1,
     limit: int = 10,
@@ -21,7 +22,7 @@ async def get_attandances_list(
     usr: NewUser = Depends(get_current_active_user)
 ):   
     if not usr.userRole in ['any_role']:
-        return get_attended_employees(search, page, limit, usr, db)  
+        return get_attended_employees(search, aDate, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
 
