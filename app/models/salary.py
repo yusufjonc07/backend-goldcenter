@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from sqlalchemy import Column, Date, Integer, Numeric, text, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.employee import * 

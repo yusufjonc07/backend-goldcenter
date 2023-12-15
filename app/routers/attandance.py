@@ -21,7 +21,7 @@ async def get_attandances_list(
     usr: NewUser = Depends(get_current_active_user)
 ):   
     if not usr.userRole in ['any_role']:
-        return get_all_attandances(search, page, limit, usr, db)  
+        return get_attended_employees(search, page, limit, usr, db)  
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
 

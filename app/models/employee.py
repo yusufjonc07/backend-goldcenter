@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship, backref
 from app.models.branch import * 
 from app.models.shift import * 
 from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy.ext.hybrid import hybrid_method
 
 class Employee(Base):
     __tablename__ = "employee"
@@ -26,6 +27,10 @@ class Employee(Base):
 
     def fullname(self):
         return f"{self.firstname} {self.lastname}"
+
+    @hybrid_property
+    def _fullname(self):
+        return func.concat(self.firstname, ' ', self.lastname)
     
     UniqueConstraint('firstname', 'lastname')
     
