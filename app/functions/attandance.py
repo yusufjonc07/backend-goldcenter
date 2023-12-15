@@ -30,6 +30,7 @@ def get_attended_employees(search, page, limit, usr, db: Session):
     attandanded_employees = db.query(
         label('employeeId', Employee.id),
         label('employeeName', Employee._fullname),
+        label('role', Employee.role),
         label('workBeginTime', Shift.workBeginTime),
         label('workEndTime', Shift.workEndTime),
         label('date', func.date(Attandance.created_at)),

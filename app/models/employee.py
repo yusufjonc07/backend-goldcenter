@@ -1,5 +1,6 @@
 from enum import unique
 from sqlalchemy import Column, UniqueConstraint, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from app.schemas.enums import DEPARTMENT_LABELS
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.branch import * 
@@ -31,6 +32,10 @@ class Employee(Base):
     @hybrid_property
     def _fullname(self):
         return func.concat(self.firstname, ' ', self.lastname)
+    
+    @hybrid_property
+    def _department(self):
+        return DEPARTMENT_LABELS[self.role]
     
     UniqueConstraint('firstname', 'lastname')
     

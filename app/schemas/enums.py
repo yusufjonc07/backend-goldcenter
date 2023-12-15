@@ -24,6 +24,18 @@ ROLE_LABELS = {
     'clerk': 'Pattachi',
 }
 
+DEPARTMENT_LABELS = {
+    "director": "Boshqaruv",
+    "accountant": 'Buxgalteriya',
+    'headConstructor': 'Xo\'jalik',
+    'constructor': 'Xo\'jalik',
+    'guard': 'Qorovul',
+    'headGuard': 'Xavfsizlik',
+    'headCleaner': 'Tozalik',
+    'cleaner': 'Tozalik',
+    'clerk': 'Buxgalteriya',
+}
+
 
 class EmployeeRoles(str, Enum):
     director = "director"
