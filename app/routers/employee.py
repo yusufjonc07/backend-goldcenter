@@ -4,6 +4,7 @@ import os
 import uuid
 from fastapi import Body, File, Form, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional
+from app.functions.attandance import employee_attandances
 from app.models.user import User
 from app.schemas.enums import ROLE_LABELS, ROLES, EmployeeRoles
 from app.schemas.user import NewUser
@@ -75,6 +76,19 @@ async def get_employee_details(
             .filter_by(id=id).first()
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+    
+@employee_router.get("/employee/{id}/attandances", description="This router returns list of the monthly attandances  of certain employee using pagination")
+async def get_attandances_list(
+    id: int,
+    year: int,
+    month: int,
+    db:Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):   
+    if not usr.userRole in ['any_role']:
+        return employee_attandances(id, year, month, db)  
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!") 
 
 
 @employee_router.post("/employee/create", description="This router is able to add new employee")

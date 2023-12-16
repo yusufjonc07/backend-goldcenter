@@ -1,4 +1,4 @@
-import math
+import calendar
 from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import label, or_
@@ -8,7 +8,7 @@ from app.models.salary import *
 from app.schemas.attandance import *
 from app.utils.pagination import pagination
 from datetime import date, datetime
-
+from app.utils.handler import integrityHandler
 
 def get_all_attandances(search, page, limit, usr, db: Session):
 
@@ -58,6 +58,36 @@ def get_attended_employees(search, aDate, page, limit, usr, db: Session):
     result['data'] = new_data
 
     return result
+
+def employee_attandances(id, year, month, db: Session):
+    try:
+        
+        days_count = calendar.monthrange(year, month)[1]
+
+        attandances = db.query(
+            func.count(Attandance.id).label('count'), 
+            func.day(Attandance.created_at).label('day')
+        ).filter(
+            func.year(Attandance.created_at)==year,
+            func.month(Attandance.created_at)==month,
+            Attandance.type == 'checkIn',
+            Attandance.employeeId == id
+        ).group_by(func.day(Attandance.created_at)).all()
+        
+        days = []
+
+        for day in range(1, days_count+1):
+            status = False
+            for attd in attandances:
+                if attd.day == day and attd.count > 0:
+                    status = True
+
+            days.append(status)
+
+        return days
+
+    except IntegrityError as e:
+        integrityHandler(e) 
 
 def update_attandance(id, form_data: UpdateAttandance, usr, db: Session):
 
