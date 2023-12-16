@@ -23,8 +23,6 @@ def get_all_attandances(search, page, limit, usr, db: Session):
     return pagination(attandances, page, limit)
 
 
-
-
 def get_attended_employees(search, aDate, page, limit, usr, db: Session):
 
     attandanded_employees = db.query(
@@ -33,20 +31,33 @@ def get_attended_employees(search, aDate, page, limit, usr, db: Session):
         label('role', Employee.role),
         label('workBeginTime', Shift.workBeginTime),
         label('workEndTime', Shift.workEndTime),
-        label('date', func.date(Attandance.created_at)),
     ).select_from(Employee).join(Employee.shift).join(Employee.attandances)\
     .filter(func.date(Attandance.created_at)==aDate)
 
     if search:
-        attandances = attandances.filter(
+        attandanded_employees = attandanded_employees.filter(
             or_(
                 Employee.firstname.like(f"%{search}%"),
                 Employee.lastname.like(f"%{search}%"),
             )
         )
 
-    return pagination(attandanded_employees, page, limit)
+    result = pagination(attandanded_employees, page, limit)
+    new_data = []
 
+    for employee in result['data']:
+        new_attandances = dict(employee)
+        new_attandances['attandances'] = db.query(Attandance).filter(
+            func.date(Attandance.created_at)==aDate,
+            Attandance.employeeId==employee.employeeId
+        ).order_by(Attandance.created_at.asc()).all()
+
+
+        new_data.append(new_attandances)
+
+    result['data'] = new_data
+
+    return result
 
 def update_attandance(id, form_data: UpdateAttandance, usr, db: Session):
 

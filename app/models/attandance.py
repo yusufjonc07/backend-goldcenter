@@ -13,5 +13,5 @@ class Attandance(Base):
     authorizator = Column(Integer, default=0)
     created_at = Column(TIMESTAMP, default=func.now())
 
-    employee = relationship('Employee', backref='attandances', lazy='joined')
+    employee = relationship('Employee', backref='attandances')
 
