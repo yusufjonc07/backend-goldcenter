@@ -24,6 +24,16 @@ async def get_tasks_list(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+@task_router.get("/notifications")
+async def get_notifications_list(
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return get_all_notifications(usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 @task_router.get("/tasks")
 async def get_tasks_list(
     search: Optional[str] = "",

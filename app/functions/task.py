@@ -46,6 +46,9 @@ def get_all_tasks_roles(usr, db: Session):
 
     return roles
 
+def get_all_notifications(usr:User, db: Session):
+    return db.query(Notification).options(joinedload(Notification.task)).filter_by(user_id=usr.id).all()
+
 def make_view_task(id:int, db: Session):
     db.query(Notification).filter_by(task_id=id, isViewed=False).update({Notification.isViewed:True})
     db.commit()

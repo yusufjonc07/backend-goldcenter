@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.document import *
 from app.functions.document import *
+from app.utils.wsmanager import manager
+
 
 document_router = APIRouter(tags=['Document Endpoint'])
 
@@ -48,6 +50,7 @@ async def create_new_document(
             db.commit()
 
             await save_file(fileName, fileName.filename, 'documents')
+            await manager.send_user(fileName.filename, ['accountant', 'director'], 'document', None, usr, db)
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:

@@ -73,7 +73,8 @@ class ConnectionManager:
 
         users = db.query(User.id).filter(
             User.userRole.in_(for_roles),
-            User.disabled == False
+            User.disabled == False,
+            User.id != usr.id
         ).all()
 
         nots = []
@@ -90,10 +91,8 @@ class ConnectionManager:
             db.refresh(new_notification)
             nots.append(new_notification)
 
-
-
         for not_one in nots:
-       
+
             for connection in self.active_connections:
                 websocket, user = connection
 
@@ -103,7 +102,6 @@ class ConnectionManager:
                         not_one.isSend = True
                 except WebSocketDisconnect:
                     await self.disconnect(websocket)
-
 
         db.commit()
 
