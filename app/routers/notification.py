@@ -42,13 +42,11 @@ async def websocket_endpoint(
     try:
 
         if user:
-            nots = db.query(Message).filter_by(forRole=user.userRole, isViewed=False).all()
-            for msg in nots:
-                await manager.send_personal_json(msg, (websocket, user))
+            unSendNotifications = db.query(Notification).filter_by(user_id=user.id, isSend=False)
+            for notifyOne in unSendNotifications.all():
+                await manager.send_personal_json(notifyOne, (websocket, user))
+                notifyOne.isSend = True
 
-            db.query(Message).filter_by(forRole=user.userRole, isViewed=False).update({
-                    Message.isViewed: True
-            })
             db.commit()
 
         while True:

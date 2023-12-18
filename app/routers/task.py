@@ -47,24 +47,20 @@ async def create_new_task(
     fileName: Optional[UploadFile] = File(...),
     context: Optional[str] = Body(...),
     forRole: ChatTypes = Body(...),
-    branchId: Optional[int] = Body(...),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['any_role']:
+    if not usr.userRole in ['director', 'accountant', 'clerk']:
         try:
 
-            if fileName:
-                _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
-            else:
-                _fileName = None
+            _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
 
             new_task = Task(
                 fileName=_fileName,
                 context=context,
-                userId=usr.id,
+                employeeId=usr.employeeId,
                 forRole=forRole,
-                branchId=branchId,
+                branchId=usr.branchId,
             )
 
             db.add(new_task)
@@ -74,7 +70,43 @@ async def create_new_task(
             dateTime = date.today().strftime("%Y/%m/%d")
 
             await save_file(fileName, _fileName, f"{new_task.forRole}/{dateTime}")
-            await manager.send_user(new_task, usr, db)
+            await manager.send_user(new_task.context, [new_task.forRole], 'task', usr, db)
+
+            raise HTTPException(200, "Ma`lumotlar saqlandi!")
+        except IntegrityError as e:
+            raise integrityHandler(e)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+    
+@task_router.post("/task/{id}/complete")
+async def complete_task(
+    id: int,
+    responseFileName: Optional[UploadFile] = File(...),
+    responseText: Optional[str] = Body(...),
+    responseType: TaskTypes = Body(...),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['director', 'accountant', 'clerk']:
+        try:
+
+            _task = db.query(Task).filter_by(id=id, forRole=usr.role, responseEmployeeId=None).first()
+            if not _task:
+                raise HTTPException(400, 'Ushbu vazifa uchun siz javobgar emassiz!')
+
+            _fileName = await validate_file(responseFileName, ['document', 'image', 'audio', 'video'], 3)
+
+            _task.responseFileName = _fileName
+            _task.responseText = responseText
+            _task.responseEmployeeId = usr.employeeId
+            _task.completedAt = func.now()
+
+            db.commit()
+
+            dateTime = date.today().strftime("%Y/%m/%d")
+
+            await save_file(responseFileName, _fileName, f"{_task.forRole}/{dateTime}")
+            await manager.send_user(_task.responseText, [_task.employee.role], 'task', usr, db)
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:

@@ -73,6 +73,10 @@ class TaskTypes(str, Enum):
     negative = "negative"
     positive = "positive"
 
+class NotificationTypes(str, Enum):
+    task = "task"
+    document = "document"
+
 
 class ExpenceTypes(str, Enum):
     salary = "salary"

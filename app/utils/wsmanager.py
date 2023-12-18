@@ -1,24 +1,19 @@
 from tokenize import Triple
+from typing import List
 from fastapi import WebSocket, WebSocketException, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from app.models.task import Task
 from app.models.user import User
 from app.models.notification import Notification
+from app.schemas.enums import NotificationTypes, UserRoles
 
 
-def get_clean_message_dict(record: Task):
+def get_json(record: Notification):
     return {
         "id": record.id,
-        "context": str(record.context),
-        "fileName": str(record.fileName),
+        "context": record.context,
+        "type": record.type,
         "isViewed": record.isViewed,
-        "userId": record.userId,
-        "forRole": str(record.forRole),
-        "branchId": record.branchId,
-        "replyId": record.replyId,
-        "createdAt": str(record.createdAt),
-        "updated_at": str(record.updated_at),
-        "employeeName": str(record.user.employee.fullname())
     }
 
 
@@ -30,7 +25,6 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, user):
         await websocket.accept()
         self.active_connections.append((websocket, user))
-        await websocket.send_text("Siz WebSocketga Ulandingiz!")
 
     async def disconnect(self, websocket: WebSocket):
         for connection in self.active_connections:
@@ -48,7 +42,7 @@ class ConnectionManager:
     async def send_personal_json(self, message, connection):
         websocket, user = connection
         try:
-            await websocket.send_json(get_clean_message_dict(message))
+            await websocket.send_json(get_json(message))
 
         except WebSocketDisconnect:
             await self.disconnect(websocket)
@@ -69,33 +63,46 @@ class ConnectionManager:
             except WebSocketDisconnect:
                 await self.disconnect(websocket)
 
-    async def send_user(self, notification, usr: User, db: Session):
+    async def send_user(
+            self, context: str,
+            for_roles: List[UserRoles],
+            type: NotificationTypes,
+            usr: User, db: Session):
 
         users = db.query(User.id).filter(
-            User.userRole.in_(notification['roles']),
-            User.id != usr.id, User.disabled == False
+            User.userRole.in_(for_roles),
+            User.disabled == False
         ).all()
 
-        for employee in users:
-            sent = False
+        nots = []
+
+        for user in users:
+            new_notification = Notification(
+                context=context,
+                user_id=user.id,
+                type=type
+            )
+            db.add(new_notification)
+            db.commit()
+            db.refresh(new_notification)
+            nots.append(new_notification)
+
+
+
+        for not_one in nots:
+       
             for connection in self.active_connections:
                 websocket, user = connection
+
                 try:
-                    if user.id == employee.id:
-                        await websocket.send_json(notification)
-                        sent = True
+                    if user.id == not_one.user_id:
+                        await websocket.send_json(get_json(not_one))
+                        not_one.isSend = True
                 except WebSocketDisconnect:
                     await self.disconnect(websocket)
 
-            if sent == False:
-                new_notification = Notification(
-                    title=f"{usr.employee.firstname} {usr.employee.firstname}",
-                    body=notification['text'],
-                    imgUrl=notification['imgUrl'],
-                    user_id=employee.id
-                )
-                db.add(new_notification)
-                db.commit()
+
+        db.commit()
 
         return
 

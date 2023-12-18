@@ -13,14 +13,9 @@ CHAT_ROLES = ["headConstructor", "headGuard", "headCleaner", "accountant"]
 
 def get_all_tasks(search, isOnlyUnread, page, limit, usr, db: Session):
 
-    givingUser = aliased(User)
-    takingUser = aliased(User)
-
     tasks = db.query(Task).options(
-        joinedload(givingUser, Task.user).options(
-            joinedload(givingUser.employee)),
-        # joinedload(Task.responseUser, takingUser).options(
-        #     joinedload(takingUser.employee)),
+        joinedload(Task.employee),
+        joinedload(Task.responseEmployee),
     )
 
     return pagination(tasks, page, limit)
