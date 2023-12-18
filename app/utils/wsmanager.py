@@ -1,12 +1,12 @@
 from tokenize import Triple
 from fastapi import WebSocket, WebSocketException, WebSocketDisconnect
 from sqlalchemy.orm import Session
-from app.models.task import Message
+from app.models.task import Task
 from app.models.user import User
 from app.models.notification import Notification
 
 
-def get_clean_message_dict(record: Message):
+def get_clean_message_dict(record: Task):
     return {
         "id": record.id,
         "context": str(record.context),

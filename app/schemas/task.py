@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from app.models.task import *
+from app.schemas.enums import TaskTypes
 
 class NewTask(BaseModel):
     context: str

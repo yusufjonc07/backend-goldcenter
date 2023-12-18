@@ -91,7 +91,7 @@ async def remove_tasks(
 ):
 
     try:
-        db.query(task).filter(task.id.in_(ids), task.userId == usr.id).delete()
+        db.query(Task).filter(Task.id.in_(ids), Task.userId == usr.id).delete()
         db.commit()
         return HTTPException(200, 'O\'chirildi!')
     except IntegrityError as e:

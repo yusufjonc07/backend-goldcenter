@@ -13,17 +13,17 @@ CHAT_ROLES = ["headConstructor", "headGuard", "headCleaner", "accountant"]
 
 def get_all_tasks(search, isOnlyUnread, page, limit, usr, db: Session):
 
-    givingEmployee = aliased(Employee)
-    takingEmployee = aliased(Employee)
+    givingUser = aliased(User)
+    takingUser = aliased(User)
 
     tasks = db.query(Task).options(
-        joinedload(Task.user, givingEmployee).options(
-            joinedload(givingEmployee.employee)),
-        joinedload(Task.responseUser, takingEmployee).options(
-            joinedload(takingEmployee.employee)),
+        joinedload(givingUser, Task.user).options(
+            joinedload(givingUser.employee)),
+        # joinedload(Task.responseUser, takingUser).options(
+        #     joinedload(takingUser.employee)),
     )
 
-    return pagination(tasks, page, limit, db)
+    return pagination(tasks, page, limit)
 
 
 def create_task(form_data: NewTask, usr: User, db: Session):
