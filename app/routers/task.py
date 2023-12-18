@@ -1,5 +1,4 @@
 from datetime import date
-import uuid
 from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
 from typing import Optional, List
 from app.schemas.user import NewUser
@@ -7,16 +6,17 @@ from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
-from sqlalchemy.orm import joinedload, Session
-from app.models.message import *
-from app.functions.message import *
-from app.schemas.message import *
+from sqlalchemy.orm import Session
+from app.models.task import *
+from app.functions.task import *
+from app.schemas.task import *
 from app.utils.wsmanager import manager
 
-message_router = APIRouter(tags=['Xabar Endpoint'])
+task_router = APIRouter(tags=['Xabar Endpoint'])
 
-@message_router.get("/messages")
-async def get_messages_list(
+
+@task_router.get("/tasks")
+async def get_tasks_list(
     isOnlyUnread: Optional[bool] = False,
     search: Optional[str] = "",
     forRole: ChatTypes = 'headCleaner',
@@ -26,29 +26,27 @@ async def get_messages_list(
     usr: NewUser = Depends(get_current_active_user)
 ):
     '''
-    
+
     `{
         'accountant': 'Bugxalteriya',
         'headConstructor': 'Xo\'jalik bo\'limi',
         'headGuard': 'Xavfsizlik bo\'limi',
         'headCleaner': 'Tozalik bo\'limi'
     }`
-    
+
     '''
 
     if not usr.userRole in ['any_role']:
-        return get_all_messages(search, isOnlyUnread, page, limit, usr, db)
+        return get_all_tasks(search, isOnlyUnread, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
-@message_router.post("/message/create")
-async def create_new_message(
-    context: Optional[str] = Body(None),
-    fileName: Optional[UploadFile] = File(None),
+@task_router.post("/task/create")
+async def create_new_task(
+    fileName: Optional[UploadFile] = File(...),
+    context: Optional[str] = Body(...),
     forRole: ChatTypes = Body(...),
-    mTtype: MessageTypes = Body(...),
-    replyId: int = Body(0),
     branchId: Optional[int] = Body(...),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
@@ -56,36 +54,27 @@ async def create_new_message(
     if not usr.userRole in ['any_role']:
         try:
 
-            if mTtype != 'request' and replyId <= 0:
-                raise HTTPException(400, 'Bu sizga chat emas!')
-
-            if fileName is None and context is None:
-                raise HTTPException(400, 'Xabar tarkibidi nimadir bo`lishi kerak')
-
             if fileName:
                 _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
             else:
                 _fileName = None
 
-            new_message = Message(
+            new_task = Task(
                 fileName=_fileName,
                 context=context,
-                forRole=forRole,
-                type=mTtype,
-                replyId=replyId if replyId > 0 else None,
                 userId=usr.id,
+                forRole=forRole,
                 branchId=branchId,
             )
 
-            db.add(new_message)
+            db.add(new_task)
             db.commit()
-            db.refresh(new_message)
+            db.refresh(new_task)
 
             dateTime = date.today().strftime("%Y/%m/%d")
 
-            await save_file(fileName, _fileName, f"{new_message.forRole}/{dateTime}")
-
-            await manager.send_user(new_message, usr, db)
+            await save_file(fileName, _fileName, f"{new_task.forRole}/{dateTime}")
+            await manager.send_user(new_task, usr, db)
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
@@ -93,29 +82,30 @@ async def create_new_message(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
-@message_router.delete("/message/{id}/delete")
-async def remove_messages(
+
+@task_router.delete("/task/{id}/delete")
+async def remove_tasks(
     ids: List[int],
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    
+
     try:
-        db.query(Message).filter(Message.id.in_(ids), Message.userId==usr.id).delete()
+        db.query(task).filter(task.id.in_(ids), task.userId == usr.id).delete()
         db.commit()
         return HTTPException(200, 'O\'chirildi!')
-    except IntegrityError as e: 
+    except IntegrityError as e:
         integrityHandler(e)
 
 
-# @message_router.put("/message/{id}/update", description="This router is able to update message")
-# async def update_one_message(
+# @task_router.put("/task/{id}/update", description="This router is able to update task")
+# async def update_one_task(
 #     id: int,
-#     form_data: UpdateMessage,
+#     form_data: Updatetask,
 #     db: Session = ActiveSession,
 #     usr: NewUser = Depends(get_current_active_user)
 # ):
 #     if not usr.userRole in ['any_role']:
-#         return update_message(id, form_data, usr, db)
+#         return update_task(id, form_data, usr, db)
 #     else:
 #         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

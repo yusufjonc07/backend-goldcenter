@@ -1,13 +1,13 @@
 from pydantic import BaseModel
-from app.models.message import *
+from app.models.task import *
 
-class NewMessage(BaseModel):
+class NewTask(BaseModel):
     context: str
-    type: MessageTypes
+    type: TaskTypes
     forrole: ChatTypes
     replyid: int
 
-class UpdateMessage(BaseModel):
+class UpdateTask(BaseModel):
     type: str
     userid: int
     forrole: str

@@ -69,8 +69,7 @@ class ChatTypes(str, Enum):
     accountant = "accountant"
 
 
-class MessageTypes(str, Enum):
-    request = "request"
+class TaskTypes(str, Enum):
     negative = "negative"
     positive = "positive"
 

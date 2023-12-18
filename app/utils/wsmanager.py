@@ -1,7 +1,7 @@
 from tokenize import Triple
 from fastapi import WebSocket, WebSocketException, WebSocketDisconnect
 from sqlalchemy.orm import Session
-from app.models.message import Message
+from app.models.task import Message
 from app.models.user import User
 from app.models.notification import Notification
 
