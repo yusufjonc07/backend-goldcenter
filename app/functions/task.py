@@ -2,6 +2,7 @@ import math
 from sqlalchemy.orm import aliased, Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
+from app.models.notification import Notification
 from app.models.task import *
 from app.schemas.task import *
 from sqlalchemy.sql import label, or_
@@ -11,17 +12,52 @@ from app.utils.pagination import pagination
 CHAT_ROLES = ["headConstructor", "headGuard", "headCleaner", "accountant"]
 
 
-def get_all_tasks(search, isOnlyUnread, page, limit, usr, db: Session):
+def get_all_tasks(search, forRole, page, limit, usr, db: Session):
 
     tasks = db.query(Task).options(
         joinedload(Task.employee),
         joinedload(Task.responseEmployee),
-    )
+    ).filter(Task.forRole==forRole)
+
+    
 
     return pagination(tasks, page, limit)
 
 
+def get_all_tasks_roles(usr, db: Session):
+
+    _roles_dict = {
+        'headConstructor': 'Xo\'jalik bo\'limi',
+        'headGuard': 'Xavfsizlik bo\'limi',
+        'headCleaner': 'Tozalik bo\'limi'
+    }
+
+    roles = []
+
+    for _role in ['headConstructor', 'headGuard', 'headCleaner']:
+        tCount = db.query(Notification).join(Notification.task).filter(
+            Task.forRole==_role,
+            Notification.isViewed==False,
+        ).count()
+        roles.append({
+            'label': _roles_dict[_role],
+            'count': tCount,
+        })
+
+    return roles
+
+def make_view_task(id:int, db: Session):
+    db.query(Notification).filter_by(task_id=id, isViewed=False).update({Notification.isViewed:True})
+    db.commit()
+    return True
+
+def make_view_notification(id:int, db: Session):
+    db.query(Notification).filter_by(id=id, isViewed=False).update({Notification.isViewed:True})
+    db.commit()
+    return True
+
 def create_task(form_data: NewTask, usr: User, db: Session):
+    
 
     try:
         new_task = Task(

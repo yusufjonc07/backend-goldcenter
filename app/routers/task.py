@@ -14,10 +14,18 @@ from app.utils.wsmanager import manager
 
 task_router = APIRouter(tags=['Xabar Endpoint'])
 
+@task_router.get("/task/roles")
+async def get_tasks_list(
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return get_all_tasks_roles(usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 @task_router.get("/tasks")
 async def get_tasks_list(
-    isOnlyUnread: Optional[bool] = False,
     search: Optional[str] = "",
     forRole: ChatTypes = 'headCleaner',
     page: int = 1,
@@ -25,19 +33,41 @@ async def get_tasks_list(
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
-    '''
-
-    `{
-        'accountant': 'Bugxalteriya',
-        'headConstructor': 'Xo\'jalik bo\'limi',
-        'headGuard': 'Xavfsizlik bo\'limi',
-        'headCleaner': 'Tozalik bo\'limi'
-    }`
-
-    '''
-
     if not usr.userRole in ['any_role']:
-        return get_all_tasks(search, isOnlyUnread, page, limit, usr, db)
+        return get_all_tasks(search, forRole, page, limit, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+    
+@task_router.put("/task/see")
+async def see_task(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return make_view_task(id, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+@task_router.get("/task/one")
+async def get_task(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return db.get(Task, id)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+    
+@task_router.put("/notification/see")
+async def see_notification(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return make_view_notification(id, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -50,7 +80,7 @@ async def create_new_task(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['director', 'accountant', 'clerk']:
+    if  usr.userRole in ['director', 'accountant', 'clerk']:
         try:
 
             _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
@@ -70,7 +100,7 @@ async def create_new_task(
             dateTime = date.today().strftime("%Y/%m/%d")
 
             await save_file(fileName, _fileName, f"{new_task.forRole}/{dateTime}")
-            await manager.send_user(new_task.context, [new_task.forRole], 'task', usr, db)
+            await manager.send_user(new_task.context, [new_task.forRole], 'task', new_task.id, usr, db)
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
@@ -97,6 +127,7 @@ async def complete_task(
             _fileName = await validate_file(responseFileName, ['document', 'image', 'audio', 'video'], 3)
 
             _task.responseFileName = _fileName
+            _task.responseType = responseType
             _task.responseText = responseText
             _task.responseEmployeeId = usr.employeeId
             _task.completedAt = func.now()
@@ -106,7 +137,7 @@ async def complete_task(
             dateTime = date.today().strftime("%Y/%m/%d")
 
             await save_file(responseFileName, _fileName, f"{_task.forRole}/{dateTime}")
-            await manager.send_user(_task.responseText, [_task.employee.role], 'task', usr, db)
+            await manager.send_user(_task.responseText, [_task.employee.role], 'task', _task.id, usr, db)
 
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:

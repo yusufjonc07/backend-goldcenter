@@ -14,6 +14,7 @@ def get_json(record: Notification):
         "context": record.context,
         "type": record.type,
         "isViewed": record.isViewed,
+        "task_id": record.task_id,
     }
 
 
@@ -67,6 +68,7 @@ class ConnectionManager:
             self, context: str,
             for_roles: List[UserRoles],
             type: NotificationTypes,
+            task_id: any,
             usr: User, db: Session):
 
         users = db.query(User.id).filter(
@@ -80,7 +82,8 @@ class ConnectionManager:
             new_notification = Notification(
                 context=context,
                 user_id=user.id,
-                type=type
+                type=type,
+                task_id=task_id,
             )
             db.add(new_notification)
             db.commit()
