@@ -38,6 +38,7 @@ def get_all_tasks_roles(usr, db: Session):
             Notification.isViewed == False,
         ).count()
         roles.append({
+            'role': _role,
             'label': _roles_dict[_role],
             'count': tCount,
         })
