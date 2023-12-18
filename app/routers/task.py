@@ -45,7 +45,7 @@ async def see_task(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return make_view_task(id, usr, db)
+        return make_view_task(id, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -67,7 +67,7 @@ async def see_notification(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return make_view_notification(id, usr, db)
+        return make_view_notification(id, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
