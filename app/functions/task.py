@@ -17,9 +17,7 @@ def get_all_tasks(search, forRole, page, limit, usr, db: Session):
     tasks = db.query(Task).options(
         joinedload(Task.employee),
         joinedload(Task.responseEmployee),
-    ).filter(Task.forRole==forRole)
-
-    
+    ).filter(Task.forRole == forRole)
 
     return pagination(tasks, page, limit)
 
@@ -36,8 +34,8 @@ def get_all_tasks_roles(usr, db: Session):
 
     for _role in ['headConstructor', 'headGuard', 'headCleaner']:
         tCount = db.query(Notification).join(Notification.task).filter(
-            Task.forRole==_role,
-            Notification.isViewed==False,
+            Task.forRole == _role,
+            Notification.isViewed == False,
         ).count()
         roles.append({
             'label': _roles_dict[_role],
@@ -46,21 +44,26 @@ def get_all_tasks_roles(usr, db: Session):
 
     return roles
 
-def get_all_notifications(usr:User, db: Session):
-    return db.query(Notification).options(joinedload(Notification.task)).filter_by(user_id=usr.id).all()
 
-def make_view_task(id:int, db: Session):
-    db.query(Notification).filter_by(task_id=id, isViewed=False).update({Notification.isViewed:True})
+def get_all_notifications(usr: User, db: Session):
+    return db.query(Notification).options(joinedload(Notification.task)).filter_by(user_id=usr.id, isViewed=False).all()
+
+
+def make_view_task(id: int, db: Session):
+    db.query(Notification).filter_by(task_id=id, isViewed=False).update(
+        {Notification.isViewed: True})
     db.commit()
     return True
 
-def make_view_notification(id:int, db: Session):
-    db.query(Notification).filter_by(id=id, isViewed=False).update({Notification.isViewed:True})
+
+def make_view_notification(id: int, db: Session):
+    notification = db.query(Notification).filter_by(id=id).first()
+    notification.isViewed = True
     db.commit()
     return True
+
 
 def create_task(form_data: NewTask, usr: User, db: Session):
-    
 
     try:
         new_task = Task(
