@@ -130,9 +130,16 @@ async def complete_task(
     if not usr.userRole in ['director', 'accountant', 'clerk']:
         try:
 
-            _task = db.query(Task).filter_by(id=id, forRole=usr.role, responseEmployeeId=None).first()
+            _task = db.query(Task).filter_by(id=id).first()
+
             if not _task:
+                raise HTTPException(400, 'Bunday vazifa mavjud emas!')
+
+            if _task.forRole != usr.userRole:
                 raise HTTPException(400, 'Ushbu vazifa uchun siz javobgar emassiz!')
+            
+            if _task.responseEmployeeId:
+                raise HTTPException(400, 'Ushbu vazifaga javob berib bo\'lingan!')
 
             _fileName = await validate_file(responseFileName, ['document', 'image', 'audio', 'video'], 3)
 
