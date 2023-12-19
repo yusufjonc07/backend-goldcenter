@@ -35,6 +35,7 @@ def get_all_tasks_roles(usr, db: Session):
     for _role in ['headConstructor', 'headGuard', 'headCleaner']:
         tCount = db.query(Notification).join(Notification.task).filter(
             Task.forRole == _role,
+            Notification.user_id==usr.id,
             Notification.isViewed == False,
         ).count()
         roles.append({
