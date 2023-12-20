@@ -28,7 +28,7 @@ async def get_clients_list(
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['any_role']:
+    if not usr.userRole in ['director', 'accountant', 'clerk']:
         return get_all_clients(floorId, status, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
@@ -42,7 +42,7 @@ def get_client_fees(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['any_role']:
+    if not usr.userRole in ['director', 'accountant']:
         return client_all_fees(floorId, year, month, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
@@ -98,7 +98,7 @@ async def create_new_client(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['any_role']:
+    if usr.userRole in ['director', 'accountant']:
         try:
 
             if agreementFile:
@@ -162,7 +162,7 @@ async def update_one_client(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['any_role']:
+    if usr.userRole in ['director', 'accountant']:
         try:
             client = db.query(Client).filter(Client.id == id)
             this_client = client.first()
@@ -213,7 +213,7 @@ async def client_fees_comfirmation(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['any_role']:
+    if usr.userRole in ['director', 'accountant']:
         return comfirm_client_fees(form_data, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

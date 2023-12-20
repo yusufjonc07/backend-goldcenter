@@ -106,7 +106,8 @@ def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
 
     for clientFee in clientFees:
 
-        clientFee.client.balance += clientFee.value
+        if clientFee.isConfirmed == True:
+            clientFee.client.balance += clientFee.value
 
         if clientFee.client.type == 'sold':
             clientFee.value = clientFee.client.shop.area * form_data.quadraticFee
@@ -114,7 +115,6 @@ def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
             clientFee.value = clientFee.client.monthlyFee
 
         clientFee.client.balance -= clientFee.value
-
         clientFee.isConfirmed = True
 
     db.commit()
