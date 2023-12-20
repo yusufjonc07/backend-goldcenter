@@ -28,7 +28,7 @@ async def get_clients_list(
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['director', 'accountant', 'clerk']:
+    if usr.userRole in ['director', 'accountant', 'clerk']:
         return get_all_clients(floorId, status, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
@@ -42,7 +42,7 @@ def get_client_fees(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if not usr.userRole in ['director', 'accountant']:
+    if usr.userRole in ['director', 'accountant']:
         return client_all_fees(floorId, year, month, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
