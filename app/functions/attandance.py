@@ -127,25 +127,25 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
 
     error = workTime = 0
 
-    dav_type = 'entry'
+    dav_type = 'checkIn'
     if type == 'any':
         if last_davomat:
-            if last_davomat.type == 'entry':
-                dav_type = 'exit'
+            if last_davomat.type == 'checkIn':
+                dav_type = 'checkOut'
 
-    elif type == 'entry':
+    elif type == 'checkIn':
 
-        if last_davomat and last_davomat.type == 'entry':
+        if last_davomat and last_davomat.type == 'checkIn':
             error += 1
 
-    elif type == 'exit':
+    elif type == 'checkOut':
 
         if last_davomat:
 
-            if last_davomat.type != 'entry':
+            if last_davomat.type != 'checkIn':
                 error += 1
             else:
-                dav_type = 'exit'
+                dav_type = 'checkOut'
 
         else:
             error += 1
@@ -160,7 +160,7 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
             func.year(Attandance.created_at) == yearMonth.year,
             func.month(Attandance.created_at) == yearMonth.month,
             Attandance.employeeId == employee.id,
-            Attandance.type == 'entry',
+            Attandance.type == 'checkIn',
         ).count()
 
         if attandance_count == 0:

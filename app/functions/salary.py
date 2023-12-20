@@ -17,21 +17,22 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
         func.year(Attandance.created_at) == year,
         func.month(Attandance.created_at) == month,
         Attandance.employeeId == Salary.employeeId,
-        Attandance.type == 'entry',
+        Attandance.type == 'checkIn',
     ).group_by(Attandance.employeeId).subquery()
 
     # how many salary advance employee received in a month
     advance_sum = db.query(func.sum(Expense.value)).filter(
-        func.year(Expense.createdAt)==year,
-        func.month(Expense.createdAt)==month,
-        Expense.employeeId==Salary.employeeId,
-        Expense.type=='salary',
+        func.year(Expense.createdAt) == year,
+        func.month(Expense.createdAt) == month,
+        Expense.employeeId == Salary.employeeId,
+        Expense.type == 'salary',
     ).subquery()
 
     salarys = db.query(
         label("employeeId", Employee.id),
         label("salaryId", Salary.id),
-        label("employeeName", func.concat(Employee.firstname, ' ', Employee.lastname)),
+        label("employeeName", func.concat(
+            Employee.firstname, ' ', Employee.lastname)),
         label("attandanceCount", attandance_count),
         label("calcWage", Salary.calcWage),
         label("isConfirmed", Salary.isConfirmed),
@@ -42,7 +43,7 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
     )
 
     if employeeId > 0:
-        salarys = salarys.filter(Salary.employeeId==employeeId)
+        salarys = salarys.filter(Salary.employeeId == employeeId)
 
     if search:
         salarys = salarys.filter(
@@ -53,16 +54,17 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
 
     return salarys.all()
 
+
 def pay_all_salarys(salariesId: list, usr, db):
     for salaryId in salariesId:
 
         salary: Salary = db.get(Salary, salaryId)
         # how many salary advance employee received in a month
         advance_sum = db.query(func.sum(Expense.value)).filter(
-            func.year(Expense.createdAt)==func.year(salary.createdAt),
-            func.month(Expense.createdAt)==func.month(salary.createdAt),
-            Expense.employeeId==salary.employeeId,
-            Expense.type=='salary',
+            func.year(Expense.createdAt) == func.year(salary.createdAt),
+            func.month(Expense.createdAt) == func.month(salary.createdAt),
+            Expense.employeeId == salary.employeeId,
+            Expense.type == 'salary',
         ).scalar()
 
         if not advance_sum:
@@ -77,14 +79,15 @@ def pay_all_salarys(salariesId: list, usr, db):
             employee = salary.employee
             employee.balance += salary.calcWage
             salary.isConfirmed = True
-            
+
     db.commit()
 
 
 def update_salary(id, form_data: UpdateSalary, usr, db: Session):
 
     try:
-        salary = db.query(Salary).filter(Salary.id == id, Salary.isConfirmed==False)
+        salary = db.query(Salary).filter(
+            Salary.id == id, Salary.isConfirmed == False)
         this_salary = salary.first()
         if this_salary:
             salary.update({

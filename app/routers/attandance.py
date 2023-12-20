@@ -97,14 +97,9 @@ async def get_attandance_users_list(
             date_str[:-6])  # remove timezone offset
         formatted_date = date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-        if attendanceStatus == 'checkIn':
-            type = 'entry'
-        else:
-            type = 'exit'
-
         if attendanceStatus:
 
-            await makeDavomat(user_id, type, formatted_date, deviceName, db)
+            await makeDavomat(user_id, attendanceStatus, formatted_date, deviceName, db)
 
             return "success"
     except Exception as e:
