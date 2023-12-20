@@ -163,7 +163,13 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
             Attandance.type == 'checkIn',
         ).count()
 
-        if attandance_count == 0:
+        salary = db.query(Salary).filter(
+            func.year(Salary.createdAt) == yearMonth.year,
+            func.month(Salary.createdAt) == yearMonth.month,
+            Salary.employeeId == employee.id,
+        ).first()
+
+        if attandance_count == 0 and salary is not None:
             new_salary = Salary(
                 employeeId=employee.id,
                 calcWage=employee.salaryQuantity,
