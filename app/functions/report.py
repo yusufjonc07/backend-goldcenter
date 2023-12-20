@@ -44,10 +44,10 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
             Floor.branchId == 1,
             Income.value > 0
         ).join(Income.client).join(Client.shop).join(Shop.floor)
-        
+
         if floor_id > 0:
             incomes = incomes.join(Income.client)\
-                .join(Client.shop).filter(Shop.floorId==floor_id)
+                .join(Client.shop).filter(Shop.floorId == floor_id)
 
         incomes = incomes.order_by(
             func.month(Income.createdAt).asc()
@@ -84,17 +84,16 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
 
                 incomesByMonths.append({
                     'monthName': MONTHS[month] if _month == 0 else str(month),
-                    'value': income.value if income.value > 0 else None,
+                    'value': income.value if income.value > 0 else 0.0,
                 })
 
                 yearlyIncome += income.value
 
-       
-
     return {
         "incomesByMonths": incomesByMonths,
-        "yearlyIncome": yearlyIncome
+        "yearlyIncome": yearlyIncome if yearlyIncome > 0 else 0.0,
     }
+
 
 def get_report_index(fromDate: date, toDate: date, db: Session, usr: User):
 
@@ -102,25 +101,25 @@ def get_report_index(fromDate: date, toDate: date, db: Session, usr: User):
         label("method", Moneyform.name),
         label("value", func.sum(Income.value)),
     ).select_from(Income).join(Income.moneyForm).join(Income.client)\
-    .join(Client.shop).join(Shop.floor)\
-    .filter(
-        func.date(Income.createdAt) >= fromDate, 
+        .join(Client.shop).join(Shop.floor)\
+        .filter(
+        func.date(Income.createdAt) >= fromDate,
         func.date(Income.createdAt) <= toDate,
-        Floor.branchId==usr.branchId
+        Floor.branchId == usr.branchId
     ).group_by(Income.moneyFormId).order_by(Moneyform.name.asc())\
-    .all()
+        .all()
 
     expenses = db.query(
         label("method", Moneyform.name),
         label("value", func.sum(Expense.value)),
     ).select_from(Expense).join(Expense.moneyForm)\
-    .filter(
-        func.date(Expense.createdAt) >= fromDate, 
+        .filter(
+        func.date(Expense.createdAt) >= fromDate,
         func.date(Expense.createdAt) <= toDate,
-        Expense.branchId==usr.branchId
+        Expense.branchId == usr.branchId
     ).group_by(Expense.moneyFormId).order_by(Moneyform.name.asc())\
-    .all()
-    
+        .all()
+
     return {
         "incomes": incomes,
         "expenses": expenses,
@@ -134,12 +133,12 @@ def get_report_index_income_floor(fromDate: date, toDate: date, db: Session, usr
         label("floorNumber", Floor.number),
         label("value", func.sum(Income.value)),
     ).select_from(Income).join(Income.client)\
-    .join(Client.shop).join(Shop.floor)\
-    .filter(
-        func.date(Income.createdAt) >= fromDate, 
+        .join(Client.shop).join(Shop.floor)\
+        .filter(
+        func.date(Income.createdAt) >= fromDate,
         func.date(Income.createdAt) <= toDate,
-        Floor.branchId==usr.branchId
+        Floor.branchId == usr.branchId
     ).group_by(Floor.id).order_by(Floor.number.asc())\
-    .all()
+        .all()
 
     return incomes

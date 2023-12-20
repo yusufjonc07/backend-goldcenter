@@ -16,11 +16,21 @@ class FormClient(BaseModel):
     def check_phoneNumber_length(cls, values):
         errMsg = HTTPException(400, 'Telefon raqami noto`g`ri kiritildi!')
 
-        if len(str(values.get('phoneNumber'))) != 9: raise errMsg 
-        if values.get('extraPhoneNumber') is not None and len(str(values.get('extraPhoneNumber'))) != 9: raise errMsg
-        
+        if len(str(values.get('phoneNumber'))) != 9:
+            raise errMsg
+        if values.get('extraPhoneNumber') is not None and len(str(values.get('extraPhoneNumber'))) != 9:
+            raise errMsg
+
         return values
+
 
 class FormWarehouseClient(BaseModel):
     placeName: str = Field(..., max_length=10)
     placePrice: float = Field(..., gt=0)
+
+
+class ConfirmFee(BaseModel):
+    floorId: int = Field(..., ge=1)
+    year: int
+    month: int = Field(..., ge=12)
+    quadraticFee: float = Field(..., ge=0)

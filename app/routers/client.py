@@ -4,6 +4,7 @@ from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile, Q
 from typing import Optional, Union
 
 from app.models.user import User
+from app.schemas.client import ConfirmFee
 from app.schemas.user import NewUser
 from app.utils.fileUtil import replace_file, save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -29,6 +30,20 @@ async def get_clients_list(
 ):
     if not usr.userRole in ['any_role']:
         return get_all_clients(floorId, status, page, limit, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@client_router.get("/client/fees")
+def get_client_fees(
+    floorId: int = Query(..., ge=1),
+    year: int = Query(...),
+    month: int = Query(..., le=12),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return client_all_fees(floorId, year, month, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -128,21 +143,6 @@ async def create_new_client(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
-@client_router.get("/client/fees")
-def get_client_fees(
-    floorId: int = Query(..., ge=1),
-    year: int = Query(...),
-    month: int = Query(..., le=12),
-    db: Session = ActiveSession,
-    usr: User = Depends(get_current_active_user)
-):
-    if not usr.userRole in ['any_role']:
-        return 1
-        return client_all_fees(floorId, year, month, usr, db)
-    else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
-
-
 @client_router.put("/client/{id}/update", description="This router is able to update client")
 async def update_one_client(
     id: int,
@@ -203,5 +203,17 @@ async def update_one_client(
                     status_code=400, detail="So`rovda xatolik!")
         except IntegrityError as e:
             integrityHandler(e)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@client_router.put("/client/fee/confirm")
+async def client_fees_comfirmation(
+    form_data: ConfirmFee,
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return comfirm_client_fees(form_data, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

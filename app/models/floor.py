@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from sqlalchemy import Column, Enum, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+from app.schemas.enums import FloorTypes
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
-from app.models.branch import * 
+from app.models.branch import *
 
 
 class Floor(Base):
@@ -12,7 +13,6 @@ class Floor(Base):
     description = Column(String, default='')
     coridorCleaningCost = Column(String, default='')
     branchId = Column(Integer, ForeignKey('branch.id'), nullable=True)
-    type = Column(String, default='')
+    type = Column(Enum(FloorTypes))
 
     branch = relationship('Branch', backref='floors')
-

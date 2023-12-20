@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, UniqueConstraint, func, TIMESTAMP
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
-from app.models.floor import * 
+from app.models.floor import *
 from sqlalchemy.dialects.mysql import DOUBLE
+
 
 class Shop(Base):
     __tablename__ = "shop"
@@ -20,4 +21,3 @@ class Shop(Base):
     UniqueConstraint("number", "floorId")
 
     floor = relationship('Floor', backref='shops')
-

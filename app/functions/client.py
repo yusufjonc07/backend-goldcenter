@@ -1,11 +1,14 @@
 from datetime import date
+from typing import List
 from fastapi import HTTPException
 from sqlalchemy.sql import label, func
 from sqlalchemy.orm import Session
 from app.models.client import *
 from app.models.clientFee import ClientFee
 from app.models.floor import Floor
+from app.schemas.client import ConfirmFee
 from app.utils.pagination import pagination
+
 
 def get_all_clients(floorId, status, page, limit, usr, db: Session):
 
@@ -24,14 +27,15 @@ def get_all_clients(floorId, status, page, limit, usr, db: Session):
         label('fileName', Client.fileName),
         label('type', Client.type),
     ).join(Client.shop)\
-    .filter(Client.status==status)
+        .filter(Client.status == status)
 
     if floorId > 0:
-        clients = clients.filter(Shop.floorId==floorId)
+        clients = clients.filter(Shop.floorId == floorId)
 
     clients = clients.order_by(Shop.number.asc())
 
     return pagination(clients, page, limit)
+
 
 def check_and_create(year, month, usr, db: Session):
     clients = db.query(Client).join(Client.shop).join(Shop.floor).filter(
@@ -39,12 +43,12 @@ def check_and_create(year, month, usr, db: Session):
     ).all()
     for client in clients:
         fee = db.query(ClientFee).filter(
-            ClientFee.clientId==client.id,
-            func.year(ClientFee.createdAt)==year,
-            func.month(ClientFee.createdAt)==month,
+            ClientFee.clientId == client.id,
+            func.year(ClientFee.createdAt) == year,
+            func.month(ClientFee.createdAt) == month,
         ).first()
 
-        if fee is None: 
+        if fee is None:
             db.add(ClientFee(
                 clientId=client.id,
                 value=client.monthlyFee,
@@ -52,6 +56,15 @@ def check_and_create(year, month, usr, db: Session):
             ))
     db.commit()
     return
+
+
+def select_fees(query: Session, floorId, year, month):
+    return query.join(ClientFee.client).join(Client.shop).filter(
+        Shop.floorId == floorId,
+        func.year(ClientFee.createdAt) == year,
+        func.month(ClientFee.createdAt) == month,
+    ).group_by(ClientFee.id).all()
+
 
 def client_all_fees(floorId, year, month, usr, db: Session):
 
@@ -61,24 +74,48 @@ def client_all_fees(floorId, year, month, usr, db: Session):
 
     if not floor:
         raise HTTPException(400, 'Qavat topilmadi!')
-    
+
     if floor.type == 'rent':
         calcFee = Client.monthlyFee
     else:
         calcFee = ClientFee.value
 
-    return db.query(
+    query = db.query(
+        label('clientId', Client.id),
         label('clientName', Client.clientName),
-        label('chiefName', Client.chiefName),
-        label('liablePerson', Client.liablePerson),
         label('shopNumber', Shop.number),
         label('shopArea', Shop.area),
         label('balance', Client.balance),
         label('calcFee', calcFee),
-    ).join(ClientFee.client).join(Client.shop).filter(
-        Shop.floorId==floorId
-    ).group_by(ClientFee.id).all()
+    )
+
+    return select_fees(query, floorId, year, month)
 
 
+def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
 
+    floor: Floor = db.get(Floor, form_data.floorId)
 
+    if not floor:
+        raise HTTPException(400, 'Qavat topilmadi!')
+
+    query = db.query(ClientFee)
+
+    clientFees: List[ClientFee] = select_fees(query, form_data.floorId,
+                                              form_data.year, form_data.month)
+
+    for clientFee in clientFees:
+
+        clientFee.client.balance += clientFee.value
+
+        if clientFee.client.type == 'sold':
+            clientFee.value = clientFee.client.shop.area * form_data.quadraticFee
+        else:
+            clientFee.value = clientFee.client.monthlyFee
+
+        clientFee.client.balance -= clientFee.value
+
+        clientFee.isConfirmed = True
+
+    db.commit()
+    raise HTTPException(200, 'Ma\'lumotlar saqlandi!')
