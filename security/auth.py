@@ -130,8 +130,8 @@ async def get_current_ws_user(token: str, db: Session = Depends(get_db)):
 
 
 async def get_current_active_user(current_user: NewUser = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Bo`shatilgan hodim")
+    if not current_user or current_user.disabled:
+        raise HTTPException(status_code=401, detail="Bo`shatilgan hodim")
     return current_user
 
 @auth_router.get("/me")

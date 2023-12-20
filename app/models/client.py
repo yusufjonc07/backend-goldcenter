@@ -16,7 +16,7 @@ class Client(Base):
     extraPhoneNumber = Column(Integer, nullable=True)
     fileName = Column(Text, nullable=True)
     liablePerson = Column(String(255))
-    shopId = Column(Integer, ForeignKey('shop.id'), default=0)
+    shopId = Column(Integer, ForeignKey('shop.id'))
     monthlyFee = Column(DOUBLE, default=0)
     balance = Column(Numeric, default=0)
     status = Column(Enum(AgreementStatus), default='active')

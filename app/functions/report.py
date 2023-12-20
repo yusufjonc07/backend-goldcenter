@@ -84,7 +84,7 @@ def get_income(floor_id: int, _year: int, _month: int, db: Session):
 
                 incomesByMonths.append({
                     'monthName': MONTHS[month] if _month == 0 else str(month),
-                    'value': income.value,
+                    'value': income.value if income.value > 0 else None,
                 })
 
                 yearlyIncome += income.value

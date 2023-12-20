@@ -1,6 +1,6 @@
 from datetime import date
 from os.path import exists
-from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile
+from fastapi import Body, File, HTTPException, APIRouter, Depends, UploadFile, Query
 from typing import Optional, Union
 
 from app.models.user import User
@@ -48,7 +48,7 @@ async def get_client_one(
                 "startedAt": client.startedAt,
                 "clientName": client.clientName,
                 "chiefName": client.chiefName,
-                "liablePerson": client.liablePerson,        
+                "liablePerson": client.liablePerson,
                 "shopNumber": client.shop.number,
                 "shopArea": client.shop.area,
                 "phoneNumber": client.phoneNumber,
@@ -124,6 +124,21 @@ async def create_new_client(
             raise HTTPException(200, "Ma`lumotlar saqlandi!")
         except IntegrityError as e:
             integrityHandler(e)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@client_router.get("/client/fees")
+def get_client_fees(
+    floorId: int = Query(..., ge=1),
+    year: int = Query(...),
+    month: int = Query(..., le=12),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return 1
+        return client_all_fees(floorId, year, month, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
