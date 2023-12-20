@@ -10,10 +10,14 @@ from app.utils.pagination import pagination
 from datetime import date, datetime
 from app.utils.handler import integrityHandler
 
-def get_all_attandances(search, page, limit, usr, db: Session):
 
+def get_all_attandances(id, fromDate, toDate, page, limit, usr, db: Session):
 
-    attandances = db.query(Attandance)
+    attandances = db.query(Attandance).filter(
+        Attandance.employeeId == id,
+        func.date(Attandance.created_at) >= fromDate,
+        func.date(Attandance.created_at) <= toDate,
+    ).order_by(Attandance.created_at.desc())
 
     # if search:
     # attandances = attandances.filter(
@@ -32,7 +36,7 @@ def get_attended_employees(search, aDate, page, limit, usr, db: Session):
         label('workBeginTime', Shift.workBeginTime),
         label('workEndTime', Shift.workEndTime),
     ).select_from(Employee).join(Employee.shift).join(Employee.attandances)\
-    .filter(func.date(Attandance.created_at)==aDate)
+        .filter(func.date(Attandance.created_at) == aDate)
 
     if search:
         attandanded_employees = attandanded_employees.filter(
@@ -48,10 +52,9 @@ def get_attended_employees(search, aDate, page, limit, usr, db: Session):
     for employee in result['data']:
         new_attandances = dict(employee)
         new_attandances['attandances'] = db.query(Attandance).filter(
-            func.date(Attandance.created_at)==aDate,
-            Attandance.employeeId==employee.employeeId
+            func.date(Attandance.created_at) == aDate,
+            Attandance.employeeId == employee.employeeId
         ).order_by(Attandance.created_at.asc()).all()
-
 
         new_data.append(new_attandances)
 
@@ -59,21 +62,22 @@ def get_attended_employees(search, aDate, page, limit, usr, db: Session):
 
     return result
 
+
 def employee_attandances(id, year, month, db: Session):
     try:
-        
+
         days_count = calendar.monthrange(year, month)[1]
 
         attandances = db.query(
-            func.count(Attandance.id).label('count'), 
+            func.count(Attandance.id).label('count'),
             func.day(Attandance.created_at).label('day')
         ).filter(
-            func.year(Attandance.created_at)==year,
-            func.month(Attandance.created_at)==month,
+            func.year(Attandance.created_at) == year,
+            func.month(Attandance.created_at) == month,
             Attandance.type == 'checkIn',
             Attandance.employeeId == id
         ).group_by(func.day(Attandance.created_at)).all()
-        
+
         days = []
 
         for day in range(1, days_count+1):
@@ -87,7 +91,8 @@ def employee_attandances(id, year, month, db: Session):
         return days
 
     except IntegrityError as e:
-        integrityHandler(e) 
+        integrityHandler(e)
+
 
 def update_attandance(id, form_data: UpdateAttandance, usr, db: Session):
 
@@ -166,7 +171,6 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
             )
 
             db.add(new_salary)
-        
 
         new_attandance = Attandance(
             type=dav_type,
