@@ -3,6 +3,7 @@ from fastapi import Body, HTTPException, APIRouter, Depends, UploadFile, File
 from typing import Optional
 
 from pydantic import Field
+from app.models.regularExpence import Regularexpence
 from app.schemas.user import NewUser
 from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -65,20 +66,24 @@ async def create_new_income(
                     employee.balance -= value
                     db.flush()
 
-            isProceed = True
+            if type == 'regular':
+                regExpense = db.get(Regularexpence, regularExpenseId)
 
-            if isProceed:
-                new_expense = Expense(
-                    type=type,
-                    employeeId=employeeId if employeeId > 0 else None,
-                    value=value,
-                    moneyFormId=moneyFormId,
-                    floorId=floorId if floorId > 0 else None,
-                    branchId=usr.branchId,
-                    comment=comment,
-                    userId=usr.id,
-                    fileName=fileName,
-                )
+                if not regExpense:
+                    raise HTTPException(400, "Chiqim topilmadi")
+
+            new_expense = Expense(
+                type=type,
+                employeeId=employeeId if employeeId > 0 else None,
+                regularExpenseId=regularExpenseId if regularExpenseId > 0 else None,
+                value=value,
+                moneyFormId=moneyFormId,
+                floorId=floorId if floorId > 0 else None,
+                branchId=usr.branchId,
+                comment=comment,
+                userId=usr.id,
+                fileName=fileName,
+            )
             db.add(new_expense)
             db.commit()
 
