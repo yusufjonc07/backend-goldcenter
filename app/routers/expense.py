@@ -39,6 +39,7 @@ async def get_expenses_list(
 async def create_new_income(
     type: ExpenceTypes = Body(...),
     employeeId: Optional[int] = Body(0),
+    regularExpenseId: Optional[int] = Body(0),
     value: float = Body(..., gt=0),
     moneyFormId: int = Body(...),
     comment: str = Body(..., min_length=5),

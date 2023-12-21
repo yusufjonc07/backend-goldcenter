@@ -3,10 +3,10 @@ from sqlalchemy import Column, Enum, Integer, DateTime, Time, String, Boolean, T
 from app.schemas.enums import ExpenceTypes
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
-from app.models.moneyForm import * 
-from app.models.branch import * 
-from app.models.user import * 
-from app.models.employee import * 
+from app.models.moneyForm import *
+from app.models.branch import *
+from app.models.user import *
+from app.models.employee import *
 from sqlalchemy.dialects.mysql import DOUBLE
 
 
@@ -17,16 +17,13 @@ class Expense(Base):
     employeeId = Column(Integer, ForeignKey('employee.id'), nullable=True)
     value = Column(DOUBLE, nullable=False)
     moneyFormId = Column(Integer, ForeignKey('moneyForm.id'), nullable=False)
-    floorId = Column(Integer, ForeignKey('floor.id'), nullable=True)
     branchId = Column(Integer, ForeignKey('branch.id'), nullable=False)
     comment = Column(String(255))
     userId = Column(Integer, ForeignKey('user.id'), nullable=False)
     fileName = Column(Text, nullable=True)
     createdAt = Column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
-    
 
     employee = relationship('Employee', backref='expenses')
     moneyForm = relationship('Moneyform', backref='expenses')
     branch = relationship('Branch', backref='expenses')
     user = relationship('User', backref='expenses')
-

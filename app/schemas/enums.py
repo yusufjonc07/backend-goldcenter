@@ -73,6 +73,7 @@ class TaskTypes(str, Enum):
     negative = "negative"
     positive = "positive"
 
+
 class NotificationTypes(str, Enum):
     task = "task"
     document = "document"
@@ -80,7 +81,7 @@ class NotificationTypes(str, Enum):
 
 class ExpenceTypes(str, Enum):
     salary = "salary"
-    construction = "construction"
+    regular = "regular"
     other = "other"
 
 
