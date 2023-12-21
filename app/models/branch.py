@@ -8,5 +8,4 @@ class Branch(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, default='')
     address = Column(String, default='')
-
-
+    dollar = Column(Numeric)

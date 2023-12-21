@@ -10,23 +10,37 @@ from app.schemas.branch import *
 
 branch_router = APIRouter(tags=['Filial Endpoint'])
 
+
 @branch_router.get("/branchs", description="This router returns list of the branchs using pagination")
 async def get_branchs_list(
     search: Optional[str] = "",
     page: int = 1,
     limit: int = 10,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
-):   
+):
     if not usr.userRole in ['any_role']:
-        return get_all_branchs(search, page, limit, usr, db)  
+        return get_all_branchs(search, page, limit, usr, db)
     else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@branch_router.get("/branch_one", description="This router returns list of the branchs using pagination")
+async def get_branch_one(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return db.get(Branch, id)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @branch_router.post("/branch/create", description="This router is able to add new branch")
 async def create_new_branch(
     form_data: NewBranch,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
@@ -34,11 +48,12 @@ async def create_new_branch(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+
 @branch_router.put("/branch/{id}/update", description="This router is able to update branch")
 async def update_one_branch(
     id: int,
     form_data: UpdateBranch,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
