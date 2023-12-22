@@ -193,6 +193,9 @@ async def update_one_client(
                                       'closed' else None)
                 })
 
+                if status == 'closed':
+                    this_client.shop.clientId = None
+
                 db.commit()
                 await replace_file(File, _old_.fileName, fileName, 'clients')
 
