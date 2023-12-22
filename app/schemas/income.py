@@ -13,7 +13,7 @@ class NewIncome(BaseModel):
     type: Optional[IncomeType] = 'rent'
     forYear: int
     forMonth: int
-    utilityBill: Optional[float] = 0
+    electrLastAmount: Optional[float] = 0
     electrAmount: Optional[float] = 0
 
 
@@ -25,5 +25,5 @@ class UpdateIncome(BaseModel):
     type: Optional[IncomeType] = 'rent'
     forYear: int
     forMonth: int
-    utilityBill: Optional[float] = 0
+    electrLastAmount: Optional[float] = 0
     electrAmount: Optional[float] = 0

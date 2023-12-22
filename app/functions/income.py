@@ -20,6 +20,12 @@ def get_all_incomes(search, page, limit, usr, db: Session):
     return pagination(incomes, page, limit)
 
 
+def get_last_electrAmount(id: int, db: Session):
+    return db.query(Income).filter_by(
+        clientId=id, type='utility'
+    ).order_by(Income.electrLastAmount).first()
+
+
 def create_income(form_data: NewIncome, usr, db: Session):
     try:
 
@@ -31,16 +37,20 @@ def create_income(form_data: NewIncome, usr, db: Session):
             type=form_data.type,
             forMonth=form_data.forMonth,
             forYear=form_data.forYear,
+            electrLastAmount=form_data.electrLastAmount,
+            electrAmount=form_data.electrAmount,
             userId=usr.id,
         )
 
         db.add(new_income)
         db.flush()
         db.refresh(new_income)
-        new_income.client.balance += new_income.value
+
+        if form_data.type == 'utility':
+            new_income.client.balance -= new_income.value
+
         db.commit()
-        db.refresh(new_income)
-        return new_income
+        raise HTTPException(status_code=200, detail="Ma'lumotlar saqlandi!")
 
     except IntegrityError as e:
         raise integrityHandler(e)
@@ -60,6 +70,8 @@ def update_income(id, form_data: UpdateIncome, usr, db: Session):
                 Income.type: form_data.type,
                 Income.forMonth: form_data.forMonth,
                 Income.forYear: form_data.forYear,
+                Income.electrLastAmount: form_data.electrLastAmount,
+                Income.electrAmount: form_data.electrAmount,
                 Income.userId: usr.id,
             })
             db.commit()

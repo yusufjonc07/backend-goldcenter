@@ -18,6 +18,7 @@ income_router = APIRouter(tags=['Kassa Endpoint'])
 @income_router.get("/incomes")
 async def get_agreement_payments(
     clientId: Optional[int] = 0,
+    type: Optional[IncomeType] = 'rent',
     fromDate: Optional[date] = None,
     toDate: Optional[date] = None,
     page: int = 1,
@@ -52,6 +53,18 @@ async def update_one_income(
 ):
     if not usr.userRole in ['any_role']:
         return update_income(id, form_data, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@income_router.get("/income/{id}/last")
+async def get_last_one_income(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return get_last_electrAmount(id, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
