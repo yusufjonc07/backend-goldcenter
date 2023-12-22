@@ -5,22 +5,32 @@ from fastapi import HTTPException
 from app.models.shop import *
 from app.schemas.shop import *
 from app.utils.handler import integrityHandler
-from app.utils.pagination import pagination 
+from app.utils.pagination import pagination
 
 
 def get_all_shops(floorId, search, page, limit, usr, db: Session):
-    
-    shops = db.query(Shop)
+
+    shops = db.query(Shop).filter(Shop.deleted == False)
 
     if floorId > 0:
-        shops = shops.filter(Shop.floorId==floorId)
+        shops = shops.filter(Shop.floorId == floorId)
 
-    #if search:
-       #shops = shops.filter(
-           #Shop.id.like(f"%{search}%"),
-       #)
+    # if search:
+       # shops = shops.filter(
+        # Shop.id.like(f"%{search}%"),
+       # )
 
     return pagination(shops, page, limit)
+
+
+def combine_shop(form_data: CombineShops, db: Session):
+    mainShop: Shop = db.get(Shop, form_data.mainShopId)
+    deletingShop: Shop = db.get(Shop, form_data.deletingShopId)
+
+    if deletingShop.clientId > 0:
+        raise HTTPException(
+            400, 'Bu do`konni qo`shib yuborishdan oldin undagi shartnomani yakunlang!')
+
 
 def divide_shop(form_data: DivideShop, db: Session):
 
@@ -55,12 +65,13 @@ def divide_shop(form_data: DivideShop, db: Session):
         db.add(newShop)
         db.commit()
         return HTTPException(200, 'Xona 2 ga bo`lindi!')
-    
+
     except Exception as e:
         integrityHandler(e)
 
+
 def create_shop(form_data: NewShop, usr, db: Session):
-    
+
     try:
 
         new_shop = Shop(
@@ -81,13 +92,14 @@ def create_shop(form_data: NewShop, usr, db: Session):
     except IntegrityError as e:
         raise integrityHandler(e)
 
+
 def update_shop(id, form_data: UpdateShop, usr, db: Session):
-    
+
     try:
         shop = db.query(Shop).filter(Shop.id == id)
         this_shop = shop.first()
         if this_shop:
-            shop.update({    
+            shop.update({
                 Shop.name: form_data.name,
                 Shop.number: form_data.number,
                 Shop.floorId: form_data.floorId,
@@ -104,4 +116,3 @@ def update_shop(id, form_data: UpdateShop, usr, db: Session):
             raise HTTPException(status_code=400, detail="So`rovda xatolik!")
     except IntegrityError as e:
         raise integrityHandler(e)
-    

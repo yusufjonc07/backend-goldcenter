@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 from app.models.shop import *
 
+
 class NewShop(BaseModel):
     name: str
     number: str
@@ -13,12 +14,22 @@ class NewShop(BaseModel):
     boxWith: float
     boxHeight: float
 
-    
 
 class DivideShop(BaseModel):
     shopId: int
     areaA: float
     areaB: float
+
+
+class CombineShops(BaseModel):
+    mainShopId: int
+    deletingShopId: int
+    number: str
+    area: float
+    fromTop: float
+    fromLeft: float
+    boxWith: float
+    boxHeight: float
 
 
 class UpdateShop(BaseModel):
@@ -30,5 +41,3 @@ class UpdateShop(BaseModel):
     fromLeft: float
     boxWith: float
     boxHeight: float
-
-        

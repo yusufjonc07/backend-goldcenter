@@ -17,6 +17,7 @@ class Shop(Base):
     fromLeft = Column(Numeric, default=0)
     boxWith = Column(Numeric, default=0)
     boxHeight = Column(Numeric, default=0)
+    deleted = Column(Boolean, default=False)
 
     UniqueConstraint("number", "floorId")
 
