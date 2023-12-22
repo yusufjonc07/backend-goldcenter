@@ -78,7 +78,7 @@ def client_all_fees(floorId, year, month, usr, db: Session):
     if floor.type == 'rent':
         calcFee = Client.monthlyFee
     else:
-        calcFee = ClientFee.value
+        calcFee = Client.monthlyFee * Shop.area
 
     query = db.query(
         label('clientId', Client.id),
@@ -110,7 +110,7 @@ def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
             clientFee.client.balance += clientFee.value
 
         if clientFee.client.type == 'sold':
-            clientFee.value = clientFee.client.shop.area * form_data.quadraticFee
+            clientFee.value = clientFee.client.shop.area * clientFee.client.monthlyFee
         else:
             clientFee.value = clientFee.client.monthlyFee
 

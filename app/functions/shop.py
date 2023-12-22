@@ -31,6 +31,26 @@ def combine_shop(form_data: CombineShops, db: Session):
         raise HTTPException(
             400, 'Bu do`konni qo`shib yuborishdan oldin undagi shartnomani yakunlang!')
 
+    if mainShop.fromTop != deletingShop.fromTop or mainShop.fromLeft != deletingShop.fromLeft:
+        raise HTTPException(
+            400, 'Qo`shib yuboriliyotgan do`konlar yonma-yon bo`lishi kerak!')
+
+    db.query(Shop).filter(
+        Shop.id == mainShop.id
+    ).update({Shop.area: form_data.area,
+              Shop.fromTop: form_data.fromTop,
+              Shop.fromLeft: form_data.fromLeft,
+              Shop.boxWith: form_data.boxWith,
+              Shop.boxHeight: form_data.boxHeight
+              })
+
+    db.query(Shop).filter(
+        Shop.id == deletingShop.id
+    ).update({Shop.deleted: True})
+
+    db.commit()
+    raise HTTPException(200, "Ma`lumotlar saqlandi!")
+
 
 def divide_shop(form_data: DivideShop, db: Session):
 

@@ -27,7 +27,7 @@ async def get_agreement_payments(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_agreement_payments(clientId, fromDate, toDate, page, limit, usr, db)
+        return get_all_agreement_payments(clientId, type, fromDate, toDate, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

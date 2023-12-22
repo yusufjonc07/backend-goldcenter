@@ -7,12 +7,10 @@ from app.models.client import Client
 from app.models.expense import *
 from app.models.income import *
 from app.models.shop import Shop
-from app.utils.pagination import pagination 
+from app.utils.pagination import pagination
 
 
-
-def get_all_agreement_payments(clientId, fromDate, toDate, page, limit, usr, db):
-   
+def get_all_agreement_payments(clientId, type, fromDate, toDate, page, limit, usr, db):
 
     incomesData = db.query(
         label("id", Income.id),
@@ -26,7 +24,7 @@ def get_all_agreement_payments(clientId, fromDate, toDate, page, limit, usr, db)
         label("comment", Income.comment),
     ).select_from(Income)\
         .join(Income.client)\
-        .join(Client.shop).join(Income.moneyForm)\
+        .join(Client.shop).join(Income.moneyForm).filter(Income.type == type)
 
     if clientId > 0:
         incomesData = incomesData.filter(Income.clientId == clientId)
@@ -43,5 +41,3 @@ def get_all_agreement_payments(clientId, fromDate, toDate, page, limit, usr, db)
        # )
 
     return pagination(incomesData, page, limit)
-    
-

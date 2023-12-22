@@ -11,24 +11,26 @@ from app.schemas.shop import *
 
 shop_router = APIRouter(tags=['Do`kon Endpoint'])
 
+
 @shop_router.get("/shops", description="This router returns list of the shops using pagination")
 async def get_shops_list(
     search: Optional[str] = "",
     page: int = 1,
     floorId: Optional[int] = 0,
     limit: int = 10,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
-):   
+):
     if not usr.userRole in ['any_role']:
-        return get_all_shops(floorId, search, page, limit, usr, db)  
+        return get_all_shops(floorId, search, page, limit, usr, db)
     else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @shop_router.post("/shop/create", description="This router is able to add new shop")
 async def create_new_shop(
     form_data: NewShop,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
@@ -36,10 +38,11 @@ async def create_new_shop(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+
 @shop_router.post("/shop/divide", description="This router is able to divide shop into two")
 async def divide_func_shop(
     form_data: DivideShop,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
@@ -47,24 +50,39 @@ async def divide_func_shop(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+
+@shop_router.post("/shop/combine", description="This router is able to divide shop into two")
+async def divide_func_shop(
+    form_data: CombineShops,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return combine_shop(form_data, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
 @shop_router.get("/shop/detail")
 async def shop_view(
     shop_id: int,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
         return db.query(Shop).options(
-            joinedload(Shop.clients.and_(Client.status.in_(['active', 'paused'])))
-        ).filter(Shop.id==shop_id).first()
+            joinedload(Shop.clients.and_(
+                Client.status.in_(['active', 'paused'])))
+        ).filter(Shop.id == shop_id).first()
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @shop_router.put("/shop/{id}/update", description="This router is able to update shop")
 async def update_one_shop(
     id: int,
     form_data: UpdateShop,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
