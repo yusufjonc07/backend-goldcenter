@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from app.models.income import *
 from app.schemas.income import *
 from app.utils.handler import integrityHandler
-from app.utils.pagination import pagination 
+from app.utils.pagination import pagination
 
 
 def get_all_incomes(search, page, limit, usr, db: Session):
@@ -13,20 +13,24 @@ def get_all_incomes(search, page, limit, usr, db: Session):
     incomes = db.query(Income)
 
     # if search:
-        # incomes = incomes.filter(
-            # Income.id.like(f"%{search}%"),
-    #)
+    # incomes = incomes.filter(
+    # Income.id.like(f"%{search}%"),
+    # )
 
     return pagination(incomes, page, limit)
 
-def create_income(form_data: NewIncome, usr, db: Session):
 
+def create_income(form_data: NewIncome, usr, db: Session):
     try:
+
         new_income = Income(
             clientId=form_data.clientId,
             value=form_data.value,
             moneyFormId=form_data.moneyFormId,
             comment=form_data.comment,
+            type=form_data.type,
+            forMonth=form_data.forMonth,
+            forYear=form_data.forYear,
             userId=usr.id,
         )
 
@@ -35,8 +39,9 @@ def create_income(form_data: NewIncome, usr, db: Session):
         db.refresh(new_income)
         new_income.client.balance += new_income.value
         db.commit()
+        db.refresh(new_income)
+        return new_income
 
-        raise HTTPException(200, "Ma`lumotlar saqlandi!")
     except IntegrityError as e:
         raise integrityHandler(e)
 
@@ -52,6 +57,9 @@ def update_income(id, form_data: UpdateIncome, usr, db: Session):
                 Income.value: form_data.value,
                 Income.moneyFormId: form_data.moneyFormId,
                 Income.comment: form_data.comment,
+                Income.type: form_data.type,
+                Income.forMonth: form_data.forMonth,
+                Income.forYear: form_data.forYear,
                 Income.userId: usr.id,
             })
             db.commit()

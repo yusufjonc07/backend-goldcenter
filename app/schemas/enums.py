@@ -104,6 +104,10 @@ class AgreementType(str, Enum):
     rent = "rent"
     sold = "sold"
 
+class IncomeType(str, Enum):
+    rent = "rent"
+    utility = "utility"
+    infrastructure = "infrastructure"
 
 class IncomeTables(str, Enum):
     clientAgreement = "clientAgreement"
