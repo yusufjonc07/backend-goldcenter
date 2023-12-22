@@ -189,12 +189,11 @@ async def update_one_client(
                     Client.status: status,
                     Client.type: type,
                     Client.startedAt: startedAt,
-                    Client.liablePerson: liablePerson,
-                    Client.closedAt: (func.now() if status ==
-                                      'closed' else None)
+                    Client.liablePerson: liablePerson
                 })
 
                 if status == 'closed':
+                    this_client.closedAt = func.now()
                     this_client.shop.clientId = None
 
                 db.commit()
