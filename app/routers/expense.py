@@ -25,13 +25,14 @@ async def get_expenses_list(
     fromDate: Optional[date] = None,
     toDate: Optional[date] = None,
     employeeId: Optional[int] = 0,
+    regularExpenceId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_expenses(search, expenseType, fromDate, toDate, employeeId,  page, limit, usr, db)
+        return get_all_expenses(search, expenseType, fromDate, toDate, employeeId, regularExpenceId,  page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -40,12 +41,11 @@ async def get_expenses_list(
 async def create_new_income(
     type: ExpenceTypes = Body(...),
     employeeId: Optional[int] = Body(0),
-    regularExpenseId: Optional[int] = Body(0),
+    regularExpenceId: Optional[int] = Body(0),
     value: float = Body(..., gt=0),
     moneyFormId: int = Body(...),
     comment: str = Body(..., min_length=5),
     file: UploadFile = File(...),
-    floorId: Optional[int] = Body(0),
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
@@ -67,7 +67,7 @@ async def create_new_income(
                     db.flush()
 
             if type == 'regular':
-                regExpense = db.get(Regularexpence, regularExpenseId)
+                regExpense = db.get(Regularexpence, regularExpenceId)
 
                 if not regExpense:
                     raise HTTPException(400, "Chiqim topilmadi")
@@ -75,10 +75,9 @@ async def create_new_income(
             new_expense = Expense(
                 type=type,
                 employeeId=employeeId if employeeId > 0 else None,
-                regularExpenseId=regularExpenseId if regularExpenseId > 0 else None,
+                regularExpenceId=regularExpenceId if regularExpenceId > 0 else None,
                 value=value,
                 moneyFormId=moneyFormId,
-                floorId=floorId if floorId > 0 else None,
                 branchId=usr.branchId,
                 comment=comment,
                 userId=usr.id,

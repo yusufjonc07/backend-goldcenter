@@ -15,6 +15,8 @@ class Expense(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     type = Column(Enum(ExpenceTypes), default='other', nullable=False)
     employeeId = Column(Integer, ForeignKey('employee.id'), nullable=True)
+    regularExpenceId = Column(Integer, ForeignKey(
+        'regularExpence.id'), nullable=True)
     value = Column(DOUBLE, nullable=False)
     moneyFormId = Column(Integer, ForeignKey('moneyForm.id'), nullable=False)
     branchId = Column(Integer, ForeignKey('branch.id'), nullable=False)

@@ -3,22 +3,26 @@ from sqlalchemy.orm import aliased, Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.expense import *
+from app.models.regularExpence import Regularexpence
 from app.schemas.expense import *
 from sqlalchemy.sql import label
 from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
 
 
-def get_all_expenses(search, type, fromDate, toDate, employeeId, page, limit, usr, db: Session):
+def get_all_expenses(search, type, fromDate, toDate, employeeId, regularExpenceId, page, limit, usr, db: Session):
 
     worker_alias = aliased(Employee, name='worker_alias')
 
     worker = db.query(func.concat(worker_alias.firstname, ' ', worker_alias.lastname)).filter_by(
         id=Expense.employeeId).scalar_subquery()
+    regularExpence = db.query(Regularexpence.name).filter_by(
+        id=Expense.regularExpenceId).scalar_subquery()
 
     expenses = db.query(
         label('type', Expense.type),
         label('worker', worker),
+        label('regularExpence', regularExpence),
         label('comment', Expense.comment),
         label('user', func.concat(Employee.firstname, ' ', Employee.lastname)),
         label('createdAt', Expense.createdAt),
@@ -31,6 +35,10 @@ def get_all_expenses(search, type, fromDate, toDate, employeeId, page, limit, us
 
     if employeeId > 0:
         expenses = expenses.filter(Expense.employeeId == employeeId)
+
+    if regularExpenceId > 0:
+        expenses = expenses.filter(
+            Expense.regularExpenceId == regularExpenceId)
 
     if fromDate and toDate:
         expenses = expenses.filter(
@@ -66,7 +74,7 @@ def create_expense(form_data: NewExpense, usr, db: Session):
         db.commit()
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
-    
+
     except IntegrityError as e:
         raise integrityHandler(e)
 
