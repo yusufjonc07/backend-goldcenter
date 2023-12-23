@@ -9,6 +9,7 @@ ROLES = [
     'headGuard',
     'headCleaner',
     'cleaner',
+    'marketing',
     'clerk',
 ]
 
@@ -21,6 +22,7 @@ ROLE_LABELS = {
     'headGuard': 'Xavfsizlik bo`limi boshlig`i',
     'headCleaner': 'Tozalik bo`limi boshlig`i',
     'cleaner': 'Tozalik bo`limi hodimi',
+    'marketing': 'Marketing bo`limi hodimi',
     'clerk': 'Pattachi',
 }
 
@@ -33,6 +35,7 @@ DEPARTMENT_LABELS = {
     'headGuard': 'Xavfsizlik',
     'headCleaner': 'Tozalik',
     'cleaner': 'Tozalik',
+    'marketing': 'Marketing',
     'clerk': 'Buxgalteriya',
 }
 
@@ -46,6 +49,7 @@ class EmployeeRoles(str, Enum):
     headGuard = "headGuard"
     headCleaner = "headCleaner"
     cleaner = "cleaner"
+    marketing = "marketing"
     clerk = "clerk"
 
 
@@ -104,10 +108,12 @@ class AgreementType(str, Enum):
     rent = "rent"
     sold = "sold"
 
+
 class IncomeType(str, Enum):
     rent = "rent"
     utility = "utility"
     infrastructure = "infrastructure"
+
 
 class IncomeTables(str, Enum):
     clientAgreement = "clientAgreement"

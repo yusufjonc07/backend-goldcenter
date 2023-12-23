@@ -25,6 +25,7 @@ def create_branch(form_data: NewBranch, usr, db: Session):
             name=form_data.name,
             address=form_data.address,
             dollar=form_data.dollar,
+            electrPrice=form_data.electrPrice,
         )
 
         db.add(new_branch)
@@ -45,6 +46,7 @@ def update_branch(id, form_data: UpdateBranch, usr, db: Session):
                 Branch.name: form_data.name,
                 Branch.address: form_data.address,
                 Branch.dollar: form_data.dollar,
+                Branch.electrPrice: form_data.electrPrice,
             })
             db.commit()
 

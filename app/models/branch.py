@@ -9,3 +9,4 @@ class Branch(Base):
     name = Column(String, default='')
     address = Column(String, default='')
     dollar = Column(Numeric)
+    electrPrice = Column(Numeric)

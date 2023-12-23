@@ -64,7 +64,7 @@ async def get_last_one_income(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_last_electrAmount(id, usr, db)
+        return get_last_electrAmount(id,  db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
