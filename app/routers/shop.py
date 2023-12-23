@@ -63,6 +63,19 @@ async def divide_func_shop(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
+@shop_router.get("/shop/correct")
+async def correct_func_shop(
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        for client in db.query(Client).all():
+            client.shop.clientId = client.id
+        return db.commit()
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
 @shop_router.get("/shop/detail")
 async def shop_view(
     shop_id: int,
