@@ -99,7 +99,7 @@ async def create_new_task(
     if usr.userRole in ['director', 'accountant', 'clerk']:
         try:
 
-            _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
+            _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 10)
 
             new_task = Task(
                 fileName=_fileName,
