@@ -20,8 +20,6 @@ class Income(Base):
     comment = Column(String(255))
     userId = Column(Integer, ForeignKey('user.id'))
     createdAt = Column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
-    electrLastAmount = Column(Numeric, default=0)
-    electrAmount = Column(Numeric, default=0)
     type = Column(Enum(IncomeType), default='rent')
 
     client = relationship('Client', backref='incomes')

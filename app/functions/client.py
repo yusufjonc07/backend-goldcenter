@@ -51,8 +51,10 @@ def check_and_create(year, month, usr, db: Session):
         if fee is None:
             db.add(ClientFee(
                 clientId=client.id,
-                value=client.monthlyFee,
-                createdAt=date(year, month, 1)
+                value=client.monthlyFee if client.shop.floor.type == 'rent' else client.shop.area *
+                client.monthlyFee,
+                electrPrice=client.shop.floor.branch.electrPrice,
+                createdAt=date(year, month, 1),
             ))
     db.commit()
     return
@@ -75,10 +77,10 @@ def client_all_fees(floorId, year, month, usr, db: Session):
     if not floor:
         raise HTTPException(400, 'Qavat topilmadi!')
 
-    if floor.type == 'rent':
-        calcFee = Client.monthlyFee
-    else:
-        calcFee = Client.monthlyFee * Shop.area
+    # if :
+    #     calcFee = Client.monthlyFee
+    # else:
+    #     calcFee = Client.monthlyFee * Shop.area
 
     query = db.query(
         label('clientId', Client.id),
@@ -86,7 +88,9 @@ def client_all_fees(floorId, year, month, usr, db: Session):
         label('shopNumber', Shop.number),
         label('shopArea', Shop.area),
         label('balance', Client.balance),
-        label('calcFee', calcFee),
+        label('value', ClientFee.value),
+        label('electrPrice', ClientFee.electrPrice),
+        label('electrAmount', ClientFee.electrAmount),
     )
 
     return select_fees(query, floorId, year, month)

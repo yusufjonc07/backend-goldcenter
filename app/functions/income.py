@@ -37,8 +37,6 @@ def create_income(form_data: NewIncome, usr, db: Session):
             type=form_data.type,
             forMonth=form_data.forMonth,
             forYear=form_data.forYear,
-            electrLastAmount=form_data.electrLastAmount,
-            electrAmount=form_data.electrAmount,
             userId=usr.id,
         )
 
@@ -70,8 +68,6 @@ def update_income(id, form_data: UpdateIncome, usr, db: Session):
                 Income.type: form_data.type,
                 Income.forMonth: form_data.forMonth,
                 Income.forYear: form_data.forYear,
-                Income.electrLastAmount: form_data.electrLastAmount,
-                Income.electrAmount: form_data.electrAmount,
                 Income.userId: usr.id,
             })
             db.commit()
