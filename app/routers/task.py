@@ -14,6 +14,7 @@ from app.utils.wsmanager import manager
 
 task_router = APIRouter(tags=['Xabar Endpoint'])
 
+
 @task_router.get("/task/roles")
 async def get_tasks_list(
     db: Session = ActiveSession,
@@ -24,6 +25,7 @@ async def get_tasks_list(
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
+
 @task_router.get("/notifications")
 async def get_notifications_list(
     db: Session = ActiveSession,
@@ -33,6 +35,7 @@ async def get_notifications_list(
         return get_all_notifications(usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @task_router.get("/tasks")
 async def get_tasks_list(
@@ -47,7 +50,8 @@ async def get_tasks_list(
         return get_all_tasks(search, forRole, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
-    
+
+
 @task_router.put("/task/see")
 async def see_task(
     id: int,
@@ -55,9 +59,10 @@ async def see_task(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return make_view_task(id, db)
+        return make_view_task(id, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
 
 @task_router.get("/task/one")
 async def get_task(
@@ -69,7 +74,8 @@ async def get_task(
         return db.get(Task, id)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
-    
+
+
 @task_router.put("/notification/see")
 async def see_notification(
     id: int,
@@ -90,7 +96,7 @@ async def create_new_task(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-    if  usr.userRole in ['director', 'accountant', 'clerk']:
+    if usr.userRole in ['director', 'accountant', 'clerk']:
         try:
 
             _fileName = await validate_file(fileName, ['document', 'image', 'audio', 'video'], 3)
@@ -117,7 +123,8 @@ async def create_new_task(
             raise integrityHandler(e)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
-    
+
+
 @task_router.post("/task/{id}/complete")
 async def complete_task(
     id: int,
@@ -136,10 +143,12 @@ async def complete_task(
                 raise HTTPException(400, 'Bunday vazifa mavjud emas!')
 
             if _task.forRole != usr.userRole:
-                raise HTTPException(400, 'Ushbu vazifa uchun siz javobgar emassiz!')
-            
+                raise HTTPException(
+                    400, 'Ushbu vazifa uchun siz javobgar emassiz!')
+
             if _task.responseEmployeeId:
-                raise HTTPException(400, 'Ushbu vazifaga javob berib bo\'lingan!')
+                raise HTTPException(
+                    400, 'Ushbu vazifaga javob berib bo\'lingan!')
 
             _fileName = await validate_file(responseFileName, ['document', 'image', 'audio', 'video'], 3)
 
