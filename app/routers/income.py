@@ -18,7 +18,7 @@ income_router = APIRouter(tags=['Kassa Endpoint'])
 @income_router.get("/incomes")
 async def get_agreement_payments(
     clientId: Optional[int] = 0,
-    type: Optional[IncomeType] = 'rent',
+    type: str = None,
     fromDate: Optional[date] = None,
     toDate: Optional[date] = None,
     page: int = 1,

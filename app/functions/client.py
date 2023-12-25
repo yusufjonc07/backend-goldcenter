@@ -118,6 +118,62 @@ def client_all_fees(floorId, year, month, usr, db: Session):
     return select_fees(query, floorId, year, month)
 
 
+def client_one_fees(id, type, year, month, usr, db: Session):
+
+    valuePaid = db.query(func.sum(Income.value)).filter(
+        Income.forMonth == func.month(ClientFee.createdAt),
+        Income.forYear == func.year(ClientFee.createdAt),
+        Income.clientId == ClientFee.clientId,
+        or_(
+            Income.type == 'rent',
+            Income.type == 'infrastructure',
+        )
+    ).subquery()
+    electrPaid = db.query(func.sum(Income.value)).filter(
+        Income.forMonth == func.month(ClientFee.createdAt),
+        Income.forYear == func.year(ClientFee.createdAt),
+        Income.clientId == ClientFee.clientId,
+        Income.type == 'utility',
+    ).subquery()
+
+    fee = db.query(
+        label('id', ClientFee.id),
+        label('clientId', Client.id),
+        label('clientName', Client.clientName),
+        label('clientType', Client.type),
+        label('shopNumber', Shop.number),
+        label('shopArea', Shop.area),
+        label('value', ClientFee.value),
+        label('valuePaid', func.coalesce(valuePaid, 0.0)),
+        label('electrPrice', ClientFee.electrPrice),
+        label('electrAmount', ClientFee.electrAmount),
+        label('electrPaid', func.coalesce(electrPaid, 0.0)),
+        label('balance', Client.balance),
+        label('isConfirmed', ClientFee.isConfirmed),
+    ).join(ClientFee.client).join(Client.shop).filter(
+        ClientFee.clientId == id,
+        func.year(ClientFee.createdAt) == year,
+        func.month(ClientFee.createdAt) == month,
+    ).first()
+
+    if not fee:
+        return {
+            "forMonth": 0.0,
+            "paidMoney": 0.0,
+        }
+
+    if fee.clientType == 'utility':
+        return {
+            "forMonth": fee.electrAmount*fee.electrPrice,
+            "paidMoney": fee.electrPaid,
+        }
+    else:
+        return {
+            "forMonth": fee.value,
+            "paidMoney": fee.valuePaid,
+        }
+
+
 def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
 
     clientFee = db.query(ClientFee).filter(

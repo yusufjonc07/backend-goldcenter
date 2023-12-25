@@ -24,7 +24,10 @@ def get_all_agreement_payments(clientId, type, fromDate, toDate, page, limit, us
         label("comment", Income.comment),
     ).select_from(Income)\
         .join(Income.client)\
-        .join(Client.shop).join(Income.moneyForm).filter(Income.type == type)
+        .join(Client.shop).join(Income.moneyForm)
+
+    if type:
+        incomesData = incomesData.filter(Income.type == type)
 
     if clientId > 0:
         incomesData = incomesData.filter(Income.clientId == clientId)
@@ -36,8 +39,8 @@ def get_all_agreement_payments(clientId, type, fromDate, toDate, page, limit, us
         )
 
     # if search:
-       # incomesData = incomesData.filter(
-        # Income.id.like(f"%{search}%"),
-       # )
+    # incomesData = incomesData.filter(
+    # Income.id.like(f"%{search}%"),
+    # )
 
     return pagination(incomesData, page, limit)

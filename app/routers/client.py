@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 from app.models.user import User
 from app.schemas.client import ConfirmFee
+from app.schemas.enums import IncomeType
 from app.schemas.user import NewUser
 from app.utils.fileUtil import replace_file, save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -45,6 +46,21 @@ def get_client_fees(
 ):
     if usr.userRole in ['director', 'accountant']:
         return client_all_fees(floorId, year, month, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@client_router.get("/client/fee_one")
+def get_client_fees(
+    id: int = Query(..., ge=1),
+    type: IncomeType = Query(...),
+    year: int = Query(...),
+    month: int = Query(..., le=12),
+    db: Session = ActiveSession,
+    usr: User = Depends(get_current_active_user)
+):
+    if usr.userRole in ['director', 'accountant']:
+        return client_one_fees(id, type, year, month, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
