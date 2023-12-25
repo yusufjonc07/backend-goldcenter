@@ -70,7 +70,8 @@ async def create_new_income(
                 regExpense = db.get(Regularexpence, regularExpenceId)
 
                 if not regExpense:
-                    raise HTTPException(400, "Chiqim topilmadi")
+                    raise HTTPException(
+                        400, f"Chiqim topilmadi {regularExpenceId}")
 
             new_expense = Expense(
                 type=type,
