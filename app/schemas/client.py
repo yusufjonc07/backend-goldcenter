@@ -30,7 +30,7 @@ class FormWarehouseClient(BaseModel):
 
 
 class ConfirmFee(BaseModel):
-    floorId: int = Field(..., ge=1)
-    year: int
-    month: int = Field(..., ge=12)
-    quadraticFee: float = Field(..., ge=0)
+    clientFeeId: int
+    electrPrice: float = Field(..., ge=0)
+    electrAmount: float = Field(..., ge=0)
+    value: float

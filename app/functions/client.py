@@ -83,14 +83,19 @@ def client_all_fees(floorId, year, month, usr, db: Session):
     #     calcFee = Client.monthlyFee * Shop.area
 
     query = db.query(
+        label('id', ClientFee.id),
         label('clientId', Client.id),
         label('clientName', Client.clientName),
+        label('clientType', Client.type),
         label('shopNumber', Shop.number),
         label('shopArea', Shop.area),
-        label('balance', Client.balance),
         label('value', ClientFee.value),
+        label('valuePaid', 1000.0),
         label('electrPrice', ClientFee.electrPrice),
         label('electrAmount', ClientFee.electrAmount),
+        label('electrPaid', 1000.0),
+        label('balance', Client.balance),
+        label('isConfirmed', ClientFee.isConfirmed),
     )
 
     return select_fees(query, floorId, year, month)
@@ -103,23 +108,24 @@ def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
     if not floor:
         raise HTTPException(400, 'Qavat topilmadi!')
 
-    query = db.query(ClientFee)
+    clientFee = db.query(ClientFee).filter(
+        ClientFee.id == form_data.clientFeeId
+    ).first()
 
-    clientFees: List[ClientFee] = select_fees(query, form_data.floorId,
-                                              form_data.year, form_data.month)
+    if not clientFee:
+        raise HTTPException(400, 'Ma`lumot topilmadi!')
 
-    for clientFee in clientFees:
+    if clientFee.isConfirmed == True:
+        clientFee.client.balance += (clientFee.value +
+                                     (clientFee.electrPrice*clientFee.electrAmount))
 
-        if clientFee.isConfirmed == True:
-            clientFee.client.balance += clientFee.value
+    clientFee.value = form_data.value
+    clientFee.electrPrice = form_data.electrPrice
+    clientFee.electrAmount = form_data.electrAmount
 
-        if clientFee.client.type == 'sold':
-            clientFee.value = clientFee.client.shop.area * clientFee.client.monthlyFee
-        else:
-            clientFee.value = clientFee.client.monthlyFee
-
-        clientFee.client.balance -= clientFee.value
-        clientFee.isConfirmed = True
+    clientFee.client.balance -= (clientFee.value +
+                                 (clientFee.electrPrice*clientFee.electrAmount))
+    clientFee.isConfirmed = True
 
     db.commit()
     raise HTTPException(200, 'Ma\'lumotlar saqlandi!')
