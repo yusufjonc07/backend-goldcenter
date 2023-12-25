@@ -1,11 +1,12 @@
 from datetime import date
 from typing import List
 from fastapi import HTTPException
-from sqlalchemy.sql import label, func
+from sqlalchemy.sql import label, func, or_
 from sqlalchemy.orm import Session
 from app.models.client import *
 from app.models.clientFee import ClientFee
 from app.models.floor import Floor
+from app.models.income import Income
 from app.schemas.client import ConfirmFee
 from app.utils.pagination import pagination
 
@@ -82,6 +83,22 @@ def client_all_fees(floorId, year, month, usr, db: Session):
     # else:
     #     calcFee = Client.monthlyFee * Shop.area
 
+    valuePaid = db.query(func.sum(Income.value)).filter(
+        Income.forMonth == func.month(ClientFee.createdAt),
+        Income.forYear == func.year(ClientFee.createdAt),
+        Income.clientId == ClientFee.clientId,
+        or_(
+            Income.type == 'rent',
+            Income.type == 'infrastructure',
+        )
+    ).subquery()
+    electrPaid = db.query(func.sum(Income.value)).filter(
+        Income.forMonth == func.month(ClientFee.createdAt),
+        Income.forYear == func.year(ClientFee.createdAt),
+        Income.clientId == ClientFee.clientId,
+        Income.type == 'utility',
+    ).subquery()
+
     query = db.query(
         label('id', ClientFee.id),
         label('clientId', Client.id),
@@ -90,10 +107,10 @@ def client_all_fees(floorId, year, month, usr, db: Session):
         label('shopNumber', Shop.number),
         label('shopArea', Shop.area),
         label('value', ClientFee.value),
-        label('valuePaid', 1000.0),
+        label('valuePaid', func.coalesce(valuePaid, 0.0)),
         label('electrPrice', ClientFee.electrPrice),
         label('electrAmount', ClientFee.electrAmount),
-        label('electrPaid', 1000.0),
+        label('electrPaid', func.coalesce(electrPaid, 0.0)),
         label('balance', Client.balance),
         label('isConfirmed', ClientFee.isConfirmed),
     )
