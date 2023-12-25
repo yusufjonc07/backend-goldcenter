@@ -120,11 +120,6 @@ def client_all_fees(floorId, year, month, usr, db: Session):
 
 def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
 
-    floor: Floor = db.get(Floor, form_data.floorId)
-
-    if not floor:
-        raise HTTPException(400, 'Qavat topilmadi!')
-
     clientFee = db.query(ClientFee).filter(
         ClientFee.id == form_data.clientFeeId
     ).first()
