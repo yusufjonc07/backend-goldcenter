@@ -35,7 +35,6 @@ async def get_employees_list(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
-
 @employee_router.get("/employee/roles")
 async def get_employees_roles(
     db: Session = ActiveSession,
@@ -72,23 +71,24 @@ async def get_employee_details(
         return db.query(Employee)\
             .options(joinedload(Employee.user).options(
                 load_only('username')
-            ))\
+            ), joinedload(Employee.shift))\
             .filter_by(id=id).first()
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
-    
+
+
 @employee_router.get("/employee/{id}/attandances", description="This router returns list of the monthly attandances  of certain employee using pagination")
 async def get_attandances_list(
     id: int,
     year: int,
     month: int,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
-):   
+):
     if not usr.userRole in ['any_role']:
-        return employee_attandances(id, year, month, db)  
+        return employee_attandances(id, year, month, db)
     else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!") 
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
 @employee_router.post("/employee/create", description="This router is able to add new employee")
