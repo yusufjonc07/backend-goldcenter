@@ -11,6 +11,7 @@ from databases.main import get_db, ActiveSession
 from app.schemas.user import NewUser
 from pydantic import BaseModel
 
+
 class TokenData(BaseModel):
     username: Optional[str] = None
 
@@ -21,12 +22,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 auth_router = APIRouter(tags=["Xavsizlik"])
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+
 
 def get_user(username, db: Session):
     user = db.query(User).filter(User.username == username).first()
@@ -56,7 +59,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 # def get_current_ws_active_user(token: str, db: Session = ActiveSession):
-    
+
 #     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 #     username: str = payload.get("sub")
 #     if username:
@@ -67,6 +70,26 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 #             return user
 
 
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_user(username=token_data.username, db=db)
+    if user is None:
+        raise credentials_exception
+
+    return user
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -85,28 +108,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user = get_user(username=token_data.username, db=db)
     if user is None:
         raise credentials_exception
-    
+
     return user
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = get_user(username=token_data.username, db=db)
-    if user is None:
-        raise credentials_exception
-    
-    return user
 
 async def get_current_ws_user(token: str, db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -125,7 +129,7 @@ async def get_current_ws_user(token: str, db: Session = Depends(get_db)):
     user = get_user(username=token_data.username, db=db)
     if user is None:
         raise credentials_exception
-    
+
     return user
 
 
@@ -134,9 +138,11 @@ async def get_current_active_user(current_user: NewUser = Depends(get_current_us
         raise HTTPException(status_code=401, detail="Bo`shatilgan hodim")
     return current_user
 
+
 @auth_router.get("/me")
 async def get_me(usr: NewUser = Depends(get_current_active_user)):
     usr.employee = usr.employee
+    usr.employee.shift = usr.employee.shift
     return usr
 
 
