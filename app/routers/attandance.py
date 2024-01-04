@@ -1,5 +1,6 @@
 from datetime import datetime, date
 import json
+import re
 from fastapi import HTTPException, APIRouter, Depends, Request
 from typing import Optional, List
 from app.schemas.user import NewUser
@@ -80,13 +81,12 @@ async def get_attandance_users_list(
     try:
         data = await req.body()
         data_str = data.decode()
-        data_str = data_str.split("\n", 3)[3]
-        data_str = data_str[:-20]
+        match = re.search(r'\{.*\}', data_str, re.DOTALL)
+        json_data = match.group(0) if match else None
 
-        # with open(f"{uuid.uuid4()}.json", "w") as f:
-        #     f.write(data_str)
+        # Load JSON data into a Python dictionary
+        data_dict = json.loads(json_data) if json_data else None
 
-        data_dict = json.loads(data_str)
         AccessControllerEvent = data_dict['AccessControllerEvent']
         user_id = AccessControllerEvent['employeeNoString']
         attendanceStatus = AccessControllerEvent['attendanceStatus']
@@ -103,4 +103,4 @@ async def get_attandance_users_list(
 
             return "success"
     except Exception as e:
-        print('xatolik')
+        print(e.args)
