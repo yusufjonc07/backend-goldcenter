@@ -71,7 +71,7 @@ class ConnectionManager:
             task_id: any,
             usr: User, db: Session):
 
-        users = db.query(User.id).filter(
+        users = db.query(User).filter(
             User.userRole.in_(for_roles),
             User.disabled == False,
             User.id != usr.id
@@ -79,10 +79,10 @@ class ConnectionManager:
 
         nots = []
 
-        for user in users:
+        for userofapp in users:
             new_notification = Notification(
                 context=context,
-                user_id=user.id,
+                user_id=userofapp.id,
                 type=type,
                 task_id=task_id,
             )
@@ -94,12 +94,14 @@ class ConnectionManager:
         for not_one in nots:
 
             for connection in self.active_connections:
-                websocket, user = connection
+                websocket, webUser = connection
 
                 try:
-                    if user.id == not_one.user_id:
+                    if webUser.id == not_one.user_id:
                         await websocket.send_json(get_json(not_one))
                         not_one.isSend = True
+                        print('JO\'NATILDI')
+
                 except WebSocketDisconnect:
                     await self.disconnect(websocket)
 

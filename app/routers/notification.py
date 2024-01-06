@@ -23,8 +23,6 @@ notification_router = APIRouter()
 #     return await manager.send_user(message, 'plant_admin', db)
 
 
- 
-
 @notification_router.websocket("/connection")
 async def websocket_endpoint(
     token: str,
@@ -37,17 +35,18 @@ async def websocket_endpoint(
     user: User = db.query(User).filter_by(
         username=username, disabled=False).first()
 
-    await manager.connect(websocket, user)
+    if user:
+        await manager.connect(websocket, user)
 
     try:
 
-        if user:
-            unSendNotifications = db.query(Notification).filter_by(user_id=user.id, isSend=False)
-            for notifyOne in unSendNotifications.all():
-                await manager.send_personal_json(notifyOne, (websocket, user))
-                notifyOne.isSend = True
+        unSendNotifications = db.query(Notification).filter_by(
+            user_id=user.id, isSend=False)
+        for notifyOne in unSendNotifications.all():
+            await manager.send_personal_json(notifyOne, (websocket, user))
+            notifyOne.isSend = True
 
-            db.commit()
+        db.commit()
 
         while True:
             await websocket.receive_text()
