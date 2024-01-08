@@ -3,6 +3,16 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.branch import *
 from app.models.client import *
+from app.models.attandance import *
+from app.models.clientFee import *
+from app.models.document import *
+from app.models.expense import *
+from app.models.income import *
+from app.models.notification import *
+from app.models.parkingCar import *
+from app.models.regularExpence import *
+from app.models.salary import *
+from app.models.task import *
 from app.schemas.branch import *
 from app.utils.pagination import pagination
 
@@ -62,18 +72,16 @@ def delete_practices(usr, db: Session):
 
     try:
 
-        db.execute('''
-            TRUNCATE TABLE `attandance`;
-            TRUNCATE TABLE `clientFee`;
-            TRUNCATE TABLE `document`;
-            TRUNCATE TABLE `expense`;
-            TRUNCATE TABLE `income`;
-            TRUNCATE TABLE `notification`;
-            TRUNCATE TABLE `parkingCar`;
-            TRUNCATE TABLE `regularExpence`;
-            TRUNCATE TABLE `salary`;
-            TRUNCATE TABLE `task`;
-        ''')
+        db.query(Attandance).delete()
+        db.query(ClientFee).delete()
+        db.query(Document).delete()
+        db.query(Expense).delete()
+        db.query(Income).delete()
+        db.query(Notification).delete()
+        db.query(ParkingCar).delete()
+        db.query(Regularexpence).delete()
+        db.query(Salary).delete()
+        db.query(Task).delete()
 
         db.query(Client).update({
             Client.balance: 0
