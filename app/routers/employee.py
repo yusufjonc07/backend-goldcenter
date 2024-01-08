@@ -204,6 +204,12 @@ async def update_one_employee(
                     Employee.fired: fired,
                     Employee.shiftId: shiftId,
                 })
+
+                if fired == True:
+                    db.query(User).filter(User.employeeId == this_employee.id).update({
+                        User.disabled: True
+                    })
+
                 db.commit()
 
                 await replace_file(passportFile, _old_employee.passportFile, passportFileName, 'employeePassports')
