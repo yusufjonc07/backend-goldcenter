@@ -14,6 +14,7 @@ from app.models.regularExpence import *
 from app.models.salary import *
 from app.models.task import *
 from app.schemas.branch import *
+from app.utils.fileUtil import delete_files_in_folder, delete_folder
 from app.utils.pagination import pagination
 
 
@@ -86,6 +87,12 @@ def delete_practices(usr, db: Session):
         db.query(Client).update({
             Client.balance: 0
         })
+
+        delete_files_in_folder('documents')
+        delete_files_in_folder('expenses')
+        delete_folder('headCleaner')
+        delete_folder('headConstructor')
+        delete_folder('headGuard')
 
         db.commit()
 
