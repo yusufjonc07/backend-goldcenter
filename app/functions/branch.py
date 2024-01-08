@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.branch import *
+from app.models.client import *
 from app.schemas.branch import *
 from app.utils.pagination import pagination
 
@@ -53,5 +54,33 @@ def update_branch(id, form_data: UpdateBranch, usr, db: Session):
             raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")
         else:
             raise HTTPException(status_code=400, detail="So`rovda xatolik!")
+    except IntegrityError as e:
+        raise HTTPException(400, e.args)
+
+
+def delete_practices(usr, db: Session):
+
+    try:
+
+        db.execute('''
+            TRUNCATE TABLE `attandance`;
+            TRUNCATE TABLE `clientFee`;
+            TRUNCATE TABLE `document`;
+            TRUNCATE TABLE `expense`;
+            TRUNCATE TABLE `income`;
+            TRUNCATE TABLE `notification`;
+            TRUNCATE TABLE `parkingCar`;
+            TRUNCATE TABLE `regularExpence`;
+            TRUNCATE TABLE `salary`;
+            TRUNCATE TABLE `task`;
+        ''')
+
+        db.query(Client).update({
+            Client.balance: 0
+        })
+
+        db.commit()
+
+        raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")
     except IntegrityError as e:
         raise HTTPException(400, e.args)

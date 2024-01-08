@@ -161,7 +161,7 @@ async def update_one_employee(
     role: EmployeeRoles = Body(...),
     birthDate: date = Body(...),
     agreementFile: Optional[UploadFile] = File(None),
-    fired: Optional[bool] = Body(False),
+    fired: Optional[bool] = Body(...),
     duty: str = Body(..., max_length=255),
     shiftId: int = Body(...),
     db: Session = ActiveSession,

@@ -1,4 +1,4 @@
-from fastapi import HTTPException, APIRouter, Depends
+from fastapi import HTTPException, APIRouter, Depends, Query
 from typing import Optional
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
@@ -58,5 +58,27 @@ async def update_one_branch(
 ):
     if not usr.userRole in ['any_role']:
         return update_branch(id, form_data, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@branch_router.delete("/delete_practices")
+async def delete_practices_all(
+    confirmation: Optional[str] = Query(...,
+                                        description="Tasdiqlayman deb yozing"),
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    """
+    !!!DIQQAT!!!
+    Ehtiyot bo'ling barcha ma'lumotlar tozalanadi!
+    Va ularni orqaga qaytarib bo'lmaydi!!!
+    """
+
+    if confirmation != "Tasdiqlayman":
+        raise HTTPException(status_code=400, detail="Tasdiqlanmadi!")
+
+    if not usr.userRole in ['any_role']:
+        return delete_practices(usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
