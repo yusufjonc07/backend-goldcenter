@@ -205,6 +205,8 @@ async def update_one_employee(
                     Employee.shiftId: shiftId,
                 })
 
+                print(fired)
+
                 if fired == True:
                     db.query(User).filter(User.employeeId == this_employee.id).update({
                         User.disabled: True
