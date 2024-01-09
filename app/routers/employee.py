@@ -46,7 +46,7 @@ async def get_employees_roles(
             roles.append({
                 'role': role,
                 'label': ROLE_LABELS[role],
-                'count': db.query(Employee).filter_by(role=role).count(),
+                'count': db.query(Employee).filter_by(role=role, fired=False).count(),
             })
         return roles
 
