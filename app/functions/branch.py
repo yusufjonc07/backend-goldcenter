@@ -73,7 +73,7 @@ def delete_practices(usr, db: Session):
 
     try:
 
-        db.query(Attandance).delete()
+        # db.query(Attandance).delete()
         db.query(ClientFee).delete()
         db.query(Document).delete()
         db.query(Expense).delete()
