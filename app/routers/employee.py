@@ -184,7 +184,7 @@ async def update_one_employee(
                     passportFileName = this_employee.passportFile
 
                 if agreementFile:
-                    agreementFileName = await validate_file(agreementFile, ['document'], 3)
+                    agreementFileName = await validate_file(agreementFile, ['document', 'image'], 3)
                 else:
                     agreementFileName = this_employee.agreementFile
 
