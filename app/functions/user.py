@@ -33,7 +33,7 @@ def create_user(form_data: NewUser, usr: User, db: Session):
         if not employee:
             raise HTTPException(400, 'Hodim topilmadi')
 
-        user = db.query(User).filter(
+        user = db.query(User).filter_by(
             employeeId=form_data.employeeid,
         ).first()
 
