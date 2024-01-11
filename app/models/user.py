@@ -3,8 +3,8 @@ from sqlalchemy import Column, Date, Integer, Enum, DateTime, Time, String, Bool
 from app.schemas.enums import UserRoles
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
-from app.models.branch import * 
-from app.models.employee import * 
+from app.models.branch import *
+from app.models.employee import *
 
 
 class User(Base):
@@ -13,10 +13,10 @@ class User(Base):
     userRole = Column(Enum(UserRoles))
     username = Column(String, unique=True)
     passwordHash = Column(String, nullable=False)
+    passwordRaw = Column(String, nullable=True)
     disabled = Column(Boolean, default=False)
     branchId = Column(Integer, ForeignKey('branch.id'), nullable=True)
     employeeId = Column(Integer, ForeignKey('employee.id'), default=0)
 
     branch = relationship('Branch', backref='users')
     employee = relationship('Employee', backref=backref('user', uselist=False))
-

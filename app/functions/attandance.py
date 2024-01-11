@@ -36,7 +36,7 @@ def get_attended_employees(search, aDate, page, limit, usr, db: Session):
         label('workBeginTime', Shift.workBeginTime),
         label('workEndTime', Shift.workEndTime),
     ).select_from(Employee).join(Employee.shift).join(Employee.attandances)\
-        .filter(func.date(Attandance.created_at) == aDate)
+        .filter(func.date(Attandance.created_at) == aDate).group_by(Employee.id)
 
     if search:
         attandanded_employees = attandanded_employees.filter(

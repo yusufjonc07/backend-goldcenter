@@ -6,16 +6,15 @@ from app.models.user import *
 from app.schemas.user import *
 from app.utils.handler import integrityHandler
 from security.auth import get_password_hash
-from app.utils.pagination import pagination 
-
+from app.utils.pagination import pagination
 
 
 def get_all_users(search, employeeId, page, limit, usr, db: Session):
-    
+
     users = db.query(User)
 
     if employeeId > 0:
-        users = users.filter(User.employeeId==employeeId)
+        users = users.filter(User.employeeId == employeeId)
 
     # if search:
     # users = users.filter(
@@ -34,15 +33,23 @@ def create_user(form_data: NewUser, usr: User, db: Session):
         if not employee:
             raise HTTPException(400, 'Hodim topilmadi')
 
-        new_user = User(
+        user = db.query(User).filter(
             employeeId=form_data.employeeid,
-            username=form_data.username,
-            userRole=employee.role,
-            passwordHash=get_password_hash(form_data.password),
-            branchId=usr.branchId,
-        )
+        ).first()
 
-        db.add(new_user)
+        if not user:
+            new_user = User(
+                employeeId=form_data.employeeid,
+                username=form_data.username,
+                userRole=employee.role,
+                passwordHash=get_password_hash(form_data.password),
+                passwordRaw=form_data.password,
+                branchId=usr.branchId,
+            )
+            db.add(new_user)
+        else:
+            update_user(user.id, form_data, usr, db)
+
         db.commit()
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
@@ -59,13 +66,15 @@ def update_user(id, form_data: UpdateUser, usr, db: Session):
 
             if len(form_data.password) > 5:
                 passwordHash = get_password_hash(form_data.password)
+                passwordRaw = form_data.password
             else:
                 passwordHash = this_user.passwordHash
+                passwordRaw = this_user.passwordRaw
 
             user.update({
-                "userRole": form_data.userrole,
                 "username": form_data.username,
                 "passwordHash": passwordHash,
+                "passwordRaw": passwordRaw,
                 "disabled": form_data.disabled,
             })
             db.commit()

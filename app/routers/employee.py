@@ -69,9 +69,7 @@ async def get_employee_details(
 
     if not usr.userRole in ['any_role']:
         return db.query(Employee)\
-            .options(joinedload(Employee.user).options(
-                load_only('username')
-            ), joinedload(Employee.shift))\
+            .options(joinedload(Employee.user), joinedload(Employee.shift))\
             .filter_by(id=id).first()
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
