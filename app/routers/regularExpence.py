@@ -48,3 +48,15 @@ async def update_one_regularExpence(
         return update_regularExpence(id, form_data, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@regularExpence_router.delete("/regularExpence/{id}/delete")
+async def delete_one_regularExpence(
+    id: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return delete_regularExpence(id, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

@@ -156,26 +156,18 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
 
         print(dateTime)
 
-        attandance_count = db.query(Attandance).filter(
-            func.year(Attandance.created_at) == yearMonth.year,
-            func.month(Attandance.created_at) == yearMonth.month,
-            Attandance.employeeId == employee.id,
-            Attandance.type == 'checkIn',
-        ).count()
-
         salary = db.query(Salary).filter(
             func.year(Salary.createdAt) == yearMonth.year,
             func.month(Salary.createdAt) == yearMonth.month,
             Salary.employeeId == employee.id,
         ).first()
 
-        if attandance_count == 0 and salary is not None:
+        if not salary:
             new_salary = Salary(
                 employeeId=employee.id,
                 calcWage=employee.salaryQuantity,
                 createdAt=dateTime,
             )
-
             db.add(new_salary)
 
         new_attandance = Attandance(
