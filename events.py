@@ -6,6 +6,7 @@ import random
 import string
 from app.utils.wsmanager import manager
 
+
 events_router = APIRouter()
 
 

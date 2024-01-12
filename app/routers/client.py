@@ -83,6 +83,8 @@ async def get_client_one(
                 "liablePerson": client.liablePerson,
                 "shopNumber": client.shop.number,
                 "shopArea": client.shop.area,
+                "floorId": client.shop.floor.id,
+                "floorNumber": client.shop.floor.number,
                 "phoneNumber": client.phoneNumber,
                 "extraPhoneNumber": client.extraPhoneNumber,
                 "balance": client.balance,

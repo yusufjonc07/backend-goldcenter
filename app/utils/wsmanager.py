@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.task import Task
 from app.models.user import User
 from app.models.notification import Notification
+from app.utils.fcm_manager import sendPush
 from app.schemas.enums import NotificationTypes, UserRoles
 
 
@@ -77,6 +78,13 @@ class ConnectionManager:
             User.id != usr.id
         ).all()
 
+        usernames = [fsmUser.username for fsmUser in users]
+        sendPush(
+            usernames,
+            'Vazifalar bo\'limi' if type == 'task' else 'Yangi hujjat',
+            context
+        )
+
         nots = []
 
         for userofapp in users:
@@ -93,17 +101,18 @@ class ConnectionManager:
 
         for not_one in nots:
 
-            for connection in self.active_connections:
-                websocket, webUser = connection
+            not_one.isSend = True
 
-                try:
-                    if webUser.id == not_one.user_id:
-                        await websocket.send_json(get_json(not_one))
-                        not_one.isSend = True
-                        print('JO\'NATILDI')
+            # for connection in self.active_connections:
+            #     websocket, webUser = connection
+            #     try:
+            #         if webUser.id == not_one.user_id:
+            #             await websocket.send_json(get_json(not_one))
+            #             not_one.isSend = True
+            #             print('JO\'NATILDI')
 
-                except WebSocketDisconnect:
-                    await self.disconnect(websocket)
+            #     except WebSocketDisconnect:
+            #         await self.disconnect(websocket)
 
         db.commit()
 
