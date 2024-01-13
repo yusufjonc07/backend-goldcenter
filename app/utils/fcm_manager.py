@@ -6,7 +6,7 @@ cred = credentials.Certificate("./app/utils/serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 
 
-def sendPush(usernames, title, msg):
+def sendPush(tokens, title, msg):
     # See documentation on defining a message payload.
     message = messaging.MulticastMessage(
         notification=messaging.Notification(
@@ -14,7 +14,7 @@ def sendPush(usernames, title, msg):
             body=msg,
         ),
         data=None,
-        tokens=usernames,
+        tokens=tokens,
     )
 
     # registration token.

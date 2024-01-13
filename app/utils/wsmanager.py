@@ -78,9 +78,11 @@ class ConnectionManager:
             User.id != usr.id
         ).all()
 
-        usernames = [fsmUser.username for fsmUser in users]
+        tokens = [
+            fsmUser.deviceToken for fsmUser in users if fsmUser.deviceToken]
+
         sendPush(
-            usernames,
+            tokens,
             'Vazifalar bo\'limi' if type == 'task' else 'Yangi hujjat',
             context
         )

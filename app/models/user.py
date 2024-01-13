@@ -12,6 +12,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     userRole = Column(Enum(UserRoles))
     username = Column(String, unique=True)
+    deviceToken = Column(String, nullable=True)
     passwordHash = Column(String, nullable=False)
     passwordRaw = Column(String, nullable=True)
     disabled = Column(Boolean, default=False)
