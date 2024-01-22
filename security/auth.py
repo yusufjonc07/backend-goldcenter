@@ -71,7 +71,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    print("TOKEN: "+token)  
+    print("TOKEN: "+token)
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -87,7 +87,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     except JWTError:
         raise credentials_exception
 
-    
     user = get_user(username=token_data.username, db=db)
     if user is None:
         raise credentials_exception
@@ -133,6 +132,12 @@ async def get_me(usr: NewUser = Depends(get_current_active_user)):
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user: User = authenticate_user(
         form_data.username, form_data.password, db=db)
+
+    if not form_data.client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="FSM Notification Token Mavjud Emas!",
+        )
 
     if not user:
         raise HTTPException(
