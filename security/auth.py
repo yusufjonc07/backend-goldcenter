@@ -133,11 +133,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     user: User = authenticate_user(
         form_data.username, form_data.password, db=db)
 
-    if not form_data.client_secret:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="FSM Notification Token Mavjud Emas!",
-        )
+    # if not form_data.client_secret:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="FSM Notification Token Mavjud Emas!",
+    #     )
 
     if not user:
         raise HTTPException(
