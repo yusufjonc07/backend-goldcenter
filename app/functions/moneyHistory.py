@@ -22,8 +22,11 @@ def get_all_agreement_payments(clientId, floorId, type, fromDate, toDate, page, 
         label("createdAt", Income.createdAt),
         label("moneyForm", Moneyform.name),
         label("comment", Income.comment),
+        label("employeeName", Employee._fullname),
     ).select_from(Income)\
         .join(Income.client)\
+        .join(Income.user)\
+        .join(User.employee)\
         .join(Client.shop).join(Income.moneyForm)
 
     if type:
