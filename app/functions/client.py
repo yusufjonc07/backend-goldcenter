@@ -2,13 +2,15 @@ from datetime import date
 from typing import List
 from fastapi import HTTPException
 from sqlalchemy.sql import label, func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from app.models.client import *
 from app.models.clientFee import ClientFee
 from app.models.floor import Floor
 from app.models.income import Income
 from app.schemas.client import ConfirmFee
 from app.utils.pagination import pagination
+
+import calendar
 
 
 def get_all_clients(floorId, status, page, limit, usr, db: Session):
@@ -54,7 +56,8 @@ def check_and_create(year, month, usr, db: Session):
                 clientId=client.id,
                 value=client.monthlyFee if client.shop.floor.type == 'rent' else client.shop.area *
                 client.monthlyFee,
-                electrPrice=client.shop.floor.branch.electrPrice,
+                # electrPrice=client.shop.floor.branch.electrPrice,
+                electrPrice=0,
                 createdAt=date(year, month, 1),
             ))
     db.commit()
@@ -111,11 +114,38 @@ def client_all_fees(floorId, year, month, usr, db: Session):
         label('electrPrice', ClientFee.electrPrice),
         label('electrAmount', ClientFee.electrAmount),
         label('electrPaid', func.coalesce(electrPaid, 0.0)),
-        label('balance', Client.balance),
+        label('balance', client_balance_in_month_subquery(year, month, db)),
         label('isConfirmed', ClientFee.isConfirmed),
     )
 
     return select_fees(query, floorId, year, month)
+
+
+def client_balance_in_month_subquery(year, month, db, end=True):
+
+    otherClientFees = aliased(ClientFee)
+
+    if end:
+        num_days_in_month = calendar.monthrange(year, month)[1]
+    else:
+        num_days_in_month = 1
+
+    return (
+        Client.balance
+        -
+        db.query(func.coalesce(func.sum(Income.value), 0)).filter(
+            Income.clientId == Client.id,
+            func.date(
+                Income.createdAt) > f"{year}-{month:02d}-{num_days_in_month:02d}",
+        ).scalar_subquery()
+        +
+        db.query(func.coalesce(func.sum(otherClientFees.value+otherClientFees.electrPrice*otherClientFees.electrAmount), 0)).filter(
+            otherClientFees.clientId == Client.id,
+            otherClientFees.isConfirmed == True,
+            func.date(
+                otherClientFees.createdAt) > f"{year}-{month:02d}-{num_days_in_month:02d}",
+        ).scalar_subquery()
+    )
 
 
 def client_one_fees(id, type, year, month, usr, db: Session):
@@ -148,7 +178,7 @@ def client_one_fees(id, type, year, month, usr, db: Session):
         label('electrPrice', ClientFee.electrPrice),
         label('electrAmount', ClientFee.electrAmount),
         label('electrPaid', func.coalesce(electrPaid, 0.0)),
-        label('balance', Client.balance),
+        label('balance', client_balance_in_month_subquery(year, month, db)),
         label('isConfirmed', ClientFee.isConfirmed),
     ).join(ClientFee.client).join(Client.shop).filter(
         ClientFee.clientId == id,
@@ -156,21 +186,29 @@ def client_one_fees(id, type, year, month, usr, db: Session):
         func.month(ClientFee.createdAt) == month,
     ).first()
 
+    clientBalance = db.query(client_balance_in_month_subquery(
+        year, month, db)).filter(Client.id == id).scalar()
+
     if not fee:
         return {
             "forMonth": 0.0,
             "paidMoney": 0.0,
+            "clientBalance": clientBalance,
         }
+
+    print(fee.balance)
 
     if fee.clientType == 'utility':
         return {
             "forMonth": fee.electrAmount*fee.electrPrice,
             "paidMoney": fee.electrPaid,
+            "clientBalance": clientBalance,
         }
     else:
         return {
             "forMonth": fee.value,
             "paidMoney": fee.valuePaid,
+            "clientBalance": clientBalance,
         }
 
 

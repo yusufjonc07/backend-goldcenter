@@ -1,18 +1,16 @@
 from enum import Enum
 from pydantic import BaseModel, Field
 from app.models.expense import *
+from typing import Optional
+
 
 class NewExpense(BaseModel):
-    type: str
-    employeeid: int
-    value: float = Field(..., gt=0, lt=1000000000)
-    moneyformid: int
-    comment: str
-    userid: int
-    filename: dict
-    createdat: str
-    branchid: int
-    floorid: int
+    type: ExpenceTypes
+    employeeId: Optional[int]
+    regularExpenceId: Optional[int]
+    value: float = Field(..., gt=0)
+    moneyFormId: int
+    comment: str = Field(..., min_length=5)
 
 
 class UpdateExpense(BaseModel):
@@ -26,5 +24,3 @@ class UpdateExpense(BaseModel):
     createdat: str
     branchid: int
     floorid: int
-
-        

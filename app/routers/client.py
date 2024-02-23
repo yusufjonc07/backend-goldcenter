@@ -12,11 +12,13 @@ from app.utils.fileUtil import replace_file, save_file, validate_file
 from app.utils.handler import integrityHandler
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.sql import label
 from sqlalchemy.exc import IntegrityError
 from app.models.client import *
 from app.functions.client import *
 from sqlalchemy import func
+from datetime import datetime
 
 client_router = APIRouter(tags=['Klient  Endpoint'])
 
@@ -92,6 +94,71 @@ async def get_client_one(
                 "fileName": client.fileName,
                 "type": client.type,
             }
+        else:
+            raise HTTPException(
+                status_code=400, detail="Bunday mijoz mavjud emas!")
+
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@client_router.get("/client/{id}/akt-sverka")
+async def get_client_akt_sverka(
+    id: int,
+    fromYear: int,
+    fromMonth: int,
+    toDate: date,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        client: Client = db.get(Client, id)
+        if client:
+
+            client = db.query(Client, label("monthBeginBalance",
+                                            client_balance_in_month_subquery(fromYear, fromMonth, db, end=False))
+                              ).options(joinedload(Client.shop)).filter(Client.id == id).first()
+
+            data = []
+
+            fees = db.query(ClientFee).filter(
+                ClientFee.isConfirmed == True,
+                ClientFee.clientId == id,
+                func.year(ClientFee.createdAt) >= fromYear,
+                func.month(ClientFee.createdAt) >= fromMonth,
+                ClientFee.createdAt <= toDate,
+            ).all()
+
+            for fee in fees:
+                data.append({
+                    "type": "fee",
+                    "date": datetime.strptime(fee.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
+                    "value": fee.value + fee.electrPrice * fee.electrAmount,
+                    "comment": None
+                })
+
+            incomes = db.query(Income).filter(
+                Income.clientId == id,
+                func.year(Income.createdAt) >= fromYear,
+                func.month(Income.createdAt) >= fromMonth,
+                func.date(Income.createdAt) <= toDate,
+            ).all()
+
+            for income in incomes:
+                data.append({
+                    "type": "income",
+                    "date": datetime.strptime(income.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
+                    "value": income.value,
+                    "comment": income.comment
+                })
+
+            sorted_data = sorted(data, key=lambda x: x['date'])
+
+            return {
+                "client": client,
+                "data": sorted_data,
+            }
+
         else:
             raise HTTPException(
                 status_code=400, detail="Bunday mijoz mavjud emas!")

@@ -4,6 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import label
 from app.models.client import Client
+from app.models.employee import Employee
 from app.models.floor import Floor
 from app.models.expense import Expense
 from app.models.income import Income
@@ -142,3 +143,19 @@ def get_report_index_income_floor(fromDate: date, toDate: date, db: Session, usr
         .all()
 
     return incomes
+
+
+def get_condition_branch(db: Session, usr):
+
+    clientLoans = db.query(func.coalesce(func.sum(Client.balance), 0)).filter(
+        Client.balance < 0,
+    ).scalar()
+
+    employeeSalaries = db.query(func.coalesce(func.sum(Employee.balance), 0)).filter(
+        Employee.balance > 0,
+    ).scalar()
+
+    return {
+        "clientLoans": -clientLoans,
+        "employeeSalaries": employeeSalaries,
+    }

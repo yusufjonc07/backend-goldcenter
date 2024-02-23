@@ -72,34 +72,53 @@ async def update_one_attandance(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
+class HikvsionEvent:
+    deviceIpAddress: str
+    attendanceStatus: str
+    deviceName: str
+    dateTime: str
+    employeeId: str
+    employeeName: str
+
+    def __init__(self, data_dict: dict) -> None:
+        ACEvent = data_dict['AccessControllerEvent']
+        self.attendanceStatus = ACEvent['attendanceStatus']
+        self.employeeId = ACEvent['employeeNoString']
+        self.employeeName = ACEvent['name']
+        self.deviceName = ACEvent['deviceName']
+        self.deviceIpAddress = data_dict['ipAddress']
+        date_str = data_dict['dateTime']
+        date_obj = datetime.fromisoformat(date_str[:-6])
+        self.dateTime = date_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+
 @attandance_router.post("/attandance/face-id", include_in_schema=False)
 async def get_attandance_users_list(
     req: Request,
     db: Session = ActiveSession,
 ):
-
     try:
+        # receive the body of the data from the request
         data = await req.body()
+
+        # decode the type of data from REQUST to str
         data_str = data.decode()
+
+        # here we have to search the json inside the string
         match = re.search(r'\{.*\}', data_str, re.DOTALL)
+
+        # after finding needy json from the str
         json_data = match.group(0) if match else None
 
         # Load JSON data into a Python dictionary
         data_dict = json.loads(json_data) if json_data else None
 
-        AccessControllerEvent = data_dict['AccessControllerEvent']
-        user_id = AccessControllerEvent['employeeNoString']
-        attendanceStatus = AccessControllerEvent['attendanceStatus']
-        deviceName = AccessControllerEvent['deviceName']
+        # use the class to collect nececary items of dict
+        eventData = HikvsionEvent(data_dict)
 
-        date_str = data_dict['dateTime']
-        date_obj = datetime.fromisoformat(
-            date_str[:-6])  # remove timezone offset
-        formatted_date = date_obj.strftime("%Y-%m-%d %H:%M:%S")
+        if eventData.attendanceStatus:
 
-        if attendanceStatus:
-
-            await makeDavomat(user_id, attendanceStatus, formatted_date, deviceName, db)
+            await makeDavomat(eventData.employeeId, eventData.attendanceStatus, eventData.dateTime, eventData.deviceName, db)
 
             return "success"
     except Exception as e:
