@@ -125,6 +125,8 @@ async def create_new_income(
         if fileName:
             await save_file(file, fileName, f"expenses")
 
+        new_expense.moneyForm.balance -= new_expense.value
+
         db.commit()
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")

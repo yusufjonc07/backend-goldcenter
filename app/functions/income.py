@@ -45,6 +45,7 @@ def create_income(form_data: NewIncome, usr, db: Session):
         db.refresh(new_income)
 
         new_income.client.balance += new_income.value
+        new_income.moneyForm.balance += new_income.value
 
         db.commit()
         raise HTTPException(status_code=200, detail="Ma'lumotlar saqlandi!")
