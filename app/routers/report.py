@@ -43,11 +43,12 @@ async def get_reports_list(
 async def get_reports_income_floor_list(
     fromDate: Optional[date] = date.today(),
     toDate: Optional[date] = date.today(),
+    moneyFormId: Optional[int] = 0,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_report_index_income_floor(fromDate, toDate, db, usr)
+        return get_report_index_income_floor(moneyFormId, fromDate, toDate, db, usr)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

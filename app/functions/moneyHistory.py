@@ -10,7 +10,7 @@ from app.models.shop import Shop
 from app.utils.pagination import pagination
 
 
-def get_all_agreement_payments(clientId, floorId, type, fromDate, toDate, page, limit, usr, db):
+def get_all_agreement_payments(moneyFormId, clientId, floorId, type, fromDate, toDate, page, limit, usr, db):
 
     incomesData = db.query(
         label("id", Income.id),
@@ -34,6 +34,10 @@ def get_all_agreement_payments(clientId, floorId, type, fromDate, toDate, page, 
 
     if clientId > 0:
         incomesData = incomesData.filter(Income.clientId == clientId)
+
+    if moneyFormId > 0:
+        incomesData = incomesData.filter(Income.moneyFormId == moneyFormId)
+
     if floorId > 0:
         incomesData = incomesData.filter(Shop.floorId == floorId)
 

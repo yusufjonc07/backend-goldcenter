@@ -10,7 +10,7 @@ from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
 
 
-def get_all_expenses(search, type, fromDate, toDate, employeeId, regularExpenceId, page, limit, usr, db: Session):
+def get_all_expenses(moneyFormId, search, type, fromDate, toDate, employeeId, regularExpenceId, page, limit, usr, db: Session):
 
     worker_alias = aliased(Employee, name='worker_alias')
 
@@ -35,6 +35,9 @@ def get_all_expenses(search, type, fromDate, toDate, employeeId, regularExpenceI
 
     if employeeId > 0:
         expenses = expenses.filter(Expense.employeeId == employeeId)
+
+    if moneyFormId > 0:
+        expenses = expenses.filter(Expense.moneyFormId == moneyFormId)
 
     if regularExpenceId > 0:
         expenses = expenses.filter(

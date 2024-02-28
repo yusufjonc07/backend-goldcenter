@@ -127,7 +127,12 @@ def get_report_index(fromDate: date, toDate: date, db: Session, usr: User):
     }
 
 
-def get_report_index_income_floor(fromDate: date, toDate: date, db: Session, usr: User):
+def get_report_index_income_floor(moneyFormId: int, fromDate: date, toDate: date, db: Session, usr: User):
+
+    if moneyFormId > 0:
+        filterMF = Income.moneyFormId == moneyFormId
+    else:
+        filterMF = Floor.id > 0
 
     incomes = db.query(
         label("floorType", func.IF(Floor.type == 'sold', 'Patta', 'Ijara')),
@@ -139,7 +144,7 @@ def get_report_index_income_floor(fromDate: date, toDate: date, db: Session, usr
         func.date(Income.createdAt) >= fromDate,
         func.date(Income.createdAt) <= toDate,
         Floor.branchId == usr.branchId
-    ).group_by(Floor.id).order_by(Floor.number.asc())\
+    ).filter(filterMF).group_by(Floor.id).order_by(Floor.number.asc())\
         .all()
 
     return incomes
