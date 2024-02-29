@@ -194,6 +194,7 @@ def client_one_fees(id, type, year, month, usr, db: Session):
             "forMonth": 0.0,
             "paidMoney": 0.0,
             "clientBalance": clientBalance,
+            "clientBalance": clientBalance,
         }
 
     print(fee.balance)
@@ -209,6 +210,7 @@ def client_one_fees(id, type, year, month, usr, db: Session):
             "forMonth": fee.value,
             "paidMoney": fee.valuePaid,
             "clientBalance": clientBalance,
+            "electrMoney": fee.electrPrice * fee.electrAmount,
         }
 
 

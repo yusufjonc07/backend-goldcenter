@@ -98,7 +98,7 @@ def update_expense(id, form_data: UpdateExpense, usr, db: Session):
                 Expense.fileName: form_data.filename,
                 Expense.createdAt: form_data.createdat,
                 Expense.branchId: form_data.branchid,
-                Expense.floorId: form_data.floorid,
+                Expense.isAvanse: form_data.isAvanse,
             })
             db.commit()
 

@@ -11,7 +11,7 @@ from sqlalchemy.dialects.mysql import DOUBLE
 class Income(Base):
     __tablename__ = "income"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    clientId = Column(Integer, ForeignKey('client.id'))
+    clientId = Column(Integer, ForeignKey('client.id'), nullable=True)
     value = Column(Numeric)
     forYear = Column(Integer)
     forMonth = Column(Integer)

@@ -57,6 +57,7 @@ async def create_new_income(
                 "regularExpenceId": 0,
                 "value": 1,
                 "moneyFormId": 1,
+                "isAvanse": false,
                 "comment": "string"
             }
         ]
@@ -116,6 +117,7 @@ async def create_new_income(
                     branchId=usr.branchId,
                     comment=form_data.comment,
                     userId=usr.id,
+                    isAvanse=form_data.isAvanse,
                     fileName=fileName,
                 )
                 db.add(new_expense)

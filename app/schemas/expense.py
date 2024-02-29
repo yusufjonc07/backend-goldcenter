@@ -10,6 +10,7 @@ class NewExpense(BaseModel):
     regularExpenceId: Optional[int]
     value: float = Field(..., gt=0)
     moneyFormId: int
+    isAvanse: bool
     comment: str = Field(..., min_length=5)
 
 
@@ -19,6 +20,7 @@ class UpdateExpense(BaseModel):
     value: float = Field(..., gt=0, lt=1000000000)
     moneyformid: int
     comment: str
+    isAvanse: bool
     userid: int
     filename: dict
     createdat: str

@@ -23,6 +23,7 @@ class Expense(Base):
     comment = Column(String(255))
     userId = Column(Integer, ForeignKey('user.id'), nullable=False)
     fileName = Column(Text, nullable=True)
+    isAvanse = Column(Boolean, default=False)
     createdAt = Column(TIMESTAMP, default=text("CURRENT_TIMESTAMP"))
 
     employee = relationship('Employee', backref='expenses')
