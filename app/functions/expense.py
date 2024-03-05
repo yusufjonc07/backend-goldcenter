@@ -27,6 +27,7 @@ def get_all_expenses(moneyFormId, search, type, fromDate, toDate, employeeId, re
         label('user', func.concat(Employee.firstname, ' ', Employee.lastname)),
         label('createdAt', Expense.createdAt),
         label('value', Expense.value),
+        label('isAvanse', Expense.isAvanse),
         label('moneyForm', Moneyform.name),
     ).join(Expense.user).join(User.employee).join(Expense.moneyForm)
 

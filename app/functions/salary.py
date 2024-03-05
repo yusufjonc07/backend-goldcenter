@@ -26,6 +26,16 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
         func.month(Expense.createdAt) == month,
         Expense.employeeId == Salary.employeeId,
         Expense.type == 'salary',
+        Expense.isAvanse == True,
+    ).subquery()
+
+    # how many salary advance employee received in a month
+    given_sum = db.query(func.sum(Expense.value)).filter(
+        func.year(Expense.createdAt) == year,
+        func.month(Expense.createdAt) == month,
+        Expense.employeeId == Salary.employeeId,
+        Expense.type == 'salary',
+        Expense.isAvanse == False,
     ).subquery()
 
     salarys = db.query(
@@ -37,6 +47,7 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
         label("calcWage", Salary.calcWage),
         label("isConfirmed", Salary.isConfirmed),
         label("salaryAdvance", func.coalesce(advance_sum, 0)),
+        label("salaryGiven", func.coalesce(given_sum, 0)),
     ).join(Salary.employee).filter(
         func.year(Salary.createdAt) == year,
         func.month(Salary.createdAt) == month,
