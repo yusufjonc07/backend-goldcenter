@@ -105,9 +105,7 @@ async def get_client_one(
 @client_router.get("/client/{id}/akt-sverka")
 async def get_client_akt_sverka(
     id: int,
-    fromYear: int,
-    fromMonth: int,
-    toDate: date,
+    year: int,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
@@ -116,7 +114,7 @@ async def get_client_akt_sverka(
         if client:
 
             client = db.query(Client, label("monthBeginBalance",
-                                            client_balance_in_month_subquery(fromYear, fromMonth, db, end=False))
+                                            client_balance_in_month_subquery(year, 1, db, end=False))
                               ).options(joinedload(Client.shop)).filter(Client.id == id).first()
 
             data = []
@@ -124,9 +122,7 @@ async def get_client_akt_sverka(
             fees = db.query(ClientFee).filter(
                 ClientFee.isConfirmed == True,
                 ClientFee.clientId == id,
-                func.year(ClientFee.createdAt) >= fromYear,
-                func.month(ClientFee.createdAt) >= fromMonth,
-                ClientFee.createdAt <= toDate,
+                func.year(ClientFee.createdAt) == year,
             ).all()
 
             for fee in fees:
@@ -139,9 +135,7 @@ async def get_client_akt_sverka(
 
             incomes = db.query(Income).filter(
                 Income.clientId == id,
-                func.year(Income.createdAt) >= fromYear,
-                func.month(Income.createdAt) >= fromMonth,
-                func.date(Income.createdAt) <= toDate,
+                func.year(Income.createdAt) == year,
             ).all()
 
             for income in incomes:
