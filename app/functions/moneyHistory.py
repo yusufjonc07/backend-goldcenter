@@ -24,10 +24,11 @@ def get_all_agreement_payments(moneyFormId, clientId, floorId, type, fromDate, t
         label("comment", Income.comment),
         label("employeeName", Employee._fullname),
     ).select_from(Income)\
-        .join(Income.client)\
+        .outerjoin(Client, Income.clientId == Client.id)\
+        .outerjoin(Shop, Income.clientId == Shop.id)\
         .join(Income.user)\
         .join(User.employee)\
-        .join(Client.shop).join(Income.moneyForm)
+        .join(Income.moneyForm)
 
     if type:
         incomesData = incomesData.filter(Income.type == type)
