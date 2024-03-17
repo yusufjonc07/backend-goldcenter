@@ -113,6 +113,7 @@ class IncomeType(str, Enum):
     rent = "rent"
     utility = "utility"
     infrastructure = "infrastructure"
+    regular = "regular"
     other = "other"
 
 

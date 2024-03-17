@@ -31,6 +31,7 @@ def create_income(form_data: NewIncome, usr, db: Session):
 
         new_income = Income(
             clientId=form_data.clientId if form_data.clientId > 0 else None,
+            regularIncomeId=form_data.regularIncomeId if form_data.regularIncomeId > 0 else None,
             value=form_data.value,
             moneyFormId=form_data.moneyFormId,
             comment=form_data.comment,

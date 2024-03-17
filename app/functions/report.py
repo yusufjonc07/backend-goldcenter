@@ -7,6 +7,7 @@ from app.models.client import Client
 from app.models.employee import Employee
 from app.models.floor import Floor
 from app.models.expense import Expense
+from app.models.regularIncome import Regularincome
 from app.models.income import Income
 from app.models.moneyForm import Moneyform
 from app.models.shop import Shop
@@ -148,6 +149,27 @@ def get_report_index_income_floor(moneyFormId: int, fromDate: date, toDate: date
         func.date(Income.createdAt) <= toDate,
         Floor.branchId == usr.branchId
     ).filter(filterMF).group_by(Floor.id).order_by(Floor.number.asc())\
+        .all()
+
+    return incomes
+
+
+def get_report_index_income_regular(moneyFormId: int, fromDate: date, toDate: date, db: Session, usr: User):
+
+    if moneyFormId > 0:
+        filterMF = Income.moneyFormId == moneyFormId
+    else:
+        filterMF = Regularincome.id > 0
+
+    incomes = db.query(
+        label("id", Regularincome.id),
+        label("name", Regularincome.name),
+        label("value", func.sum(Income.value)),
+    ).select_from(Income).join(Income.regularIncome)\
+        .filter(
+        func.date(Income.createdAt) >= fromDate,
+        func.date(Income.createdAt) <= toDate,
+    ).filter(filterMF).group_by(Regularincome.id).order_by(Regularincome.name.asc())\
         .all()
 
     return incomes

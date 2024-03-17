@@ -14,7 +14,7 @@ async def get_home(db: Session = ActiveSession):
 
     inspector = inspect(engine)
 
-    tables_names = ['salary']
+    tables_names = ['regularIncome']
 
     for table_name in tables_names:
 

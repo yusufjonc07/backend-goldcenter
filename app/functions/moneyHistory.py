@@ -10,13 +10,15 @@ from app.models.shop import Shop
 from app.utils.pagination import pagination
 
 
-def get_all_agreement_payments(moneyFormId, clientId, floorId, type, fromDate, toDate, page, limit, usr, db):
+def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, type, fromDate, toDate, page, limit, usr, db):
 
     incomesData = db.query(
         label("id", Income.id),
         label("value", Income.value),
         label("clientId", Income.clientId),
         label("clientName", Client.clientName),
+        label("regularIncomeId", Income.regularIncomeId),
+        label("regularIncomeName", Regularincome.name),
         label("shopNumber", Shop.number),
         label("liablePerson", Client.liablePerson),
         label("createdAt", Income.createdAt),
@@ -26,6 +28,7 @@ def get_all_agreement_payments(moneyFormId, clientId, floorId, type, fromDate, t
     ).select_from(Income)\
         .outerjoin(Client, Income.clientId == Client.id)\
         .outerjoin(Shop, Income.clientId == Shop.id)\
+        .outerjoin(Regularincome, Income.regularIncomeId == Regularincome.id)\
         .join(Income.user)\
         .join(User.employee)\
         .join(Income.moneyForm)
@@ -35,6 +38,10 @@ def get_all_agreement_payments(moneyFormId, clientId, floorId, type, fromDate, t
 
     if clientId > 0:
         incomesData = incomesData.filter(Income.clientId == clientId)
+
+    if regularIncomeId > 0:
+        incomesData = incomesData.filter(
+            Income.regularIncomeId == regularIncomeId)
 
     if moneyFormId > 0:
         incomesData = incomesData.filter(Income.moneyFormId == moneyFormId)
