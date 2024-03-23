@@ -7,6 +7,7 @@ from app.models.moneyForm import *
 from app.models.branch import *
 from app.models.user import *
 from app.models.employee import *
+from app.models.regularExpence import *
 from sqlalchemy.dialects.mysql import DOUBLE
 
 
@@ -30,3 +31,4 @@ class Expense(Base):
     moneyForm = relationship('Moneyform', backref='expenses')
     branch = relationship('Branch', backref='expenses')
     user = relationship('User', backref='expenses')
+    regularExpence = relationship('RegularExpence', backref='expenses')

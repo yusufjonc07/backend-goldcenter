@@ -67,6 +67,20 @@ async def get_reports_income_regular_list(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
+@report_router.get("/report/expense/regular")
+async def get_reports_expense_regular_list(
+    fromDate: Optional[date] = date.today(),
+    toDate: Optional[date] = date.today(),
+    moneyFormId: Optional[int] = 0,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return get_report_index_expense_regular(moneyFormId, fromDate, toDate, db, usr)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
 @report_router.get("/report/condition")
 async def get_branch_condition(
     db: Session = ActiveSession,

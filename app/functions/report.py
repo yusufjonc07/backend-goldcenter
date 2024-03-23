@@ -8,6 +8,7 @@ from app.models.employee import Employee
 from app.models.floor import Floor
 from app.models.expense import Expense
 from app.models.regularIncome import RegularIncome
+from app.models.regularExpence import RegularExpence
 from app.models.income import Income
 from app.models.moneyForm import Moneyform
 from app.models.shop import Shop
@@ -173,6 +174,27 @@ def get_report_index_income_regular(moneyFormId: int, fromDate: date, toDate: da
         .all()
 
     return incomes
+
+
+def get_report_index_expense_regular(moneyFormId: int, fromDate: date, toDate: date, db: Session, usr: User):
+
+    if moneyFormId > 0:
+        filterMF = Expense.moneyFormId == moneyFormId
+    else:
+        filterMF = RegularIncome.id > 0
+
+    expenses = db.query(
+        label("id", RegularExpence.id),
+        label("name", RegularExpence.name),
+        label("value", func.sum(Expense.value)),
+    ).select_from(Expense).join(Expense.regularExpence)\
+        .filter(
+        func.date(Expense.createdAt) >= fromDate,
+        func.date(Expense.createdAt) <= toDate,
+    ).filter(filterMF).group_by(RegularExpence.id).order_by(RegularExpence.name.asc())\
+        .all()
+
+    return expenses
 
 
 def get_condition_branch(db: Session, usr):
