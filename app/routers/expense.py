@@ -107,6 +107,9 @@ async def create_new_income(
                 if not regExpense:
                     raise HTTPException(
                         400, f"Doimiy chiqim topilmadi")
+                else:
+                    regExpense.balance -= form_data.value
+                    db.flush()
             try:
                 new_expense = Expense(
                     type=form_data.type,

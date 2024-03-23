@@ -7,6 +7,8 @@ from sqlalchemy.orm import joinedload, Session
 from app.models.regularExpence import *
 from app.functions.regularExpence import *
 from app.schemas.regularExpence import *
+from sqlalchemy.sql import label
+from datetime import datetime
 
 regularExpence_router = APIRouter(tags=['Doimiy Chiqim Endpoint'])
 
@@ -21,6 +23,64 @@ async def get_regularExpences_list(
 ):
     if not usr.userRole in ['any_role']:
         return get_all_regularExpences(search, page, limit, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@regularExpence_router.get("/regularExpence/{id}/akt-sverka")
+async def get_regularExpence_akt_sverka(
+    id: int,
+    year: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        client: RegularExpence = db.get(RegularExpence, id)
+        if client:
+
+            regularExpence = db.query(RegularExpence, label("monthBeginBalance",
+                                                            regularExpence_balance_in_month_subquery(year, 1, db, end=False))
+                                      ).filter(RegularExpence.id == id).first()
+
+            data = []
+
+            fees = db.query(DebetHistory).filter(
+                DebetHistory.regularExpenceId == id,
+                func.year(DebetHistory.createdAt) == year,
+            ).all()
+
+            for fee in fees:
+                data.append({
+                    "type": "fee",
+                    "date": datetime.strptime(fee.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
+                    "value": fee.value,
+                    "comment": fee.comment
+                })
+
+            incomes = db.query(Expense).filter(
+                Expense.regularExpenceId == id,
+                func.year(Expense.createdAt) == year,
+            ).all()
+
+            for income in incomes:
+                data.append({
+                    "type": "expense",
+                    "date": datetime.strptime(income.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
+                    "value": income.value,
+                    "comment": income.comment
+                })
+
+            sorted_data = sorted(data, key=lambda x: x['date'])
+
+            return {
+                "regularExpence": regularExpence,
+                "data": sorted_data,
+            }
+
+        else:
+            raise HTTPException(
+                status_code=400, detail="Bunday mijoz mavjud emas!")
+
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

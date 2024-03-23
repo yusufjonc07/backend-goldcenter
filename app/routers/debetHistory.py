@@ -14,13 +14,14 @@ debetHistory_router = APIRouter(tags=['DebetHistory Endpoint'])
 @debetHistory_router.get("/debetHistorys", description="This router returns list of the debetHistorys using pagination")
 async def get_debetHistorys_list(
     search: Optional[str] = "",
+    regularExpenseId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_debetHistorys(search, page, limit, usr, db)
+        return get_all_debetHistorys(search, regularExpenseId, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

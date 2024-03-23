@@ -1,12 +1,14 @@
 import math
-from sqlalchemy.orm import joinedload, Session
+from sqlalchemy.orm import aliased, Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.regularExpence import *
+from app.models.debetHistory import *
 from app.models.expense import *
 from app.schemas.regularExpence import *
 from app.utils.pagination import pagination
 from app.utils.handler import integrityHandler
+import calendar
 
 
 def get_all_regularExpences(search, page, limit, usr, db: Session):
@@ -19,6 +21,32 @@ def get_all_regularExpences(search, page, limit, usr, db: Session):
     # )
 
     return pagination(regularExpences, page, limit)
+
+
+def regularExpence_balance_in_month_subquery(year, month, db, end=True):
+
+    otherDebetHistorys = aliased(DebetHistory)
+
+    if end:
+        num_days_in_month = calendar.monthrange(year, month)[1]
+    else:
+        num_days_in_month = 1
+
+    return (
+        RegularExpence.balance
+        -
+        db.query(func.coalesce(func.sum(Expense.value), 0)).filter(
+            Expense.regularExpenceId == RegularExpence.id,
+            func.date(
+                Expense.createdAt) > f"{year}-{month:02d}-{num_days_in_month:02d}",
+        ).scalar_subquery()
+        +
+        db.query(func.coalesce(func.sum(otherDebetHistorys.value), 0)).filter(
+            otherDebetHistorys.regularExpenceId == RegularExpence.id,
+            func.date(
+                otherDebetHistorys.createdAt) > f"{year}-{month:02d}-{num_days_in_month:02d}",
+        ).scalar_subquery()
+    )
 
 
 def create_regularExpence(form_data: NewRegularexpence, usr, db: Session):

@@ -7,14 +7,19 @@ from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
 
 
-def get_all_debetHistorys(search, page, limit, usr, db: Session):
+def get_all_debetHistorys(search, regularExpenseId, page, limit, usr, db: Session):
 
     debetHistorys = db.query(DebetHistory)
 
-    # if search:
-    # debetHistorys = debetHistorys.filter(
-    # DebetHistory.name.like(f"%{search}%"),
-    # )
+    if search:
+        debetHistorys = debetHistorys.filter(
+            DebetHistory.comment.like(f"%{search}%"),
+        )
+
+    if regularExpenseId > 0:
+        debetHistorys = debetHistorys.filter(
+            DebetHistory.regularExpenceId == regularExpenseId,
+        )
 
     return pagination(debetHistorys, page, limit)
 
@@ -29,6 +34,17 @@ def create_debetHistory(form_data: NewDebethistory, usr, db: Session):
         )
 
         db.add(new_debetHistory)
+
+        regExpense = db.get(
+            RegularExpence, form_data.regularexpenceid)
+
+        if not regExpense:
+            raise HTTPException(
+                400, f"Doimiy chiqim topilmadi")
+        else:
+            regExpense.balance += form_data.value
+            db.flush()
+
         db.commit()
 
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
