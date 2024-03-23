@@ -18,7 +18,7 @@ def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, 
         label("clientId", Income.clientId),
         label("clientName", Client.clientName),
         label("regularIncomeId", Income.regularIncomeId),
-        label("regularIncomeName", Regularincome.name),
+        label("regularIncomeName", RegularIncome.name),
         label("shopNumber", Shop.number),
         label("liablePerson", Client.liablePerson),
         label("createdAt", Income.createdAt),
@@ -28,7 +28,7 @@ def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, 
     ).select_from(Income)\
         .outerjoin(Client, Income.clientId == Client.id)\
         .outerjoin(Shop, Income.clientId == Shop.id)\
-        .outerjoin(Regularincome, Income.regularIncomeId == Regularincome.id)\
+        .outerjoin(RegularIncome, Income.regularIncomeId == RegularIncome.id)\
         .join(Income.user)\
         .join(User.employee)\
         .join(Income.moneyForm)

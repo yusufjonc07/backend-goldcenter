@@ -11,11 +11,11 @@ from app.utils.handler import integrityHandler
 
 def get_all_regularExpences(search, page, limit, usr, db: Session):
 
-    regularExpences = db.query(Regularexpence)
+    regularExpences = db.query(RegularExpence)
 
     # if search:
     # regularExpences = regularExpences.filter(
-    # Regularexpence.id.like(f"%{search}%"),
+    # RegularExpence.id.like(f"%{search}%"),
     # )
 
     return pagination(regularExpences, page, limit)
@@ -24,7 +24,7 @@ def get_all_regularExpences(search, page, limit, usr, db: Session):
 def create_regularExpence(form_data: NewRegularexpence, usr, db: Session):
 
     try:
-        new_regularExpence = Regularexpence(name=form_data.name)
+        new_regularExpence = RegularExpence(name=form_data.name)
         db.add(new_regularExpence)
         db.commit()
 
@@ -36,11 +36,11 @@ def create_regularExpence(form_data: NewRegularexpence, usr, db: Session):
 def update_regularExpence(id, form_data: UpdateRegularexpence, usr, db: Session):
 
     try:
-        regularExpence = db.query(Regularexpence).filter(
-            Regularexpence.id == id)
+        regularExpence = db.query(RegularExpence).filter(
+            RegularExpence.id == id)
         this_regularExpence = regularExpence.first()
         if this_regularExpence:
-            regularExpence.update({Regularexpence.name: form_data.name})
+            regularExpence.update({RegularExpence.name: form_data.name})
             db.commit()
 
             raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")
@@ -55,7 +55,7 @@ def delete_regularExpence(id, usr, db: Session):
     try:
 
         db.query(Expense).filter_by(regularExpenceId=id).delete()
-        db.query(Regularexpence).filter_by(id=id).delete()
+        db.query(RegularExpence).filter_by(id=id).delete()
         db.commit()
 
         raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")

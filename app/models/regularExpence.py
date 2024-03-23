@@ -5,7 +5,7 @@ from app.models.floor import *
 from app.models.branch import *
 
 
-class Regularexpence(Base):
+class RegularExpence(Base):
     __tablename__ = "regularExpence"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, default='')

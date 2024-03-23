@@ -9,11 +9,11 @@ from app.utils.pagination import pagination
 
 def get_all_regularIncomes(search, page, limit, usr, db: Session):
 
-    regularIncomes = db.query(Regularincome)
+    regularIncomes = db.query(RegularIncome)
 
     if search:
         regularIncomes = regularIncomes.filter(
-            Regularincome.name.like(f"%{search}%"),
+            RegularIncome.name.like(f"%{search}%"),
         )
 
     return pagination(regularIncomes, page, limit)
@@ -22,7 +22,7 @@ def get_all_regularIncomes(search, page, limit, usr, db: Session):
 def create_regularIncome(form_data: NewRegularincome, usr, db: Session):
 
     try:
-        new_regularIncome = Regularincome(
+        new_regularIncome = RegularIncome(
             name=form_data.name,
         )
 
@@ -37,11 +37,11 @@ def create_regularIncome(form_data: NewRegularincome, usr, db: Session):
 def update_regularIncome(id, form_data: UpdateRegularincome, usr, db: Session):
 
     try:
-        regularIncome = db.query(Regularincome).filter(Regularincome.id == id)
+        regularIncome = db.query(RegularIncome).filter(RegularIncome.id == id)
         this_regularIncome = regularIncome.first()
         if this_regularIncome:
             regularIncome.update({
-                Regularincome.name: form_data.name,
+                RegularIncome.name: form_data.name,
             })
             db.commit()
 

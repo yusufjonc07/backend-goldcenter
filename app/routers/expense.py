@@ -4,7 +4,7 @@ from typing import Optional, List
 import json
 
 from pydantic import ValidationError
-from app.models.regularExpence import Regularexpence
+from app.models.regularExpence import RegularExpence
 from app.schemas.user import NewUser
 from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -102,7 +102,7 @@ async def create_new_income(
 
             if form_data.type == 'regular':
                 regExpense = db.get(
-                    Regularexpence, form_data.regularExpenceId)
+                    RegularExpence, form_data.regularExpenceId)
 
                 if not regExpense:
                     raise HTTPException(

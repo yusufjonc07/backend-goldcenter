@@ -3,7 +3,7 @@ from sqlalchemy.orm import aliased, Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models.expense import *
-from app.models.regularExpence import Regularexpence
+from app.models.regularExpence import RegularExpence
 from app.schemas.expense import *
 from sqlalchemy.sql import label
 from app.utils.handler import integrityHandler
@@ -16,7 +16,7 @@ def get_all_expenses(moneyFormId, search, type, fromDate, toDate, employeeId, re
 
     worker = db.query(func.concat(worker_alias.firstname, ' ', worker_alias.lastname)).filter_by(
         id=Expense.employeeId).scalar_subquery()
-    regularExpence = db.query(Regularexpence.name).filter_by(
+    regularExpence = db.query(RegularExpence.name).filter_by(
         id=Expense.regularExpenceId).scalar_subquery()
 
     expenses = db.query(

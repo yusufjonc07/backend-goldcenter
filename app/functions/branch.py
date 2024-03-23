@@ -80,7 +80,7 @@ def delete_practices(usr, db: Session):
         db.query(Income).delete()
         db.query(Notification).delete()
         db.query(ParkingCar).delete()
-        db.query(Regularexpence).delete()
+        db.query(RegularExpence).delete()
         db.query(Salary).delete()
         db.query(Task).delete()
 

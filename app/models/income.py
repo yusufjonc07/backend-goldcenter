@@ -26,6 +26,6 @@ class Income(Base):
     type = Column(Enum(IncomeType), default='rent')
 
     client = relationship('Client', backref='incomes')
-    regularIncome = relationship('Regularincome', backref='incomes')
+    regularIncome = relationship('RegularIncome', backref='incomes')
     moneyForm = relationship('Moneyform', backref='incomes')
     user = relationship('User', backref='incomes')
