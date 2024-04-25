@@ -47,7 +47,6 @@ async def create_new_income(
     db: Session = ActiveSession,
     usr: User = Depends(get_current_active_user)
 ):
-
     """
         `form_data_string`
         [
@@ -111,6 +110,10 @@ async def create_new_income(
                     regExpense.balance -= form_data.value
                     db.flush()
             try:
+
+                if not form_data.regularExpenceId:
+                    form_data.regularExpenceId = 0
+
                 new_expense = Expense(
                     type=form_data.type,
                     employeeId=form_data.employeeId if form_data.employeeId > 0 else None,

@@ -19,7 +19,6 @@ income_router = APIRouter(tags=['Kassa Endpoint'])
 async def get_agreement_payments(
     clientId: Optional[int] = 0,
     regularIncomeId: Optional[int] = 0,
-    incomeType: Optional[str] = None,
     floorId: Optional[int] = 0,
     moneyFormId: Optional[int] = 0,
     type: Optional[IncomeType] = None,

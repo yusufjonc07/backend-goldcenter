@@ -55,7 +55,6 @@ def create_regularExpence(form_data: NewRegularexpence, usr, db: Session):
         new_regularExpence = RegularExpence(name=form_data.name)
         db.add(new_regularExpence)
         db.commit()
-
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
     except IntegrityError as e:
         raise integrityHandler(e)

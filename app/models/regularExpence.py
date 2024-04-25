@@ -9,4 +9,4 @@ class RegularExpence(Base):
     __tablename__ = "regularExpence"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String)
-    balance = Column(Numeric)
+    balance = Column(Numeric, default=0)

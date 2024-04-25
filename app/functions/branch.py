@@ -5,6 +5,7 @@ from app.models.branch import *
 from app.models.client import *
 from app.models.attandance import *
 from app.models.clientFee import *
+from app.models.debetHistory import DebetHistory
 from app.models.document import *
 from app.models.expense import *
 from app.models.income import *
@@ -81,11 +82,17 @@ def delete_practices(usr, db: Session):
         db.query(Notification).delete()
         db.query(ParkingCar).delete()
         db.query(RegularExpence).delete()
+        db.query(RegularIncome).delete()
+        db.query(DebetHistory).delete()
         db.query(Salary).delete()
         db.query(Task).delete()
 
         db.query(Client).update({
             Client.balance: 0
+        })
+
+        db.query(Moneyform).update({
+            Moneyform.balance: 0
         })
 
         delete_files_in_folder('documents')

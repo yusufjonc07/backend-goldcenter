@@ -207,7 +207,12 @@ def get_condition_branch(db: Session, usr):
         Employee.balance > 0,
     ).scalar()
 
+    regularExpenses = db.query(func.coalesce(func.sum(RegularExpence.balance), 0)).filter(
+        RegularExpence.balance > 0,
+    ).scalar()
+
     return {
         "clientLoans": -clientLoans,
         "employeeSalaries": employeeSalaries,
+        "regularExpenses": regularExpenses,
     }
