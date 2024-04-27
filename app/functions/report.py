@@ -106,12 +106,10 @@ def get_report_index(fromDate: date, toDate: date, db: Session, usr: User):
     incomes = db.query(
         label("method", Moneyform.name),
         label("value", func.sum(Income.value)),
-    ).select_from(Income).join(Income.moneyForm).join(Income.client)\
-        .join(Client.shop).join(Shop.floor)\
+    ).select_from(Income).join(Income.moneyForm)\
         .filter(
         func.date(Income.createdAt) >= fromDate,
         func.date(Income.createdAt) <= toDate,
-        Floor.branchId == usr.branchId
     ).group_by(Income.moneyFormId).order_by(Moneyform.name.asc())\
         .all()
 

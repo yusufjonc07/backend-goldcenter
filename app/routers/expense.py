@@ -126,15 +126,21 @@ async def create_new_income(
                     isAvanse=form_data.isAvanse,
                     fileName=fileName,
                 )
+
                 db.add(new_expense)
                 db.flush()
+
+                if new_expense.moneyForm.balance < new_expense.value:
+                    raise HTTPException(
+                        400, f"{new_expense.moneyForm.name} balansida yetarli mablag' yetarli emas!")
+                else:
+                    new_expense.moneyForm.balance -= new_expense.value
+
             except IntegrityError as e:
                 raise integrityHandler(e)
 
         if fileName:
             await save_file(file, fileName, f"expenses")
-
-        new_expense.moneyForm.balance -= new_expense.value
 
         db.commit()
 
