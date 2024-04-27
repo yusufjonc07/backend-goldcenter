@@ -55,6 +55,8 @@ def get_all_expenses(moneyFormId, search, type, fromDate, toDate, employeeId, re
         # Expense.id.like(f"%{search}%"),
     # )
 
+    expenses = expenses.order_by(Expense.createdAt.desc())
+
     return pagination(expenses, page, limit)
 
 

@@ -55,9 +55,13 @@ def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, 
             func.date(Income.createdAt) <= toDate,
         )
 
+    
+
     # if search:
     # incomesData = incomesData.filter(
     # Income.id.like(f"%{search}%"),
     # )
+
+    incomesData = incomesData.order_by(Income.createdAt.desc())
 
     return pagination(incomesData, page, limit)
