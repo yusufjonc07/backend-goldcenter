@@ -10,7 +10,7 @@ class Attandance(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     type = Column(String)
     employeeId = Column(Integer, ForeignKey('employee.id'), default=0)
-    workTime = Column(String, default='')
+    workTime = Column(Numeric)
     authorizator = Column(Integer, default=0)
     created_at = Column(TIMESTAMP, default=func.now())
 

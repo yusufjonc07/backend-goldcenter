@@ -110,6 +110,7 @@ def client_all_fees(floorId, year, month, usr, db: Session):
         label('shopNumber', Shop.number),
         label('shopArea', Shop.area),
         label('value', ClientFee.value),
+        label('adPrice', ClientFee.adPrice),
         label('valuePaid', func.coalesce(valuePaid, 0.0)),
         label('electrPrice', ClientFee.electrPrice),
         label('electrAmount', ClientFee.electrAmount),
@@ -174,6 +175,7 @@ def client_one_fees(id, type, year, month, usr, db: Session):
         label('shopNumber', Shop.number),
         label('shopArea', Shop.area),
         label('value', ClientFee.value),
+        label('adPrice', ClientFee.adPrice),
         label('valuePaid', func.coalesce(valuePaid, 0.0)),
         label('electrPrice', ClientFee.electrPrice),
         label('electrAmount', ClientFee.electrAmount),
@@ -193,7 +195,6 @@ def client_one_fees(id, type, year, month, usr, db: Session):
         return {
             "forMonth": 0.0,
             "paidMoney": 0.0,
-            "clientBalance": clientBalance,
             "clientBalance": clientBalance,
         }
 
@@ -229,6 +230,7 @@ def comfirm_client_fees(form_data: ConfirmFee, usr, db: Session):
 
     clientFee.value = form_data.value
     clientFee.electrPrice = form_data.electrPrice
+    clientFee.adPrice = form_data.adPrice
     clientFee.electrAmount = form_data.electrAmount
 
     clientFee.client.balance -= (clientFee.value +

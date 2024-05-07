@@ -105,7 +105,10 @@ async def get_client_one(
 @client_router.get("/client/{id}/akt-sverka")
 async def get_client_akt_sverka(
     id: int,
-    year: int,
+    fromYear: int,
+    fromMonth: int,
+    toYear: int,
+    toMonth: int,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
@@ -114,7 +117,7 @@ async def get_client_akt_sverka(
         if client:
 
             client = db.query(Client, label("monthBeginBalance",
-                                            client_balance_in_month_subquery(year, 1, db, end=False))
+                                            client_balance_in_month_subquery(fromYear, fromMonth, db, end=False))
                               ).options(joinedload(Client.shop)).filter(Client.id == id).first()
 
             data = []
@@ -122,20 +125,28 @@ async def get_client_akt_sverka(
             fees = db.query(ClientFee).filter(
                 ClientFee.isConfirmed == True,
                 ClientFee.clientId == id,
-                func.year(ClientFee.createdAt) == year,
+                func.year(ClientFee.createdAt) >= fromYear,
+                func.month(ClientFee.createdAt) >= fromMonth,
+                func.year(ClientFee.createdAt) <= toYear,
+                func.month(ClientFee.createdAt) <= toMonth,
             ).all()
 
             for fee in fees:
                 data.append({
                     "type": "fee",
                     "date": datetime.strptime(fee.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
-                    "value": fee.value + fee.electrPrice * fee.electrAmount,
+                    "value": fee.value,
+                    "adPrice": fee.adPrice,
+                    "electricity": fee.electrPrice * fee.electrAmount,
                     "comment": None
                 })
 
             incomes = db.query(Income).filter(
                 Income.clientId == id,
-                func.year(Income.createdAt) == year,
+                func.year(Income.createdAt) >= fromYear,
+                func.month(Income.createdAt) >= fromMonth,
+                func.year(Income.createdAt) <= toYear,
+                func.month(Income.createdAt) <= toMonth,
             ).all()
 
             for income in incomes:
@@ -143,6 +154,8 @@ async def get_client_akt_sverka(
                     "type": "income",
                     "date": datetime.strptime(income.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
                     "value": income.value,
+                    "adPrice": 0,
+                    "electricity": 0,
                     "comment": income.comment
                 })
 

@@ -147,6 +147,16 @@ async def makeDavomat(employeeId, type, dateTime, authorizatorName, db: Session)
             else:
                 dav_type = 'checkOut'
 
+                # Convert first_variable to a datetime object
+                first_datetime = datetime.strptime(
+                    dateTime, "%Y-%m-%d %H:%M:%S")
+
+                # Calculate the difference in minutes
+                workTime = (first_datetime -
+                            last_davomat.created_at).total_seconds() / 60
+
+                print("Difference in minutes:", workTime)
+
         else:
             error += 1
 

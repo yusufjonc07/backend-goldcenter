@@ -10,28 +10,43 @@ from app.schemas.salary import *
 
 salary_router = APIRouter(tags=['Maoshlar Endpoint'])
 
+
 @salary_router.get("/salaries", description="This router returns list of the salarys using pagination")
 async def get_salarys_list(
     year: int,
     month: int,
     search: Optional[str] = "",
     employeeId: Optional[int] = 0,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
-):   
+):
     if not usr.userRole in ['any_role']:
-        return get_all_salarys(search, year, month, usr, db, employeeId)  
+        return get_all_salarys(search, year, month, usr, db, employeeId)
     else:
-        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")  
-    
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@salary_router.get("/salaries/table", description="This router returns list of the salarys as a table using pagination")
+async def get_salarys_table(
+    year: int,
+    month: int,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return get_salaries_table(year, month, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
 @salary_router.post("/salaries/pay")
 async def get_salarys_list(
     salariesIds: SalaryIdList,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
-):   
+):
     if not usr.userRole in ['any_role']:
-        return pay_all_salarys(salariesIds, usr, db)  
+        return pay_all_salarys(salariesIds, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -40,7 +55,7 @@ async def get_salarys_list(
 async def update_one_salary(
     id: int,
     form_data: UpdateSalary,
-    db:Session = ActiveSession,
+    db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:

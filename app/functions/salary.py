@@ -17,7 +17,14 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
         func.year(Attandance.created_at) == year,
         func.month(Attandance.created_at) == month,
         Attandance.employeeId == Salary.employeeId,
-        Attandance.type == 'checkIn',
+    ).group_by(Attandance.employeeId).subquery()
+
+    # how many hours employee worked in a month
+    attandance_hour = db.query(func.sum(Attandance.workTime)).filter(
+        func.year(Attandance.created_at) == year,
+        func.month(Attandance.created_at) == month,
+        Attandance.employeeId == Salary.employeeId,
+        Attandance.workTime > 0,
     ).group_by(Attandance.employeeId).subquery()
 
     # how many salary advance employee received in a month
@@ -44,6 +51,7 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
         label("employeeName", func.concat(
             Employee.firstname, ' ', Employee.lastname)),
         label("attandanceCount", attandance_count),
+        label("attandanceHours", attandance_hour),
         label("calcWage", Salary.calcWage),
         label("isConfirmed", Salary.isConfirmed),
         label("salaryAdvance", func.coalesce(advance_sum, 0)),
@@ -64,6 +72,25 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
         )
 
     return salarys.all()
+
+
+def get_salaries_table(year, month, usr, db: Session):
+    salaries = get_all_salarys(None, year, month, usr, db)
+
+    attandaces = db.query(
+        label("employee_id", Attandance.employeeId),
+        label("day", func.day(Attandance.created_at)),
+        label("workTime", func.sum(Attandance.workTime)),
+    ).filter(
+        func.year(Attandance.created_at) == year,
+        func.month(Attandance.created_at) == month,
+        Attandance.workTime > 0,
+    ).group_by(Attandance.employeeId, func.day(Attandance.created_at)).all()
+
+    return {
+        "salaries": salaries,
+        "attandaces": attandaces,
+    }
 
 
 def pay_all_salarys(salariesId: list, usr, db):

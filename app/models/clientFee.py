@@ -12,6 +12,7 @@ class ClientFee(Base):
     value = Column(Numeric, default=0)
     isConfirmed = Column(Boolean, default=False)
     createdAt = Column(Date, default=func.now())
+    adPrice = Column(Numeric, default=0)
     electrPrice = Column(Numeric, default=0)
     electrAmount = Column(Numeric, default=0)
 

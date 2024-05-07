@@ -32,5 +32,6 @@ class FormWarehouseClient(BaseModel):
 class ConfirmFee(BaseModel):
     clientFeeId: int
     electrPrice: float = Field(..., ge=0)
+    adPrice: float = Field(..., ge=0)
     electrAmount: float = Field(..., ge=0)
     value: float
