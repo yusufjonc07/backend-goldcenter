@@ -138,7 +138,8 @@ async def get_client_akt_sverka(
                     "value": fee.value,
                     "adPrice": fee.adPrice,
                     "electricity": fee.electrPrice * fee.electrAmount,
-                    "comment": None
+                    "comment": None,
+                    "moneyForm": None,
                 })
 
             incomes = db.query(Income).filter(
@@ -156,7 +157,8 @@ async def get_client_akt_sverka(
                     "value": income.value,
                     "adPrice": 0,
                     "electricity": 0,
-                    "comment": income.comment
+                    "moneyForm": income.moneyForm.name,
+                    "comment": income.comment,
                 })
 
             sorted_data = sorted(data, key=lambda x: x['date'])

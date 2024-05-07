@@ -1,5 +1,5 @@
 from fastapi import HTTPException, APIRouter, Depends, UploadFile, File
-from typing import Optional
+from typing import Optional, List
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -37,12 +37,12 @@ async def get_agreement_payments(
 
 @income_router.post("/income/create", description="This router is able to add new income")
 async def create_new_income(
-    form_data: NewIncome,
+    form_datas: List[NewIncome],
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return create_income(form_data, usr, db)
+        return create_income(form_datas, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -56,6 +56,19 @@ async def update_one_income(
 ):
     if not usr.userRole in ['any_role']:
         return update_income(id, form_data, usr, db)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@income_router.post("/income/excelUpload")
+async def upload_one_excel(
+    file: UploadFile = File(...),
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        fileName = await validate_file(file, ['document'], 3)
+        raise HTTPException(200, "Bekendni chalasi bor!")
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 

@@ -2,6 +2,7 @@ import math
 from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
+from typing import List
 from app.models.income import *
 from app.schemas.income import *
 from app.utils.handler import integrityHandler
@@ -26,29 +27,30 @@ def get_last_electrAmount(id: int, db: Session):
     ).order_by(Income.electrLastAmount).first()
 
 
-def create_income(form_data: NewIncome, usr, db: Session):
+def create_income(form_datas: List[NewIncome], usr, db: Session):
     try:
+        for form_data in form_datas:
 
-        new_income = Income(
-            clientId=form_data.clientId if form_data.clientId > 0 else None,
-            regularIncomeId=form_data.regularIncomeId if form_data.regularIncomeId > 0 else None,
-            value=form_data.value,
-            moneyFormId=form_data.moneyFormId,
-            comment=form_data.comment,
-            type=form_data.type,
-            forMonth=form_data.forMonth,
-            forYear=form_data.forYear,
-            userId=usr.id,
-        )
+            new_income = Income(
+                clientId=form_data.clientId if form_data.clientId > 0 else None,
+                regularIncomeId=form_data.regularIncomeId if form_data.regularIncomeId > 0 else None,
+                value=form_data.value,
+                moneyFormId=form_data.moneyFormId,
+                comment=form_data.comment,
+                type=form_data.type,
+                forMonth=form_data.forMonth,
+                forYear=form_data.forYear,
+                userId=usr.id,
+            )
 
-        db.add(new_income)
-        db.flush()
-        db.refresh(new_income)
+            db.add(new_income)
+            db.flush()
+            db.refresh(new_income)
 
-        if form_data.clientId > 0:
-            new_income.client.balance += new_income.value
+            if form_data.clientId > 0:
+                new_income.client.balance += new_income.value
 
-        new_income.moneyForm.balance += new_income.value
+            new_income.moneyForm.balance += new_income.value
 
         db.commit()
         raise HTTPException(status_code=200, detail="Ma'lumotlar saqlandi!")
