@@ -82,3 +82,83 @@ def update_income(id, form_data: UpdateIncome, usr, db: Session):
             raise HTTPException(status_code=400, detail="So`rovda xatolik!")
     except IntegrityError as e:
         raise HTTPException(400, e.args)
+
+
+def validate_clients_by_inn(client_inns, db: Session):
+
+    unique_client_inns = list(set(client_inns))
+    not_found_inns = []
+
+    # validate
+    for inn in unique_client_inns:
+        client = db.query(Client).filter_by(inn=inn).first()
+        if not client:
+            not_found_inns.append(inn)
+
+    if len(not_found_inns) > 0:
+        raise HTTPException(400, ", ".join(not_found_inns) +
+                            ". Bu INN lardagi mijozlar topilmadi!")
+
+    return True
+
+
+def validate_money_forms_by_name(money_form_names, db: Session):
+
+    unique_money_form_names = list(set(money_form_names))
+    not_found_names = []
+
+    for name in unique_money_form_names:
+        money_form = db.query(Moneyform).filter_by(name=name).first()
+        if not money_form:
+            not_found_names.append(name)
+
+    if len(not_found_names) > 0:
+        raise HTTPException(400, ", ".join(not_found_names) +
+                            ". Bu nomlardagi kassalar topilmadi!")
+
+    return True
+
+
+def validate_excel_ws(worksheet, db: Session):
+
+    # inn array
+    client_inns = []
+
+    # money form array
+    money_form_names = []
+
+    # get first 1000 rows from worksheet
+    for row in worksheet.iter_rows(min_row=2, max_col=7, max_row=1000):
+
+        # stop a loop when the cell is empty
+        if row[0].value is None:
+            break
+
+        client_inns.append(str(row[0].value))
+        money_form_names.append(str(row[2].value))
+
+    validate_clients_by_inn(client_inns, db)
+    validate_money_forms_by_name(money_form_names, db)
+
+
+def create_income_by_ecxel_data(excel_datas: List[NewIncomeExcel], db: Session, usr: User):
+
+    income_form_datas = []
+
+    for excel_data in excel_datas:
+
+        client = db.query(Client).filter_by(inn=excel_data.inn).first()
+        moneyForm = db.query(Moneyform).filter_by(
+            name=excel_data.moneyFormName).first()
+
+        income_form_datas.append(NewIncome(
+            clientId=client.id,
+            value=excel_data.value,
+            moneyFormId=moneyForm.id,
+            createdAt=excel_data.date,
+            type=excel_data.type,
+            forYear=excel_data.forYear,
+            forMonth=excel_data.forMonth,
+        ))
+
+    create_income(income_form_datas, usr, db)

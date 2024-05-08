@@ -2,6 +2,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from app.models.expense import *
 from typing import Optional
+from datetime import date
 
 
 class NewExpense(BaseModel):
@@ -26,3 +27,11 @@ class UpdateExpense(BaseModel):
     createdat: str
     branchid: int
     floorid: int
+
+
+class NewExpenseExcel(BaseModel):
+    pnfl: str
+    value: float = Field(..., gt=0)
+    moneyFormName: str
+    isAvanse: bool
+    date: date

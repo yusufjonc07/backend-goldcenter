@@ -60,6 +60,8 @@ async def save_file(file: UploadFile, filename: str, url: Path):
     with open(f"{ASSETS_URL}/{dest}", "wb") as f:
         f.write(file_contents)
 
+    return upload_dir
+
 
 async def replace_file(file: Optional[UploadFile] = None, filename: str = ..., replaceWith: str = ..., url: Path = ...):
 

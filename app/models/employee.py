@@ -3,16 +3,18 @@ from sqlalchemy import Column, UniqueConstraint, Integer, Numeric, DateTime, Tim
 from app.schemas.enums import DEPARTMENT_LABELS
 from databases.main import Base
 from sqlalchemy.orm import relationship, backref
-from app.models.branch import * 
-from app.models.shift import * 
+from app.models.branch import *
+from app.models.shift import *
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.hybrid import hybrid_method
+
 
 class Employee(Base):
     __tablename__ = "employee"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     firstname = Column(String, default='')
     lastname = Column(String, default='')
+    pnfl = Column(String, nullable=True, unique=True)
     phoneNumber = Column(Integer, default=0)
     balance = Column(Numeric, default=0)
     passportFile = Column(Text)
@@ -32,13 +34,12 @@ class Employee(Base):
     @hybrid_property
     def _fullname(self):
         return func.concat(self.firstname, ' ', self.lastname)
-    
+
     @hybrid_property
     def _department(self):
         return DEPARTMENT_LABELS[self.role]
-    
+
     UniqueConstraint('firstname', 'lastname')
-    
+
     branch = relationship('Branch', backref='employees')
     shift = relationship('Shift', backref='employees')
-

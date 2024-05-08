@@ -10,6 +10,8 @@ from app.schemas.income import *
 from app.functions.moneyHistory import get_all_agreement_payments
 from datetime import date
 from app.utils.fileUtil import save_file, validate_file
+from openpyxl import load_workbook
+from pydantic import ValidationError
 
 
 income_router = APIRouter(tags=['Kassa Endpoint'])
@@ -66,9 +68,51 @@ async def upload_one_excel(
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
+    """
+    1000 qatorgacha excel fayl yuklash mumkin
+    <a target="blank" href='https://gc-api.magnitgroup.uz/files/excel/MIJOZ_KIRIM_SHABLON.xlsx'>SHABLON👈</a>
+    """
+
     if not usr.userRole in ['any_role']:
-        fileName = await validate_file(file, ['document'], 3)
-        raise HTTPException(200, "Bekendni chalasi bor!")
+
+        # validate file
+        await validate_file(file, ['document'], 3)
+
+        # save file
+        fileUploadUrl = await save_file(file, file.filename, f"")
+
+        # load excel data as a workbook
+        wb = load_workbook(filename=fileUploadUrl+file.filename)
+
+        # get active sheet
+        ws = wb.active
+
+        # validate worksheet
+        validate_excel_ws(ws, db)
+
+        form_datas = []
+        for row in ws.iter_rows(min_row=2, max_col=7, max_row=1000):
+
+            # stop a loop when the cell is empty
+            if row[0].value is None:
+                break
+
+            try:
+                form_datas.append(
+                    NewIncomeExcel(
+                        inn=row[0].value,
+                        value=row[1].value,
+                        moneyFormName=row[2].value,
+                        date=row[3].value,
+                        type=row[4].value,
+                        forYear=row[5].value,
+                        forMonth=row[6].value,
+                    )
+                )
+            except ValidationError as vErr:
+                raise HTTPException(422, vErr.errors())
+
+        return create_income_by_ecxel_data(form_datas, db, usr)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -80,6 +124,7 @@ async def update_one_income(
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
+
     if not usr.userRole in ['any_role']:
         fileName = await validate_file(file, ['document', 'image'], 3)
         income = db.query(Income).filter_by(id=id).first()

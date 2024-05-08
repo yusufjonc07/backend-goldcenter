@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from app.models.income import *
 from app.schemas.enums import IncomeType
 from typing import Optional
+from datetime import date
 
 
 class NewIncome(BaseModel):
@@ -10,7 +11,18 @@ class NewIncome(BaseModel):
     clientId: Optional[int] = 0
     value: float = Field(..., gt=0, lt=1000000000)
     moneyFormId: int
-    comment: str
+    comment: Optional[str] = "-"
+    createdAt: Optional[date] = date.today()
+    type: Optional[IncomeType] = 'rent'
+    forYear: int
+    forMonth: int
+
+
+class NewIncomeExcel(BaseModel):
+    inn: str
+    value: float = Field(..., gt=0, lt=1000000000)
+    moneyFormName: str
+    date: date
     type: Optional[IncomeType] = 'rent'
     forYear: int
     forMonth: int

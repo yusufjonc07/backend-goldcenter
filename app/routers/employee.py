@@ -60,7 +60,6 @@ async def get_employee_details(
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
-
     '''
     Hodimning avatarini olish: `/files/employeeAvatars/`\n
     Hodimning passportini olish: `/files/employeePassports/`\n
@@ -93,6 +92,7 @@ async def get_attandances_list(
 async def create_new_employee(
     firstname: str = Body(..., max_length=20),
     lastname: str = Body(..., max_length=20),
+    pnfl: str = Body(..., max_length=20),
     phoneNumber: int = Body(..., min=100000000, max=999999999),
     agreementFile: UploadFile = File(...),
     passportFile: UploadFile = File(...),
@@ -126,6 +126,7 @@ async def create_new_employee(
                 firstname=firstname,
                 lastname=lastname,
                 phoneNumber=phoneNumber,
+                pnfl=pnfl,
                 birthDate=birthDate,
                 avatarFile=avatarFileName,
                 passportFile=passportFileName,
@@ -152,6 +153,7 @@ async def update_one_employee(
     id: int,
     firstname: str = Body(..., max_length=20),
     lastname: str = Body(..., max_length=20),
+    pnfl: str = Body(..., max_length=20),
     phoneNumber: int = Body(..., min=100000000, max=999999999),
     passportFile: UploadFile = File(None),
     avatarFile: Optional[UploadFile] = File(None),
@@ -194,6 +196,7 @@ async def update_one_employee(
                     Employee.phoneNumber: phoneNumber,
                     Employee.salaryQuantity: salaryQuantity,
                     Employee.role: role,
+                    Employee.pnfl: pnfl,
                     Employee.agreementFile: agreementFileName,
                     Employee.birthDate: birthDate,
                     Employee.avatarFile: avatarFileName,
@@ -202,8 +205,6 @@ async def update_one_employee(
                     Employee.fired: fired,
                     Employee.shiftId: shiftId,
                 })
-
-                print(fired)
 
                 if fired == True:
                     db.query(User).filter(User.employeeId == this_employee.id).update({
