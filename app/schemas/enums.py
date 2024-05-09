@@ -85,7 +85,7 @@ class NotificationTypes(str, Enum):
 
 class ExpenceTypes(str, Enum):
     salary = "salary"
-    regular = "regular"
+    contragent = "contragent"
     other = "other"
 
 
@@ -119,7 +119,7 @@ class IncomeType(str, Enum):
     utility = "utility"
     infrastructure = "infrastructure"
     ad = "ad"
-    regular = "regular"
+    contragent = "contragent"
     other = "other"
 
 
