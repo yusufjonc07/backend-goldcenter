@@ -7,8 +7,7 @@ from app.models.client import Client
 from app.models.employee import Employee
 from app.models.floor import Floor
 from app.models.expense import Expense
-from app.models.regularIncome import RegularIncome
-from app.models.regularExpence import RegularExpence
+from app.models.contragent import Contragent
 from app.models.income import Income
 from app.models.moneyForm import Moneyform
 from app.models.shop import Shop
@@ -153,22 +152,22 @@ def get_report_index_income_floor(moneyFormId: int, fromDate: date, toDate: date
     return incomes
 
 
-def get_report_index_income_regular(moneyFormId: int, fromDate: date, toDate: date, db: Session, usr: User):
+def get_report_index_income_contragent(moneyFormId: int, fromDate: date, toDate: date, db: Session, usr: User):
 
     if moneyFormId > 0:
         filterMF = Income.moneyFormId == moneyFormId
     else:
-        filterMF = RegularIncome.id > 0
+        filterMF = Contragent.id > 0
 
     incomes = db.query(
-        label("id", RegularIncome.id),
-        label("name", RegularIncome.name),
+        label("id", Contragent.id),
+        label("name", Contragent.name),
         label("value", func.sum(Income.value)),
-    ).select_from(Income).join(Income.regularIncome)\
+    ).select_from(Income).join(Income.contragent)\
         .filter(
         func.date(Income.createdAt) >= fromDate,
         func.date(Income.createdAt) <= toDate,
-    ).filter(filterMF).group_by(RegularIncome.id).order_by(RegularIncome.name.asc())\
+    ).filter(filterMF).group_by(Contragent.id).order_by(Contragent.name.asc())\
         .all()
 
     return incomes
@@ -179,17 +178,17 @@ def get_report_index_expense_regular(moneyFormId: int, fromDate: date, toDate: d
     if moneyFormId > 0:
         filterMF = Expense.moneyFormId == moneyFormId
     else:
-        filterMF = RegularIncome.id > 0
+        filterMF = Contragent.id > 0
 
     expenses = db.query(
-        label("id", RegularExpence.id),
-        label("name", RegularExpence.name),
+        label("id", Contragent.id),
+        label("name", Contragent.name),
         label("value", func.sum(Expense.value)),
-    ).select_from(Expense).join(Expense.regularExpence)\
+    ).select_from(Expense).join(Expense.contragent)\
         .filter(
         func.date(Expense.createdAt) >= fromDate,
         func.date(Expense.createdAt) <= toDate,
-    ).filter(filterMF).group_by(RegularExpence.id).order_by(RegularExpence.name.asc())\
+    ).filter(filterMF).group_by(Contragent.id).order_by(Contragent.name.asc())\
         .all()
 
     return expenses
@@ -205,8 +204,8 @@ def get_condition_branch(db: Session, usr):
         Employee.balance > 0,
     ).scalar()
 
-    regularExpenses = db.query(func.coalesce(func.sum(RegularExpence.balance), 0)).filter(
-        RegularExpence.balance > 0,
+    regularExpenses = db.query(func.coalesce(func.sum(Contragent.balance), 0)).filter(
+        Contragent.balance > 0,
     ).scalar()
 
     return {

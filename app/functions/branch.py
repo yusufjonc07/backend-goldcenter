@@ -8,10 +8,11 @@ from app.models.clientFee import *
 from app.models.debetHistory import DebetHistory
 from app.models.document import *
 from app.models.expense import *
+from app.models.category import *
 from app.models.income import *
 from app.models.notification import *
 from app.models.parkingCar import *
-from app.models.regularExpence import *
+from app.models.contragent import *
 from app.models.salary import *
 from app.models.task import *
 from app.schemas.branch import *
@@ -81,8 +82,8 @@ def delete_practices(usr, db: Session):
         db.query(Income).delete()
         db.query(Notification).delete()
         db.query(ParkingCar).delete()
-        db.query(RegularExpence).delete()
-        db.query(RegularIncome).delete()
+        db.query(Category).delete()
+        db.query(Contragent).delete()
         db.query(DebetHistory).delete()
         db.query(Salary).delete()
         db.query(Task).delete()

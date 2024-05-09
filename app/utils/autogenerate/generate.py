@@ -14,7 +14,7 @@ async def get_home(db: Session = ActiveSession):
 
     inspector = inspect(engine)
 
-    tables_names = ['debetHistory']
+    tables_names = ['category']
 
     for table_name in tables_names:
 
@@ -86,18 +86,18 @@ async def get_home(db: Session = ActiveSession):
                 create_of_crud += f"        {colName}=form_data.{colName.lower()},\n"
                 update_of_crud += f"\n            {model_name}.{colName}: form_data.{colName.lower()},"
 
-        with open(f'./app/models/{table_name}.py', 'w') as f:
-            f.write(f'''from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
-from databases.main import Base
-from sqlalchemy.orm import relationship, backref
-{relationships_imports}
+#         with open(f'./app/models/{table_name}.py', 'w') as f:
+#             f.write(f'''from sqlalchemy import Column, Date, Integer, Numeric, DateTime, Time, String, Boolean, Text, ForeignKey, func, TIMESTAMP
+# from databases.main import Base
+# from sqlalchemy.orm import relationship, backref
+# {relationships_imports}
 
-class {model_name}(Base):
-    __tablename__ = "{table_name}"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-{model_content}
-{relationships}
-''')
+# class {model_name}(Base):
+#     __tablename__ = "{table_name}"
+#     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+# {model_content}
+# {relationships}
+# ''')
 
         with open(f'./app/functions/{table_name}.py', 'w') as f:
             f.write(f'''from sqlalchemy.orm import Session

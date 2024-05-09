@@ -7,7 +7,7 @@ from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
 
 
-def get_all_debetHistorys(search, regularExpenseId, page, limit, usr, db: Session):
+def get_all_debetHistorys(search, contragentId, page, limit, usr, db: Session):
 
     debetHistorys = db.query(DebetHistory)
 
@@ -16,9 +16,9 @@ def get_all_debetHistorys(search, regularExpenseId, page, limit, usr, db: Sessio
             DebetHistory.comment.like(f"%{search}%"),
         )
 
-    if regularExpenseId > 0:
+    if contragentId > 0:
         debetHistorys = debetHistorys.filter(
-            DebetHistory.regularExpenceId == regularExpenseId,
+            DebetHistory.contragentId == contragentId,
         )
 
     return pagination(debetHistorys, page, limit)
@@ -29,14 +29,14 @@ def create_debetHistory(form_data: NewDebethistory, usr, db: Session):
     try:
         new_debetHistory = DebetHistory(
             comment=form_data.comment,
-            regularExpenceId=form_data.regularexpenceid,
+            contragentId=form_data.regularexpenceid,
             value=form_data.value,
         )
 
         db.add(new_debetHistory)
 
         regExpense = db.get(
-            RegularExpence, form_data.regularexpenceid)
+            Contragent, form_data.regularexpenceid)
 
         if not regExpense:
             raise HTTPException(
@@ -60,7 +60,7 @@ def update_debetHistory(id, form_data: UpdateDebethistory, usr, db: Session):
         if this_debetHistory:
             debetHistory.update({
                 DebetHistory.comment: form_data.comment,
-                DebetHistory.regularExpenceId: form_data.regularexpenceid,
+                DebetHistory.contragentId: form_data.regularexpenceid,
                 DebetHistory.value: form_data.value,
             })
             db.commit()

@@ -1,10 +1,10 @@
 from click import Option
 from fastapi import Body, HTTPException, APIRouter, Depends, UploadFile, File, Form
-from typing import Optional, List
+from typing import Optional
 import json
 
 from pydantic import ValidationError
-from app.models.regularExpence import RegularExpence
+from app.models.contragent import Contragent
 from app.schemas.user import NewUser
 from app.utils.fileUtil import save_file, validate_file
 from app.utils.handler import integrityHandler
@@ -28,7 +28,7 @@ async def get_expenses_list(
     fromDate: Optional[date] = None,
     toDate: Optional[date] = None,
     employeeId: Optional[int] = 0,
-    regularExpenceId: Optional[int] = 0,
+    contragentId: Optional[int] = 0,
     moneyFormId: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
@@ -36,7 +36,7 @@ async def get_expenses_list(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_expenses(moneyFormId, search, expenseType, fromDate, toDate, employeeId, regularExpenceId,  page, limit, usr, db)
+        return get_all_expenses(moneyFormId, search, expenseType, fromDate, toDate, employeeId, contragentId,  page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -55,7 +55,7 @@ async def create_new_income(
             {
                 "type": "salary",
                 "employeeId": 12,
-                "regularExpenceId": 0,
+                "contragentId": 0,
                 "value": 1,
                 "moneyFormId": 1,
                 "isAvanse": false,
@@ -103,7 +103,7 @@ async def create_new_income(
 
             if form_data.type == 'regular':
                 regExpense = db.get(
-                    RegularExpence, form_data.regularExpenceId)
+                    Contragent, form_data.contragentId)
 
                 if not regExpense:
                     raise HTTPException(
@@ -113,13 +113,13 @@ async def create_new_income(
                     db.flush()
             try:
 
-                if not form_data.regularExpenceId:
-                    form_data.regularExpenceId = 0
+                if not form_data.contragentId:
+                    form_data.contragentId = 0
 
                 new_expense = Expense(
                     type=form_data.type,
                     employeeId=form_data.employeeId if form_data.employeeId > 0 else None,
-                    regularExpenceId=form_data.regularExpenceId if form_data.regularExpenceId > 0 else None,
+                    contragentId=form_data.contragentId if form_data.contragentId > 0 else None,
                     value=form_data.value,
                     moneyFormId=form_data.moneyFormId,
                     branchId=usr.branchId,

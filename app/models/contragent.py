@@ -5,8 +5,11 @@ from app.models.floor import *
 from app.models.branch import *
 
 
-class RegularExpence(Base):
-    __tablename__ = "regularExpence"
+class Contragent(Base):
+    __tablename__ = "contragent"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String)
     balance = Column(Numeric, default=0)
+    categoryId = Column(Integer, ForeignKey('category.id'))
+
+    category = relationship('Category', backref='contragents')

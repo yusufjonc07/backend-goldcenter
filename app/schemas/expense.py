@@ -8,7 +8,7 @@ from datetime import date
 class NewExpense(BaseModel):
     type: ExpenceTypes
     employeeId: Optional[int]
-    regularExpenceId: Optional[int]
+    contragentId: Optional[int]
     value: float = Field(..., gt=0)
     moneyFormId: int
     isAvanse: bool

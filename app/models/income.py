@@ -4,7 +4,7 @@ from databases.main import Base
 from sqlalchemy.orm import relationship, backref
 from app.models.client import *
 from app.models.moneyForm import *
-from app.models.regularIncome import *
+from app.models.contragent import *
 from app.models.user import *
 from sqlalchemy.dialects.mysql import DOUBLE
 
@@ -13,8 +13,8 @@ class Income(Base):
     __tablename__ = "income"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     clientId = Column(Integer, ForeignKey('client.id'), nullable=True)
-    regularIncomeId = Column(Integer, ForeignKey(
-        'regularIncome.id'), nullable=True)
+    contragentId = Column(Integer, ForeignKey(
+        'contragent.id'), nullable=True)
     value = Column(Numeric)
     forYear = Column(Integer)
     forMonth = Column(Integer)
@@ -26,6 +26,6 @@ class Income(Base):
     type = Column(Enum(IncomeType), default='rent')
 
     client = relationship('Client', backref='incomes')
-    regularIncome = relationship('RegularIncome', backref='incomes')
+    contragent = relationship('Contragent', backref='incomes')
     moneyForm = relationship('Moneyform', backref='incomes')
     user = relationship('User', backref='incomes')

@@ -7,7 +7,7 @@ from datetime import date
 
 
 class NewIncome(BaseModel):
-    regularIncomeId: Optional[int] = 0
+    contragentId: Optional[int] = 0
     clientId: Optional[int] = 0
     value: float = Field(..., gt=0, lt=1000000000)
     moneyFormId: int

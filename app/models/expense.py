@@ -7,7 +7,7 @@ from app.models.moneyForm import *
 from app.models.branch import *
 from app.models.user import *
 from app.models.employee import *
-from app.models.regularExpence import *
+from app.models.contragent import *
 from sqlalchemy.dialects.mysql import DOUBLE
 
 
@@ -16,8 +16,8 @@ class Expense(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     type = Column(Enum(ExpenceTypes), default='other', nullable=False)
     employeeId = Column(Integer, ForeignKey('employee.id'), nullable=True)
-    regularExpenceId = Column(Integer, ForeignKey(
-        'regularExpence.id'), nullable=True)
+    contragentId = Column(Integer, ForeignKey(
+        'contragent.id'), nullable=True)
     value = Column(DOUBLE, nullable=False)
     moneyFormId = Column(Integer, ForeignKey('moneyForm.id'), nullable=False)
     branchId = Column(Integer, ForeignKey('branch.id'), nullable=False)
@@ -31,4 +31,4 @@ class Expense(Base):
     moneyForm = relationship('Moneyform', backref='expenses')
     branch = relationship('Branch', backref='expenses')
     user = relationship('User', backref='expenses')
-    regularExpence = relationship('RegularExpence', backref='expenses')
+    contragent = relationship('Contragent', backref='expenses')

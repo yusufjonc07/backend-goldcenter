@@ -2,28 +2,28 @@ import math
 from sqlalchemy.orm import aliased, Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from app.models.regularExpence import *
+from app.models.contragent import *
 from app.models.debetHistory import *
 from app.models.expense import *
-from app.schemas.regularExpence import *
+from app.schemas.contragent import *
 from app.utils.pagination import pagination
 from app.utils.handler import integrityHandler
 import calendar
 
 
-def get_all_regularExpences(search, page, limit, usr, db: Session):
+def get_all_contragents(search, page, limit, usr, db: Session):
 
-    regularExpences = db.query(RegularExpence)
+    contragents = db.query(Contragent)
 
     # if search:
-    # regularExpences = regularExpences.filter(
-    # RegularExpence.id.like(f"%{search}%"),
+    # contragents = contragents.filter(
+    # Contragent.id.like(f"%{search}%"),
     # )
 
-    return pagination(regularExpences, page, limit)
+    return pagination(contragents, page, limit)
 
 
-def regularExpence_balance_in_month_subquery(year, month, db, end=True):
+def contragent_balance_in_month_subquery(year, month, db, end=True):
 
     otherDebetHistorys = aliased(DebetHistory)
 
@@ -33,41 +33,43 @@ def regularExpence_balance_in_month_subquery(year, month, db, end=True):
         num_days_in_month = 1
 
     return (
-        RegularExpence.balance
+        Contragent.balance
         -
         db.query(func.coalesce(func.sum(Expense.value), 0)).filter(
-            Expense.regularExpenceId == RegularExpence.id,
+            Expense.contragentId == Contragent.id,
             func.date(
                 Expense.createdAt) > f"{year}-{month:02d}-{num_days_in_month:02d}",
         ).scalar_subquery()
         +
         db.query(func.coalesce(func.sum(otherDebetHistorys.value), 0)).filter(
-            otherDebetHistorys.regularExpenceId == RegularExpence.id,
+            otherDebetHistorys.contragentId == Contragent.id,
             func.date(
                 otherDebetHistorys.createdAt) > f"{year}-{month:02d}-{num_days_in_month:02d}",
         ).scalar_subquery()
     )
 
 
-def create_regularExpence(form_data: NewRegularexpence, usr, db: Session):
+def create_contragent(form_data: NewContragent, usr, db: Session):
 
     try:
-        new_regularExpence = RegularExpence(name=form_data.name)
-        db.add(new_regularExpence)
+        new_contragent = Contragent(
+            name=form_data.name, categoryId=form_data.categoryId)
+        db.add(new_contragent)
         db.commit()
         raise HTTPException(200, "Ma`lumotlar saqlandi!")
     except IntegrityError as e:
         raise integrityHandler(e)
 
 
-def update_regularExpence(id, form_data: UpdateRegularexpence, usr, db: Session):
+def update_contragent(id, form_data: UpdateContragent, usr, db: Session):
 
     try:
-        regularExpence = db.query(RegularExpence).filter(
-            RegularExpence.id == id)
-        this_regularExpence = regularExpence.first()
-        if this_regularExpence:
-            regularExpence.update({RegularExpence.name: form_data.name})
+        contragent = db.query(Contragent).filter(
+            Contragent.id == id)
+        this_contragent = contragent.first()
+        if this_contragent:
+            contragent.update({Contragent.name: form_data.name,
+                              Contragent.categoryId: form_data.categoryId})
             db.commit()
 
             raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")
@@ -77,12 +79,12 @@ def update_regularExpence(id, form_data: UpdateRegularexpence, usr, db: Session)
         raise integrityHandler(e)
 
 
-def delete_regularExpence(id, usr, db: Session):
+def delete_contragent(id, usr, db: Session):
 
     try:
 
-        db.query(Expense).filter_by(regularExpenceId=id).delete()
-        db.query(RegularExpence).filter_by(id=id).delete()
+        db.query(Expense).filter_by(contragentId=id).delete()
+        db.query(Contragent).filter_by(id=id).delete()
         db.commit()
 
         raise HTTPException(status_code=200, detail="O`zgarish saqlandi!")

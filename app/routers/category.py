@@ -4,47 +4,48 @@ from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
 from sqlalchemy.orm import joinedload, Session
-from app.models.regularIncome import *
-from app.functions.regularIncome import *
-from app.schemas.regularIncome import *
+from app.models.category import *
+from app.functions.category import *
+from app.schemas.category import *
 
-regularIncome_router = APIRouter(tags=['Doimiy Kirim Endpoint'])
+category_router = APIRouter(tags=['Category Endpoint'])
 
 
-@regularIncome_router.get("/regularIncomes", description="This router returns list of the regularIncomes using pagination")
-async def get_regularIncomes_list(
+@category_router.get("/categories", description="This router returns list of the categorys using pagination")
+async def get_categorys_list(
     search: Optional[str] = "",
+    type: Optional[CategoryTypes] = None,
     page: int = 1,
     limit: int = 10,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_regularIncomes(search, page, limit, usr, db)
+        return get_all_categorys(search, type, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
-@regularIncome_router.post("/regularIncome/create", description="This router is able to add new regularIncome")
-async def create_new_regularIncome(
-    form_data: NewRegularincome,
+@category_router.post("/category/create", description="This router is able to add new category")
+async def create_new_category(
+    form_data: NewCategory,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return create_regularIncome(form_data, usr, db)
+        return create_category(form_data, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
-@regularIncome_router.put("/regularIncome/{id}/update", description="This router is able to update regularIncome")
-async def update_one_regularIncome(
+@category_router.put("/category/{id}/update", description="This router is able to update category")
+async def update_one_category(
     id: int,
-    form_data: UpdateRegularincome,
+    form_data: UpdateCategory,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return update_regularIncome(id, form_data, usr, db)
+        return update_category(id, form_data, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

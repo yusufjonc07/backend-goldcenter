@@ -89,6 +89,11 @@ class ExpenceTypes(str, Enum):
     other = "other"
 
 
+class CategoryTypes(str, Enum):
+    expense = "expense"
+    income = "income"
+
+
 class UserRoles(str, Enum):
     director = "director"
     accountant = "accountant"

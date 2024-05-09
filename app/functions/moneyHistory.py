@@ -10,15 +10,15 @@ from app.models.shop import Shop
 from app.utils.pagination import pagination
 
 
-def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, type, fromDate, toDate, page, limit, usr, db):
+def get_all_agreement_payments(moneyFormId, clientId, contragentId, floorId, type, fromDate, toDate, page, limit, usr, db):
 
     incomesData = db.query(
         label("id", Income.id),
         label("value", Income.value),
         label("clientId", Income.clientId),
         label("clientName", Client.clientName),
-        label("regularIncomeId", Income.regularIncomeId),
-        label("regularIncomeName", RegularIncome.name),
+        label("contragentId", Income.contragentId),
+        label("regularIncomeName", Contragent.name),
         label("shopNumber", Shop.number),
         label("liablePerson", Client.liablePerson),
         label("createdAt", Income.createdAt),
@@ -28,7 +28,7 @@ def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, 
     ).select_from(Income)\
         .outerjoin(Client, Income.clientId == Client.id)\
         .outerjoin(Shop, Income.clientId == Shop.id)\
-        .outerjoin(RegularIncome, Income.regularIncomeId == RegularIncome.id)\
+        .outerjoin(Contragent, Income.contragentId == Contragent.id)\
         .join(Income.user)\
         .join(User.employee)\
         .join(Income.moneyForm)
@@ -39,9 +39,9 @@ def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, 
     if clientId > 0:
         incomesData = incomesData.filter(Income.clientId == clientId)
 
-    if regularIncomeId > 0:
+    if contragentId > 0:
         incomesData = incomesData.filter(
-            Income.regularIncomeId == regularIncomeId)
+            Income.contragentId == contragentId)
 
     if moneyFormId > 0:
         incomesData = incomesData.filter(Income.moneyFormId == moneyFormId)
@@ -54,8 +54,6 @@ def get_all_agreement_payments(moneyFormId, clientId, regularIncomeId, floorId, 
             func.date(Income.createdAt) >= fromDate,
             func.date(Income.createdAt) <= toDate,
         )
-
-    
 
     # if search:
     # incomesData = incomesData.filter(
