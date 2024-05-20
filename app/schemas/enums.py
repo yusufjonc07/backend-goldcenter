@@ -127,6 +127,11 @@ class IncomeTables(str, Enum):
     clientAgreement = "clientAgreement"
 
 
+class DebCredType(str, Enum):
+    inner = "inner"
+    outer = "outer"
+
+
 class MoneyHistoryTables(str, Enum):
     income = "income"
     expense = "expense"

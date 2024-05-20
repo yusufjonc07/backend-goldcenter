@@ -92,6 +92,8 @@ async def create_new_income(
 
         for form_data in form_datas:
 
+            print(form_data)
+
             if form_data.type == 'salary':
                 employee = db.get(Employee, form_data.employeeId)
 
@@ -101,15 +103,15 @@ async def create_new_income(
                     employee.balance -= form_data.value
                     db.flush()
 
-            if form_data.type == 'regular':
-                regExpense = db.get(
+            if form_data.type == 'contragent':
+                contragent = db.get(
                     Contragent, form_data.contragentId)
 
-                if not regExpense:
+                if not contragent:
                     raise HTTPException(
                         400, f"Doimiy chiqim topilmadi")
                 else:
-                    regExpense.balance -= form_data.value
+                    contragent.balance -= form_data.value
                     db.flush()
             try:
 

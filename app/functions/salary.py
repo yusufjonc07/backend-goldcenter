@@ -8,24 +8,10 @@ from app.schemas.salary import *
 from app.utils.handler import integrityHandler
 from app.utils.pagination import pagination
 from sqlalchemy.sql import label, distinct
+from sqlalchemy.orm import aliased
 
 
 def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
-
-    # how many days employee attandanded in a month
-    attandance_count = db.query(func.count(distinct(func.date(Attandance.created_at)))).filter(
-        func.year(Attandance.created_at) == year,
-        func.month(Attandance.created_at) == month,
-        Attandance.employeeId == Salary.employeeId,
-    ).group_by(Attandance.employeeId).subquery()
-
-    # how many hours employee worked in a month
-    attandance_hour = db.query(func.sum(Attandance.workTime)).filter(
-        func.year(Attandance.created_at) == year,
-        func.month(Attandance.created_at) == month,
-        Attandance.employeeId == Salary.employeeId,
-        Attandance.workTime > 0,
-    ).group_by(Attandance.employeeId).subquery()
 
     # how many salary advance employee received in a month
     advance_sum = db.query(func.sum(Expense.value)).filter(
@@ -50,15 +36,18 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
         label("salaryId", Salary.id),
         label("employeeName", func.concat(
             Employee.firstname, ' ', Employee.lastname)),
-        label("attandanceCount", attandance_count),
-        label("attandanceHours", attandance_hour),
+        label("attandanceCount", func.count(
+            distinct(func.date(Attandance.created_at)))),
+        label("attandanceHours", func.sum(Attandance.workTime)),
         label("calcWage", Salary.calcWage),
         label("isConfirmed", Salary.isConfirmed),
         label("salaryAdvance", func.coalesce(advance_sum, 0)),
         label("salaryGiven", func.coalesce(given_sum, 0)),
-    ).join(Salary.employee).filter(
+    ).select_from(Salary).join(Salary.employee).join(Employee.attandances).filter(
         func.year(Salary.createdAt) == year,
         func.month(Salary.createdAt) == month,
+        func.year(Attandance.created_at) == year,
+        func.month(Attandance.created_at) == month,
     )
 
     if employeeId > 0:
@@ -71,7 +60,7 @@ def get_all_salarys(search, year, month,   usr, db: Session, employeeId=0):
             Employee.phoneNumber.like(f"%{search}%"),
         )
 
-    return salarys.all()
+    return salarys.group_by(Salary.id).all()
 
 
 def get_salaries_table(year, month, usr, db: Session):

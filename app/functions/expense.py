@@ -17,13 +17,13 @@ def get_all_expenses(moneyFormId, search, type, fromDate, toDate, employeeId, co
 
     worker = db.query(func.concat(worker_alias.firstname, ' ', worker_alias.lastname)).filter_by(
         id=Expense.employeeId).scalar_subquery()
-    regularExpence = db.query(Contragent.name).filter_by(
+    contragent = db.query(Contragent.name).filter_by(
         id=Expense.contragentId).scalar_subquery()
 
     expenses = db.query(
         label('type', Expense.type),
         label('worker', worker),
-        label('regularExpence', regularExpence),
+        label('contragent', contragent),
         label('comment', Expense.comment),
         label('user', func.concat(Employee.firstname, ' ', Employee.lastname)),
         label('createdAt', Expense.createdAt),

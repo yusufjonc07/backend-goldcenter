@@ -12,6 +12,9 @@ from app.models.income import Income
 from app.models.moneyForm import Moneyform
 from app.models.shop import Shop
 from app.models.user import User
+from app.functions.client import *
+from app.functions.employee import *
+from app.functions.contragent import *
 import calendar
 
 from app.schemas.enums import ReportTypes
@@ -173,7 +176,7 @@ def get_report_index_income_contragent(moneyFormId: int, fromDate: date, toDate:
     return incomes
 
 
-def get_report_index_expense_regular(moneyFormId: int, fromDate: date, toDate: date, db: Session, usr: User):
+def get_report_index_expense_contragent(moneyFormId: int, fromDate: date, toDate: date, db: Session, usr: User):
 
     if moneyFormId > 0:
         filterMF = Expense.moneyFormId == moneyFormId
@@ -204,12 +207,37 @@ def get_condition_branch(db: Session, usr):
         Employee.balance > 0,
     ).scalar()
 
-    regularExpenses = db.query(func.coalesce(func.sum(Contragent.balance), 0)).filter(
+    contragents = db.query(func.coalesce(func.sum(Contragent.balance), 0)).filter(
         Contragent.balance > 0,
     ).scalar()
 
     return {
         "clientLoans": -clientLoans,
         "employeeSalaries": employeeSalaries,
-        "regularExpenses": regularExpenses,
+        "contragents": contragents,
     }
+
+
+def get_debitor_creditor(fromYear, fromMonth, toYear, toMonth, type, db: Session, usr):
+
+    if type == 'inner':
+        return db.query(
+            label("name", Client.clientName),
+            label('balance', client_balance_in_month_subquery(
+                fromYear, fromMonth, db)),
+            label('debit', client_debet(
+                fromYear, fromMonth, toYear, toMonth, db)),
+            label('credit', client_credit(
+                fromYear, fromMonth, toYear, toMonth, db)),
+        ).all()
+
+    elif type == 'outer':
+        return db.query(
+            label("name", Contragent.name),
+            label('balance', contragent_balance_in_month_subquery(
+                fromYear, fromMonth, db, False)),
+            label('debit', contragent_debet(
+                fromYear, fromMonth, toYear, toMonth, db)),
+            label('credit', contragent_credit(
+                fromYear, fromMonth, toYear, toMonth, db)),
+        ).all()

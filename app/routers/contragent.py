@@ -17,13 +17,14 @@ contragent_router = APIRouter(tags=['Kontragent Endpoint'])
 @contragent_router.get("/contragents", description="This router returns list of the contragents using pagination")
 async def get_contragents_list(
     search: Optional[str] = "",
+    category_id: Optional[int] = 0,
     page: int = 1,
     limit: int = 10,
     db: Session = ActiveSession,
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_all_contragents(search, page, limit, usr, db)
+        return get_all_contragents(search, category_id, page, limit, usr, db)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -55,7 +56,8 @@ async def get_contragent_akt_sverka(
                     "type": "fee",
                     "date": datetime.strptime(fee.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
                     "value": fee.value,
-                    "comment": fee.comment
+                    "comment": fee.comment,
+                    "moneyForm": None,
                 })
 
             incomes = db.query(Income).filter(
@@ -68,7 +70,8 @@ async def get_contragent_akt_sverka(
                     "type": "income",
                     "date": datetime.strptime(income.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
                     "value": income.value,
-                    "comment": income.comment
+                    "comment": income.comment,
+                    "moneyForm": income.moneyForm.name,
                 })
 
             expenses = db.query(Expense).filter(

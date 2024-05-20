@@ -18,7 +18,7 @@ def get_all_agreement_payments(moneyFormId, clientId, contragentId, floorId, typ
         label("clientId", Income.clientId),
         label("clientName", Client.clientName),
         label("contragentId", Income.contragentId),
-        label("regularIncomeName", Contragent.name),
+        label("contragentName", Contragent.name),
         label("shopNumber", Shop.number),
         label("liablePerson", Client.liablePerson),
         label("createdAt", Income.createdAt),

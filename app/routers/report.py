@@ -1,7 +1,7 @@
 from datetime import date
 from fastapi import HTTPException, APIRouter, Depends
 from typing import Optional
-from app.schemas.enums import ReportTypes
+from app.schemas.enums import DebCredType
 from app.schemas.user import NewUser
 from security.auth import get_current_active_user
 from databases.main import ActiveSession
@@ -53,8 +53,8 @@ async def get_reports_income_floor_list(
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
-@report_router.get("/report/income/regular")
-async def get_reports_income_regular_list(
+@report_router.get("/report/income/contragent")
+async def get_reports_income_contragent_list(
     fromDate: Optional[date] = date.today(),
     toDate: Optional[date] = date.today(),
     moneyFormId: Optional[int] = 0,
@@ -62,13 +62,13 @@ async def get_reports_income_regular_list(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_report_index_income_regular(moneyFormId, fromDate, toDate, db, usr)
+        return get_report_index_income_contragent(moneyFormId, fromDate, toDate, db, usr)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
 
-@report_router.get("/report/expense/regular")
-async def get_reports_expense_regular_list(
+@report_router.get("/report/expense/contragent")
+async def get_reports_expense_contragent_list(
     fromDate: Optional[date] = date.today(),
     toDate: Optional[date] = date.today(),
     moneyFormId: Optional[int] = 0,
@@ -76,7 +76,7 @@ async def get_reports_expense_regular_list(
     usr: NewUser = Depends(get_current_active_user)
 ):
     if not usr.userRole in ['any_role']:
-        return get_report_index_expense_regular(moneyFormId, fromDate, toDate, db, usr)
+        return get_report_index_expense_contragent(moneyFormId, fromDate, toDate, db, usr)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
 
@@ -88,5 +88,21 @@ async def get_branch_condition(
 ):
     if not usr.userRole in ['any_role']:
         return get_condition_branch(db, usr)
+    else:
+        raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")
+
+
+@report_router.get("/report/debitor-creditor")
+async def get_debitors_creditors(
+    fromYear: int,
+    toYear: int,
+    fromMonth: int,
+    toMonth: int,
+    type: DebCredType,
+    db: Session = ActiveSession,
+    usr: NewUser = Depends(get_current_active_user)
+):
+    if not usr.userRole in ['any_role']:
+        return get_debitor_creditor(fromYear, fromMonth, toYear, toMonth, type, db, usr)
     else:
         raise HTTPException(status_code=400, detail="Sizga ruxsat berilmagan!")

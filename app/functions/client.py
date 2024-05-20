@@ -122,6 +122,33 @@ def client_all_fees(floorId, year, month, usr, db: Session):
     return select_fees(query, floorId, year, month)
 
 
+def client_debet(fromYear, fromMonth, toYear, toMonth, db: Session):
+
+    num_days_in_month = calendar.monthrange(toYear, toMonth)[1]
+
+    return db.query(func.coalesce(func.sum(ClientFee.adPrice+ClientFee.value+ClientFee.electrPrice*ClientFee.electrAmount), 0)).filter(
+        ClientFee.clientId == Client.id,
+        ClientFee.isConfirmed == True,
+        func.date(
+            ClientFee.createdAt) >= f"{fromYear}-{fromMonth:02d}-01",
+        func.date(
+            ClientFee.createdAt) <= f"{toYear}-{toMonth:02d}-{num_days_in_month:02d}",
+    ).scalar_subquery()
+
+
+def client_credit(fromYear, fromMonth, toYear, toMonth, db: Session):
+
+    num_days_in_month = calendar.monthrange(toYear, toMonth)[1]
+
+    return db.query(func.coalesce(func.sum(Income.value), 0)).filter(
+        Income.clientId == Client.id,
+        func.date(
+            Income.createdAt) >= f"{fromYear}-{fromMonth:02d}-01",
+        func.date(
+            Income.createdAt) <= f"{toYear}-{toMonth:02d}-{num_days_in_month:02d}",
+    ).scalar_subquery()
+
+
 def client_balance_in_month_subquery(year, month, db, end=True):
 
     otherClientFees = aliased(ClientFee)
@@ -140,7 +167,7 @@ def client_balance_in_month_subquery(year, month, db, end=True):
                 Income.createdAt) > f"{year}-{month:02d}-{num_days_in_month:02d}",
         ).scalar_subquery()
         +
-        db.query(func.coalesce(func.sum(otherClientFees.value+otherClientFees.electrPrice*otherClientFees.electrAmount), 0)).filter(
+        db.query(func.coalesce(func.sum(otherClientFees.adPrice+otherClientFees.value+otherClientFees.electrPrice*otherClientFees.electrAmount), 0)).filter(
             otherClientFees.clientId == Client.id,
             otherClientFees.isConfirmed == True,
             func.date(

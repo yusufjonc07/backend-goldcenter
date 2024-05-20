@@ -50,6 +50,9 @@ def create_income(form_datas: List[NewIncome], usr, db: Session):
             if form_data.clientId > 0:
                 new_income.client.balance += new_income.value
 
+            if form_data.contragentId > 0:
+                new_income.contragent.balance += new_income.value
+
             new_income.moneyForm.balance += new_income.value
 
         db.commit()
@@ -134,7 +137,7 @@ def validate_excel_ws(worksheet, db: Session):
         if row[0].value is None:
             break
 
-        client_inns.append(str(row[0].value))
+        client_inns.append(int(row[0].value))
         money_form_names.append(str(row[2].value))
 
     validate_clients_by_inn(client_inns, db)

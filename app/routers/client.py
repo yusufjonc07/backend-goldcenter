@@ -132,15 +132,39 @@ async def get_client_akt_sverka(
             ).all()
 
             for fee in fees:
-                data.append({
-                    "type": "fee",
-                    "date": datetime.strptime(fee.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
-                    "value": fee.value,
-                    "adPrice": fee.adPrice,
-                    "electricity": fee.electrPrice * fee.electrAmount,
-                    "comment": None,
-                    "moneyForm": None,
-                })
+
+                _date = datetime.strptime(
+                    fee.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d")
+
+                if fee.value > 0:
+                    data.append({
+                        "type": "fee",
+                        "target": ("infrastructure" if client.Client.type == 'sold' else "rent"),
+                        "date": _date,
+                        "value": fee.value,
+                        "comment": None,
+                        "moneyForm": None,
+                    })
+
+                if fee.adPrice > 0:
+                    data.append({
+                        "type": "fee",
+                        "target": "adPrice",
+                        "date": _date,
+                        "value": fee.adPrice,
+                        "comment": None,
+                        "moneyForm": None,
+                    })
+
+                if fee.electrPrice * fee.electrAmount > 0:
+                    data.append({
+                        "type": "fee",
+                        "target": "electricity",
+                        "date": _date,
+                        "value": fee.electrPrice * fee.electrAmount,
+                        "comment": None,
+                        "moneyForm": None,
+                    })
 
             incomes = db.query(Income).filter(
                 Income.clientId == id,
@@ -153,10 +177,9 @@ async def get_client_akt_sverka(
             for income in incomes:
                 data.append({
                     "type": "income",
+                    "target": income.type,
                     "date": datetime.strptime(income.createdAt.strftime("%Y-%m-%d"), "%Y-%m-%d"),
                     "value": income.value,
-                    "adPrice": 0,
-                    "electricity": 0,
                     "moneyForm": income.moneyForm.name,
                     "comment": income.comment,
                 })

@@ -29,14 +29,14 @@ def create_debetHistory(form_data: NewDebethistory, usr, db: Session):
     try:
         new_debetHistory = DebetHistory(
             comment=form_data.comment,
-            contragentId=form_data.regularexpenceid,
+            contragentId=form_data.contragentId,
             value=form_data.value,
         )
 
         db.add(new_debetHistory)
 
         regExpense = db.get(
-            Contragent, form_data.regularexpenceid)
+            Contragent, form_data.contragentId)
 
         if not regExpense:
             raise HTTPException(
@@ -60,7 +60,7 @@ def update_debetHistory(id, form_data: UpdateDebethistory, usr, db: Session):
         if this_debetHistory:
             debetHistory.update({
                 DebetHistory.comment: form_data.comment,
-                DebetHistory.contragentId: form_data.regularexpenceid,
+                DebetHistory.contragentId: form_data.contragentId,
                 DebetHistory.value: form_data.value,
             })
             db.commit()

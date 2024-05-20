@@ -100,7 +100,7 @@ async def upload_one_excel(
             try:
                 form_datas.append(
                     NewIncomeExcel(
-                        inn=row[0].value,
+                        inn=int(row[0].value),
                         value=row[1].value,
                         moneyFormName=row[2].value,
                         date=row[3].value,
